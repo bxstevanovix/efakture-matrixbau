@@ -1,0 +1,90 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: efk-matrixbau-nginx
+    ports:
+      - "8090:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ..:/var/www/html:ro
+    depends_on:
+      - app
+    networks:
+      - efk-matrixbau-net
+    restart: unless-stopped
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    container_name: efk-matrixbau-app
+    volumes:
+      - ..:/var/www/html
+    environment:
+      APP_NAME: "eFakture Matrixbau"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8090
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: efakture_matrixbau
+      DB_USERNAME: efakture
+      DB_PASSWORD: efakture
+      CACHE_STORE: file
+      SESSION_DRIVER: file
+      QUEUE_CONNECTION: sync
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - efk-matrixbau-net
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11.4.3
+    container_name: efk-matrixbau-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: efakture_matrixbau
+      MYSQL_USER: efakture
+      MYSQL_PASSWORD: efakture
+    ports:
+      - "3310:3306"
+    volumes:
+      - efk-matrixbau-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-uroot", "-proot_password", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - efk-matrixbau-net
+    restart: unless-stopped
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: efk-matrixbau-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+      UPLOAD_LIMIT: 256M
+    ports:
+      - "8091:80"
+    depends_on:
+      - db
+    networks:
+      - efk-matrixbau-net
+    restart: unless-stopped
+
+volumes:
+  efk-matrixbau-db-data:
+
+networks:
+  efk-matrixbau-net:
+    driver: bridge

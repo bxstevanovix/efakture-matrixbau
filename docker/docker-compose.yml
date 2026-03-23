@@ -1,3 +1,5 @@
+name: efk-matrixbau
+
 services:
   nginx:
     image: nginx:alpine

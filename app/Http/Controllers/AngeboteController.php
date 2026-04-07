@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Models\User;
 use Spatie\Browsershot\Browsershot;
+use Illuminate\Support\Facades\Storage;
 class AngeboteController extends Controller 
 {
     protected $request;
@@ -95,10 +96,12 @@ class AngeboteController extends Controller
         $pdfBinary = $this->generate($html);
 
         // folder
-        $path = public_path('data/matrix-bau/angebote');
+        // storage folder
+        $disk = 'public'; // disk iz config/filesystems.php
+        $folder = 'matrix-bau/angebote';
 
-        if (!is_dir($path)) {
-            @mkdir($path, 0775, true);
+        if (!Storage::disk($disk)->exists($folder)) {
+            Storage::disk($disk)->makeDirectory($folder, 0775, true);
         }
 
         $slug = Str::slug($customerName);
@@ -106,15 +109,14 @@ class AngeboteController extends Controller
         $timestamp = Carbon::now()->format('dm-Hi');
 
         // filename
-        $filename = $this->getUniqueFileName(
-            $path, "{$number}-{$slug}-{$timestamp}.pdf"
-        );
+        $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
 
-        $filePath = $path . '/' . $filename;
+        // snimi PDF u storage
+        Storage::disk($disk)->put("{$folder}/{$filename}", $pdfBinary);
 
-        file_put_contents($filePath, $pdfBinary);
+        $filePathForDb = "{$folder}/{$filename}";
 
-        if (!file_exists($filePath)) {
+        if (!Storage::disk($disk)->exists($filePathForDb)) {
             return response()->json(['error' => 'PDF saving failed'], 500);
         }
 
@@ -152,7 +154,7 @@ class AngeboteController extends Controller
 
         $invoice->date_start = $dateValue;
         
-        $invoice->invoice_url = 'data/matrix-bau/angebote/' . $filename;
+        $invoice->invoice_url = "storage/{$filePathForDb}";
         $invoice->created_by = auth()->id();
 
         $invoice->save();
@@ -188,16 +190,19 @@ class AngeboteController extends Controller
         ]);
     }
 
-    // Funkcija koja dodaje sufiks ako fajl već postoji
-    public function getUniqueFileName($path, $filename)
+    // Funkcija koja dodaje sufiks ako fajl već postoji u storage
+    protected function getUniqueFileName($folder, $filename)
     {
+        $disk = 'public'; // isti disk koji koristiš za snimanje
         $original = pathinfo($filename, PATHINFO_FILENAME);
         $extension = pathinfo($filename, PATHINFO_EXTENSION);
 
         $counter = 1;
+        $path = "{$folder}/{$filename}";
 
-        while (file_exists($path.'/'.$filename)) {
-            $filename = $original.'-'.$counter.'.'.$extension;
+        while (Storage::disk($disk)->exists($path)) {
+            $filename = $original . '-' . $counter . '.' . $extension;
+            $path = "{$folder}/{$filename}";
             $counter++;
         }
 

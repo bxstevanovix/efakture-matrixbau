@@ -1,0 +1,33 @@
+.error{
+    color: red;
+}
+
+.btn-group{
+    max-height: 45px !important;
+}
+
+.dataTables_length, .dataTables_info {
+    margin-left: 10px;
+}
+
+select[name="exampledb_length"] {
+    border-radius: 12px;
+    padding: 6px 12px;
+    text-align: center;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-weight: 500;
+    min-width: 20px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+select[name="exampledb_length"] option {
+    text-align: center;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    padding: 10px !important;
+}

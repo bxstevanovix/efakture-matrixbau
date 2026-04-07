@@ -1,6 +1,6 @@
 FROM php:8.4-fpm-alpine
 
-# Install system dependencies
+# Install system dependencies + Node.js + Chromium
 RUN apk add --no-cache \
     git \
     curl \
@@ -12,7 +12,15 @@ RUN apk add --no-cache \
     oniguruma-dev \
     icu-dev \
     libxml2-dev \
-    linux-headers
+    linux-headers \
+    nodejs \
+    npm \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
 # Configure and install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -73,6 +81,9 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progre
 COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Set environment variable for Browsershot to find Chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
 EXPOSE 9000
 

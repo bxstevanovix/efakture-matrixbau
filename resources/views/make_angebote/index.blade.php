@@ -1,6 +1,6 @@
 	@extends('_layouts.layout')
 
-	@section('head_title', __('Predracuni'))
+	@section('head_title', __('Ponude'))
 
 	@push('head_links')
 	@endpush
@@ -11,7 +11,7 @@
 
 	<div class="row page-titles mx-0">
 		<ol class="breadcrumb">
-			<li class="breadcrumb-item"><a href="{{route('angebote.index')}}">@lang('Predracuni')</a></li>
+			<li class="breadcrumb-item"><a href="{{route('angebote.index')}}">@lang('Ponude')</a></li>
 			<li class="breadcrumb-item active">@lang('Pregled')</li>
 		</ol>
 	</div>
@@ -19,14 +19,14 @@
 		<div class="col-12">
 			<div class="card">
 				<div class="card-header">
-					<h4 class="card-title">@lang('Predracuni')</h4>
+					<h4 class="card-title">@lang('Ponude')</h4>
 					<button 
 						id="openModal"
 						type="button"
 						class="btn btn-primary"
-						title="@lang('Kreiraj predracun')"
+						title="@lang('Kreiraj ponudu')"
 					>
-						<i class="fa fa-plus"></i> @lang('Kreiraj predracun')
+						<i class="fa fa-plus"></i> @lang('Kreiraj ponudu')
 					</button>
 				</div>
 				<div class="card-body">
@@ -34,7 +34,7 @@
 						<table id="exampledb" class="display w-100">
 							<thead>
 								<tr>
-									<th>@lang('Predracun Br.')</th>
+									<th>@lang('Ponuda Br.')</th>
 									<th>@lang('Firma')</th>
 									<th>@lang('Adresa')</th>
 									<th>@lang('Datum')</th>

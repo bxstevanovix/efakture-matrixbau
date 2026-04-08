@@ -153,7 +153,7 @@
 <script>
 $(function() {
     $('#companySelect').select2({
-        placeholder: "Izaberi firmu",
+        placeholder: "Firma auswählen",
         allowClear: true,
         width: '100%'
     });

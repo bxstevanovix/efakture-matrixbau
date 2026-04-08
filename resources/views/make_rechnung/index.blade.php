@@ -494,7 +494,7 @@
 				});
 
 				$('#firma_select').select2({
-					placeholder: "Pretraži firmu...",
+					placeholder: "Firma suchen…",
 					allowClear: true,
 					width: '100%'
 				});

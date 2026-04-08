@@ -41,7 +41,7 @@
                 <ul aria-expanded="false" class="left">
                     <li class="nav-text-icon-toggle">@lang('Firme')</li>
                     <li><a class="dz-active" href="{{ route("firme.index") }}">@lang('Lista firmi')</a></li>
-                    <li><a class="dz-active" href="{{ route('firme.create') }}">+ @lang('Kreiraj firme')</a></li>
+                    <li><a class="dz-active" href="{{ route('firme.create') }}">+ @lang('Kreiraj firmu')</a></li>
                 </ul>
             </li>
             <hr>
@@ -59,12 +59,12 @@
             <li>
                 <a class="has-arrow " href="javascript:void(0);" aria-expanded="true">
                     <i class="flaticon-notes"></i>
-                    <span class="nav-text">@lang('Predracuni')</span>
+                    <span class="nav-text">@lang('Ponude')</span>
                 </a>
                 <ul aria-expanded="true" class="mm-show">
-                    <li class="nav-text-icon-toggle">@lang('Predracuni')</li>
-                    <li><a class="dz-active" href="{{ route("angebote.index") }}">@lang('Lista predracuna')</a></li>
-                    <li><a class="dz-active" href="{{ route('angebote.index') }}?openModal=1">+ @lang('Kreiraj predracun')</a></li>
+                    <li class="nav-text-icon-toggle">@lang('Ponude')</li>
+                    <li><a class="dz-active" href="{{ route("angebote.index") }}">@lang('Lista ponuda')</a></li>
+                    <li><a class="dz-active" href="{{ route('angebote.index') }}?openModal=1">+ @lang('Kreiraj ponudu')</a></li>
                 </ul>
             </li>
 

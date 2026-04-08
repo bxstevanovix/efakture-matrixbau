@@ -347,12 +347,12 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: months,
             datasets: [
                 {
-                    label: 'Plaćene',
+                    label: 'Bezahlt',
                     data: invoicesData, // ✅ FIX
                     backgroundColor: 'rgba(75, 192, 192, 0.6)'
                 },
                 {
-                    label: 'Neplaćene',
+                    label: 'Unbezahlt',
                     data: prepareData(monthlyInvoicesNotPaid), // ✅ FIX
                     backgroundColor: 'rgba(255, 99, 132, 0.6)'
                 }
@@ -373,12 +373,12 @@ document.addEventListener('DOMContentLoaded', function () {
             labels: months,
             datasets: [
                 {
-                    label: 'Plaćene',
+                    label: 'Bezahlt',
                     data: procurementsData, // ✅ FIX
                     backgroundColor: 'rgba(75, 192, 192, 0.6)'
                 },
                 {
-                    label: 'Neplaćene',
+                    label: 'Unbezahlt',
                     data: prepareData(monthlyProcurementsNotPaid), // ✅ FIX
                     backgroundColor: 'rgba(255, 99, 132, 0.6)'
                 }
@@ -454,7 +454,7 @@ var table = $('#entity-list-table').DataTable({
     "paging": false, // Onemogućava paginaciju
     "info": false, // Onemogućava informacije o prikazu
     "language": {
-            emptyTable: "Nije pronađena ni jedna faktura za današnji datum"
+            emptyTable: "Keine Rechnung für heute gefunden."
         },
     "searching": false,
     "ajax": {
@@ -480,7 +480,7 @@ var table1 = $('#entity-list-table1').DataTable({
     "paging": false, // Onemogućava paginaciju
     "info": false, // Onemogućava informacije o prikazu
     "language": {
-            emptyTable: "Nije pronađena ni jedna faktura za današnji datum"
+            emptyTable: "Keine Rechnung für heute gefunden."
         },
     "searching": false,
     "ajax": {

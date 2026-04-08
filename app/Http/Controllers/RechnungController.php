@@ -34,7 +34,7 @@ class RechnungController extends Controller
      */
     public function datatable()
     {
-        $query = Entity::query()->where('id', '>', 0)->orderBy('created_at', 'desc');
+        $query = Entity::query()->where('id', '>', 0);
 
         return datatables($query)
             ->editColumn('id_invoice', function ($entity) {
@@ -60,6 +60,9 @@ class RechnungController extends Controller
             ->editColumn("created_by", function ($entity) {
                 $user = User::find($entity->created_by);
                 return $user ? $user->name : '-';
+            })
+            ->orderColumn('id_invoice', function ($query, $order) {
+                $query->orderBy('id', $order); // 👈 SORT PO ID
             })
             ->rawColumns(['actions', 'image'])
             ->setRowAttr([

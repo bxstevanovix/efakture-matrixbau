@@ -66,19 +66,19 @@
 				"serverSide": true,
 				"ajax": { url: datatableUrl, type: "post" },
 				"columns": [
-					{"data": "id_invoice", width: "10%"},
-					{"data": "firma", width: "22%"},
-					{"data": "adress", width: "22%"},
-					{"data": "date_start", width: "10%"},
-					{"data": "created_by", width: "16%"},
-					{"data": "price", width: "10%"},
+					{"data": "id_invoice", "name" : "id_invoice", width: "10%"},
+					{"data": "firma", width: "22%", orderable:false},
+					{"data": "adress", width: "22%", orderable:false},
+					{"data": "date_start", width: "10%", orderable:false},
+					{"data": "created_by", width: "16%", orderable:false},
+					{"data": "price", width: "10%", orderable:false},
 					{"data": "actions", width: "10%", orderable:false, searchable:false, className:"text-right"}
 				],
 				"language": {
 					"search": "Suchen:",
 					"paginate": { "previous": '<i class="fa-solid fa-angle-left"></i>', "next": '<i class="fa-solid fa-angle-right"></i>' }
 				},
-				"order": [[0, "asc"]]
+				"order": [[0, "desc"]]
 			});
 
 			// OPEN MODAL

@@ -49,6 +49,9 @@ class AngeboteController extends Controller
                 return $user ? $user->name : '-';
             })
             ->rawColumns(['actions', 'image'])
+            ->orderColumn('id_invoice', function ($query, $order) {
+                $query->orderBy('id', $order); // 👈 SORT PO ID
+            })
             ->setRowAttr([
                 'data-id' => function($entity) {
                     return $entity->id;

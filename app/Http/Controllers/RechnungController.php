@@ -7,11 +7,11 @@ use App\Models\Rechnung as Entity;
 
 use App\Http\Resources\JsonResource;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Firma;
 use Spatie\Browsershot\Browsershot;
-use Illuminate\Support\Facades\Storage;
 
 class RechnungController extends Controller 
 {
@@ -115,26 +115,23 @@ class RechnungController extends Controller
             'schlussrechnung' => 'schlussrechnungen'
         ];
 
-        $disk = 'public';
-        $folder = 'matrix-bau/' . $typeMap[$type];
-
-        if (!Storage::disk($disk)->exists($folder)) {
-            Storage::disk($disk)->makeDirectory($folder, 0775, true);
-        }
+        // folder
+        $folder = $typeMap[$type];
+        Storage::disk('public')->makeDirectory($folder);
 
         $slug = Str::slug($customerName);
         $number = Str::slug(str_replace('/', '-', $rechnungNr));
         $timestamp = Carbon::now()->format('dm-Hi');
 
         // filename
-        $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
+        $filename = $this->getUniqueFileName(
+            storage_path('app/public/' . $folder), "{$number}-{$slug}-{$timestamp}.pdf"
+        );
 
-        // snimi PDF u storage
-        Storage::disk($disk)->put("{$folder}/{$filename}", $pdfBinary);
+        $storagePath = $folder . '/' . $filename;
+        Storage::disk('public')->put($storagePath, $pdfBinary);
 
-        $filePathForDb = "{$folder}/{$filename}";
-
-        if (!Storage::disk($disk)->exists($filePathForDb)) {
+        if (!Storage::disk('public')->exists($storagePath)) {
             return response()->json(['error' => 'PDF saving failed'], 500);
         }
 
@@ -155,7 +152,7 @@ class RechnungController extends Controller
 
         $invoice->date_start = $dateValue;
         
-        $invoice->invoice_url = "storage/{$filePathForDb}";
+        $invoice->invoice_url = $folder . '/' . $filename;
         $invoice->created_by = auth()->id();
 
         $invoice->save();
@@ -171,13 +168,15 @@ class RechnungController extends Controller
     {
         $angebot = Entity::findOrFail($id);
 
-        // Pravljenje punog puta do PDF fajla
-        $path = public_path($angebot->invoice_url);
+        $path = storage_path('app/public/' . $angebot->invoice_url);
 
-        // Serviranje PDF-a sa pravim nazivom
+        if (!file_exists($path)) {
+            abort(404, 'PDF nije pronađen');
+        }
+
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="Angebot_'.$angebot->id_invoice.'.pdf"',
+            'Content-Disposition' => 'inline; filename="Rechnung_'.$angebot->id_invoice.'.pdf"',
         ]);
     }
     

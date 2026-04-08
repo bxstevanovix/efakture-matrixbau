@@ -7,6 +7,7 @@ use App\Models\Angebot as Entity;
 
 use App\Http\Resources\JsonResource;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Models\User;
 use Spatie\Browsershot\Browsershot;
@@ -96,27 +97,22 @@ class AngeboteController extends Controller
         $pdfBinary = $this->generate($html);
 
         // folder
-        // storage folder
-        $disk = 'public'; // disk iz config/filesystems.php
-        $folder = 'matrix-bau/angebote';
-
-        if (!Storage::disk($disk)->exists($folder)) {
-            Storage::disk($disk)->makeDirectory($folder, 0775, true);
-        }
+        $folder = 'angebote';
+        Storage::disk('public')->makeDirectory($folder);
 
         $slug = Str::slug($customerName);
         $number = $rechnungNr ? Str::slug(str_replace('/', '-', $rechnungNr)) : 'angebot';
         $timestamp = Carbon::now()->format('dm-Hi');
 
         // filename
-        $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
+        $filename = $this->getUniqueFileName(
+            storage_path('app/public/' . $folder), "{$number}-{$slug}-{$timestamp}.pdf"
+        );
 
-        // snimi PDF u storage
-        Storage::disk($disk)->put("{$folder}/{$filename}", $pdfBinary);
+        $storagePath = $folder . '/' . $filename;
+        Storage::disk('public')->put($storagePath, $pdfBinary);
 
-        $filePathForDb = "{$folder}/{$filename}";
-
-        if (!Storage::disk($disk)->exists($filePathForDb)) {
+        if (!Storage::disk('public')->exists($storagePath)) {
             return response()->json(['error' => 'PDF saving failed'], 500);
         }
 
@@ -154,7 +150,7 @@ class AngeboteController extends Controller
 
         $invoice->date_start = $dateValue;
         
-        $invoice->invoice_url = "storage/{$filePathForDb}";
+        $invoice->invoice_url = 'angebote/' . $filename;
         $invoice->created_by = auth()->id();
 
         $invoice->save();
@@ -170,10 +166,12 @@ class AngeboteController extends Controller
     {
         $angebot = Entity::findOrFail($id);
 
-        // Pravljenje punog puta do PDF fajla
-        $path = public_path($angebot->invoice_url);
+        $path = storage_path('app/public/' . $angebot->invoice_url);
 
-        // Serviranje PDF-a sa pravim nazivom
+        if (!file_exists($path)) {
+            abort(404, 'PDF nije pronađen');
+        }
+
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="Angebot_'.$angebot->id_invoice.'.pdf"',

@@ -2,7 +2,7 @@
     <a 
         href="{{ route('rechnung.view', $entity->id) }}" 
         class="btn light btn-info printInvoiceButton"
-        data-url="{{ asset($entity->invoice_url) }}" 
+        data-url="{{ asset('storage/' . $entity->invoice_url) }}" 
         target="_blank"
         title="@lang('PDF')"
         >

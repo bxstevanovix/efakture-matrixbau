@@ -85,6 +85,10 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Set environment variable for Browsershot to find Chromium
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
+# instaliraj jebeni puppeteer
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+RUN npm install -g puppeteer
+
 EXPOSE 9000
 
 ENTRYPOINT ["docker-entrypoint.sh"]

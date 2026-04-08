@@ -151,5 +151,15 @@
   "Pregled ponude": "Angebotsübersicht",
   "Cijena": "Preis",
   "Kolicina": "Menge",
-  "Ukupna cijena": "Gesamtpreis"
+  "Ukupna cijena": "Gesamtpreis",
+  "Email": "E-Mail",
+  "Promjena šifre": "Passwort ändern",
+  "Trenutna šifra": "Aktuelles Passwort",
+  "Nova šifra": "Neues Passwort",
+  "Potvrdi šifru": "Passwort bestätigen",
+  "Promijenjeno": "Geändert",
+  "Brisanje Naloga": "Konto löschen",
+  "Ova akcija je nepovratna. Svi podaci će biti obrisani.": "Diese Aktion ist unwiderruflich. Alle Daten werden gelöscht.",
+  "Unesite šifru za potvrdu": "Geben Sie das Passwort zur Bestätigung ein",
+  "Obriši nalog": "Konto löschen"
 }

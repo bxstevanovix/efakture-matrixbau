@@ -35,7 +35,7 @@
         <div class="col-xl-6 col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Promjena šifre</h4>
+                    <h4 class="card-title">@lang('Promjena šifre')</h4>
                 </div>
                 <div class="card-body">
                     @include('profile.partials.update-password-form')
@@ -47,7 +47,7 @@
         <div class="col-xl-12">
             <div class="card border-danger">
                 <div class="card-header">
-                    <h4 class="card-title text-danger">Brisanje naloga</h4>
+                    <h4 class="card-title text-danger">@lang('Brisanje Naloga')</h4>
                 </div>
                 <div class="card-body">
                     @include('profile.partials.delete-user-form')

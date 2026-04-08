@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Models\User;
 use Spatie\Browsershot\Browsershot;
-use Illuminate\Support\Facades\Storage;
 class AngeboteController extends Controller 
 {
     protected $request;

@@ -60,7 +60,7 @@
 									<!-- firma -->
 									<div class="mb-3 row align-items-center">
 										<label for="customer_name" class="col-sm-2 col-form-label">@lang('Ime firme')</label>
-										<div class="col-sm-10">
+										<div class="col-sm-8">
 											<input 
 												id="customer_name"
 												type="text" 
@@ -75,6 +75,17 @@
 											<div class="invalid-feedback">
 												Bitte geben Sie den Namen der Firma ein.
 											</div>
+										</div>
+										<div class="col-sm-2">
+											<input 
+												type="number" 
+												id="spacing_input"
+												class="form-control"
+												min="0"
+												max="100"
+												value="0"
+												style="text-align:center;"
+											>
 										</div>
 									</div>
 									<!-- adresa -->
@@ -361,7 +372,7 @@
 							</div>
 
 							<!-- FIRMA -->
-							<div class="firma">
+							<div id="firma_block" class="firma">
 								<p style="font-size:12px; max-width:350px; word-wrap:break-word;" class="customer-lead">
 									<strong id="p_customer_name"></strong>
 								</p>

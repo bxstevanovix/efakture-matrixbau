@@ -18,7 +18,7 @@
 									<!-- firma -->
 									<div class="mb-3 row align-items-center">
 										<label for="customer_name" class="col-sm-2 col-form-label">@lang('Ime firme')</label>
-										<div class="col-sm-10">
+										<div class="col-sm-8">
 											<input 
 												id="customer_name"
 												type="text" 
@@ -37,6 +37,17 @@
 											<div class="invalid-feedback">
 												Bitte geben Sie den Namen der Firma ein.
 											</div>
+										</div>
+										<div class="col-sm-2">
+											<input 
+												type="number" 
+												id="spacing_input"
+												class="form-control"
+												min="0"
+												max="100"
+												value="0"
+												style="text-align:center;"
+											>
 										</div>
 									</div>
 									<!-- adresa -->
@@ -273,14 +284,7 @@
 
 									<!-- textarea -->
 									<div class="mb-3 col-md-8">
-										<textarea 
-											id="invoice_note"
-											class="form-control"
-											placeholder="Optionaler Text..."
-											rows="4"
-											style="margin-top: 50px;"
-											autocomplete="off"
-										></textarea>
+										<div id="invoice_note_editor" style="margin-top:50px;"></div>
 									</div>
 									<!-- sacuvaj button -->
 									<div class="mb-3 col-md-4">
@@ -320,7 +324,7 @@
 							</div>
 
 							<!-- FIRMA -->
-							<div class="firma">
+							<div id="firma_block" class="firma">
 								<p style="font-size:12px; max-width:350px; word-wrap:break-word;" class="customer-lead">
 									<strong id="p_customer_name"></strong>
 								</p>
@@ -427,16 +431,7 @@
 
 							<div class="description-left">
 								<div class="description-left">
-									<pre 
-										id="p_invoice_note"
-										style="
-										font-size:9px;
-										font-family: inherit;
-										width:385px;
-										color:black;
-										white-space: pre-wrap;
-										">
-									</pre>
+									<div id="p_invoice_note" style="font-size:9px;"></div>
 								</div>
 							</div>
 

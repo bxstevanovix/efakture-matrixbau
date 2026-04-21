@@ -109,7 +109,7 @@
 					<input type="text" class="item-qty form-control" value="0">
 					<input type="text" class="item-price form-control" value="0">
 					<input type="text" class="item-total form-control" value="0">
-					<button type="button" class="remove-item">×</button>
+					<button type="button" class="remove-item text-center"><i class="fa fa-times"></i></button>
 				`;
 
 				row.querySelector(".remove-item").onclick = () => {
@@ -444,7 +444,20 @@
 					}
 				});
 
-				
+				const inputpx = document.getElementById('spacing_input');
+				const firma = document.getElementById('firma_block');
+
+				inputpx.addEventListener('input', function () {
+					let value = parseInt(this.value) || 0;
+
+					// zaštita (0–100)
+					if (value < 0) value = 0;
+					if (value > 100) value = 100;
+
+					firma.style.marginTop = value + 'px';
+				});
+
+				firma.style.marginTop = inputpx.value + 'px';
 
 		});
 

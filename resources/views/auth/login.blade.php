@@ -92,7 +92,7 @@
 					<a><img width="420px" src="{{ asset('img/cist-beli-logo.jpg') }}" class="light-login" alt=""></a>
 				</div>
 				{{-- <h3 style="font-size: 34px;" class="mb-2">E-FAKTURE</h3> --}}
-				<p>11Easily create invoices, track your clients, and optimize your processes.<br> <strong>E-fakture</strong> gives you complete control over your business. <br> Learn more at <a style="color: var(--primary);" href="https://fakture.at" target="_blank">fakture.at</a></p>
+				<p>Easily create invoices, track your clients, and optimize your processes.<br> <strong>E-fakture</strong> gives you complete control over your business. <br> Learn more at <a style="color: var(--primary);" href="https://fakture.at" target="_blank">fakture.at</a></p>
 			</div>
             <div class="aside-image" style="background-image:url('{{ asset('files/images/pic1.svg') }}');"></div>
 		</div>

@@ -333,4 +333,25 @@
         text-rendering: geometricPrecision;
     }
 
+
+    .remove-item {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+        cursor: pointer;
+
+        font-size: 18px;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .remove-item:hover {
+        background-color: #d9363e;
+    }
 </style>

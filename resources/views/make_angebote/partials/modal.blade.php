@@ -284,7 +284,14 @@
 
 									<!-- textarea -->
 									<div class="mb-3 col-md-8">
-										<div id="invoice_note_editor" style="margin-top:50px;"></div>
+										<textarea 
+											id="invoice_note"
+											class="form-control"
+											placeholder="Optionaler Text..."
+											rows="4"
+											style="margin-top: 50px;"
+											autocomplete="off"
+										></textarea>
 									</div>
 									<!-- sacuvaj button -->
 									<div class="mb-3 col-md-4">
@@ -431,7 +438,16 @@
 
 							<div class="description-left">
 								<div class="description-left">
-									<div id="p_invoice_note" style="font-size:9px;"></div>
+									<pre 
+										id="p_invoice_note"
+										style="
+										font-size:9px;
+										font-family: inherit;
+										width:385px;
+										color:black;
+										white-space: pre-wrap;
+										">
+									</pre>
 								</div>
 							</div>
 

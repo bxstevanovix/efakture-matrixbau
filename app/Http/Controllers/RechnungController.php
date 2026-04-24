@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Firma;
 use Spatie\Browsershot\Browsershot;
+use App\Models\Beschreibung;
 
 class RechnungController extends Controller 
 {
@@ -160,6 +161,21 @@ class RechnungController extends Controller
 
         $invoice->save();
 
+        if($request->items){
+            foreach ($request->items as $item) {
+
+                Beschreibung::create([
+                    'invoice_type' => 'angebot',
+                    'invoice_id' => $invoice->id,
+
+                    'name'  => $item['name'] ?? null,
+                    'qty'   => $item['qty'] ?? 0,
+                    'price' => $item['price'] ?? 0,
+                    'total' => $item['total'] ?? 0,
+                ]);
+            }
+        }
+
         return response()->json([
             'success' => true,
             'invoice_id' => $invoice->id,
@@ -246,7 +262,7 @@ class RechnungController extends Controller
             <meta charset='utf-8'>
             <style>
             body {
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: Arial, sans-serif;
             }
 
 
@@ -255,7 +271,7 @@ class RechnungController extends Controller
             }
 
             .a4-preview {
-                font-family: Arial, Helvetica, sans-serif;
+                font-family: Arial, sans-serif;
             }
 		
             .a4-wrapper {

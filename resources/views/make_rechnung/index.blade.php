@@ -100,15 +100,16 @@
 				}
 			});
 
+			let index = 1;
 			// ADD ITEM
 			document.getElementById("addItem").onclick = function(){
 				const row = document.createElement("div");
 				row.classList.add("item-row","col-12");
 				row.innerHTML = `
-					<input type="text" class="item-name form-control" placeholder="Beschreibung">
-					<input type="text" class="item-qty form-control" value="0">
-					<input type="text" class="item-price form-control" value="0">
-					<input type="text" class="item-total form-control" value="0">
+					<input name="items[${index}][name]" type="text" class="item-name form-control" placeholder="Beschreibung">
+					<input name="items[${index}][qty]" type="text" class="item-qty form-control" value="0">
+					<input name="items[${index}][price]" type="text" class="item-price form-control" value="0">
+					<input name="items[${index}][total]" type="text" class="item-total form-control" value="0">
 					<button type="button" class="remove-item text-center"><i class="fa fa-times"></i></button>
 				`;
 
@@ -119,6 +120,8 @@
 
 				itemsContainer.appendChild(row);
 				updatePreview();
+
+				index++;
 			};
 
 			document.querySelectorAll("#customer_name, #adress, #ort, #uid, #date, #bvh, #rechnung_nr, #auftragsnr, #ausführungszeit, #discount_percent, #use_tax, #invoice_note")
@@ -282,6 +285,17 @@
 					const rechnungNr = document.getElementById("rechnung_nr").value;
 					const html = document.getElementById('a4wrapper').innerHTML;
 
+					let items = [];
+
+					document.querySelectorAll(".item-row").forEach(row => {
+						items.push({
+							name: row.querySelector(".item-name")?.value || "",
+							qty: row.querySelector(".item-qty")?.value || 0,
+							price: row.querySelector(".item-price")?.value || 0,
+							total: row.querySelector(".item-total")?.value || 0,
+						});
+					});
+
 					$.ajax({
 						url: "{{ route('rechnung.store') }}",
 						type: "POST",
@@ -299,6 +313,7 @@
 							invoice_note: $("#invoice_note").val(),
 							total: $("#p_total").text(),
 							html: html,
+							items: items,
 							_token: $('meta[name="csrf-token"]').attr('content')
 						},
 						success: function(response){

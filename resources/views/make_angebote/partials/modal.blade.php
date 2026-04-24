@@ -206,10 +206,10 @@
 									<div class="row" id="items">
 										<!-- PRVI RED (stalni) -->
 										<div class="item-row col-12 first-row">
-											<input type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
-											<input type="text" class="item-qty form-control" value="0" autocomplete="off">
-											<input type="text" class="item-price form-control" value="0" autocomplete="off">
-											<input type="text" class="item-total form-control" value="0" autocomplete="off">
+											<input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
+											<input name="items[0][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">
+											<input name="items[0][price]" type="text" class="item-price form-control" value="0" autocomplete="off">
+											<input name="items[0][total]" type="text" class="item-total form-control" value="0" autocomplete="off">
 											<button style="background-color:#ddd;" disabled type="button" class="remove-item"></button>
 										</div>
 									</div>

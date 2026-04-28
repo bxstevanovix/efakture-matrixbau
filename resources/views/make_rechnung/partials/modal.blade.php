@@ -1,3 +1,14 @@
+<style>
+	.autocomplete-box {
+		border-radius: 0 0 10px 10px;
+		border-top: none;
+	}
+
+	.autocomplete-box {
+		box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+	}
+	
+</style>
 <div id="invoiceModal" class="modal">
 		<div class="modal-content">
 			<!-- HEADER -->
@@ -182,7 +193,7 @@
 												name="bvh"
 												placeholder="z.B. 11000 Ort, Straße 11"
 												value=""
-												maxlength="155"
+												maxlength="255"
 												autocomplete="off"
 											>
 										</div>
@@ -198,7 +209,7 @@
 												name=""
 												placeholder="Obj. Nr. 123/36WE, Auftragsnr. 123/989/38/1"
 												value=""
-												maxlength="50"
+												maxlength="255"
 												autocomplete="off"
 											>
 										</div>
@@ -214,16 +225,12 @@
 												name="rechnung_nr"
 												placeholder="Rechnung Nr."
 												value=""
-												maxlength="50"
+												maxlength="255"
 												autocomplete="off"
 												required
 											>
-											@error('rechnung_nr')
-												<div id="rechnung_nr_error" class="invalid-feedback">
-													{{ $message }}
-												</div>
-											@enderror
 										</div>
+										<div class="text-danger rechnung-error"></div>
 									</div>
 									<!-- Ausführungszeit -->
 									<div class="mb-3 col-md-4">
@@ -236,7 +243,7 @@
 												name=""
 												placeholder="KW: 32/25"
 												value=""
-												maxlength="50"
+												maxlength="255"
 												autocomplete="off"
 											>
 										</div>
@@ -246,8 +253,11 @@
 
 									<div class="row" id="items">
 										<!-- PRVI RED (stalni) -->
-										<div class="item-row col-12 first-row">
-											<input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
+										<div class="item-row col-12 first-row" style="position:relative;">
+											<div style="position:relative; flex: 2;">
+												<input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
+												<div class="autocomplete-box beschreibung-box"></div>
+											</div>
 											<input name="items[0][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">
 											<input name="items[0][price]" type="text" class="item-price form-control" value="0" autocomplete="off">
 											<input name="items[0][total]" type="text" class="item-total form-control" value="0" autocomplete="off">
@@ -325,14 +335,7 @@
 
 									<!-- textarea -->
 									<div class="mb-3 col-md-8">
-										<textarea 
-											id="invoice_note"
-											class="form-control"
-											placeholder="Optionaler Text..."
-											rows="4"
-											style="margin-top: 50px;"
-											autocomplete="off"
-										></textarea>
+										<div id="editor"></div>
 									</div>
 									<!-- sacuvaj button -->
 									<div class="mb-3 col-md-4">
@@ -479,16 +482,16 @@
 
 							<div class="description-left">
 								<div class="description-left">
-									<pre 
+									<div 
 										id="p_invoice_note"
 										style="
-										font-size:9px;
-										font-family: inherit;
-										width:385px;
-										color:black;
-										white-space: pre-wrap;
+											font-size:10px;
+											font-family: inherit;
+											width:385px;
+											color:black;
+											white-space: normal;
 										">
-									</pre>
+									</div>
 								</div>
 							</div>
 

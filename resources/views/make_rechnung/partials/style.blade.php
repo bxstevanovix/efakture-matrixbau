@@ -301,6 +301,7 @@
     }
     .card-body {
         padding: 5px !important;
+        padding-bottom: 30px !important;
     }
 
     .doc-card{
@@ -352,6 +353,62 @@
 
     .remove-item:hover {
         background-color: #d9363e;
+    }
+
+    .autocomplete-box {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;          /* 🔥 KLJUČ */
+        background: #fff;
+        border: 1px solid #ddd;
+        z-index: 9999;
+        max-height: 200px;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    .autocomplete-item {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .autocomplete-item {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .autocomplete-item:hover {
+        background: #f2f2f2;
+    }
+
+    .ql-editor {
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #p_invoice_note p {
+        margin: 0 0 4px 0;
+    }
+
+    #p_invoice_note ul,
+    #p_invoice_note ol {
+        margin: 0 0 4px 15px;
+        padding: 0;
+    }
+
+    #p_invoice_note strong {
+        font-weight: bold;
+    }
+
+    .ql-size-small {
+        font-size: 12px;
+    }
+    .ql-size-large {
+        font-size: 18px;
+    }
+    .ql-size-huge {
+        font-size: 32px;
     }
 
 </style>

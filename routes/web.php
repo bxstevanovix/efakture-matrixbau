@@ -90,7 +90,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/view/{id}', [AngeboteController::class, 'viewPdf'])->name('view');
         // Autocomplete za firma i adress
         Route::get('/autocomplete/firma', [AngeboteController::class, 'autocompleteFirma']);
-        Route::get('/autocomplete/adress', [AngeboteController::class, 'autocompleteAdress']);
+        Route::get('/autocomplete/adresa', [AngeboteController::class, 'autocompleteAdress']);
+        Route::get('/autocomplete/beschreibung', [AngeboteController::class, 'autocompleteBeschreibung']);
     });
 
     // RECHNUNG

@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\Firma;
 use Spatie\Browsershot\Browsershot;
 use App\Models\Beschreibung;
+use Illuminate\Validation\Rule;
 
 class RechnungController extends Controller 
 {
@@ -85,11 +86,19 @@ class RechnungController extends Controller
             'date' => 'required|date',
             'bvh' => 'nullable|string|max:255',
             'auftragsnr' => 'nullable|string|max:255',
-            'rechnung_nr' => 'required|string|max:50|unique:rechnungen,id_invoice',
+            'rechnung_nr' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('rechnungen', 'id_invoice')->whereNull('deleted_at'),
+            ],
             'ausführungszeit' => 'nullable|string|max:100',
             'invoice_note' => 'nullable|string',
             'total' => 'required',
             'html' => 'required|string'
+        ]
+        , [
+            'rechnung_nr.unique' => 'Angebotsnummer bereits vergeben!'
         ]);
 
         $type = $data['type'];
@@ -111,7 +120,7 @@ class RechnungController extends Controller
 
         $html = $data['html'];
 
-        $pdfBinary = $this->generate($html);
+        $pdfBinary = $this->generate($html, $type);
 
         $typeMap = [
             'rechnung' => 'rechnungen',
@@ -195,7 +204,7 @@ class RechnungController extends Controller
 
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="Rechnung_'.$angebot->id_invoice.'.pdf"',
+            'Content-Disposition' => 'inline; filename="' . $angebot->id_invoice . '.pdf"',
         ]);
     }
     
@@ -205,7 +214,7 @@ class RechnungController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Racun je uspešno obrisan!'
+            'message' => __('Racun je uspešno obrisan!')
         ]);
     }
 
@@ -241,7 +250,24 @@ class RechnungController extends Controller
             ->pluck('adress');
     }
 
-    public function generate($html)
+    public function autocompleteBeschreibung(Request $request)
+    {
+        $q = $request->q;
+
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Beschreibung::where('name', 'LIKE', "%{$q}%")
+            ->select('name')
+            ->distinct()
+            ->limit(10)
+            ->pluck('name');
+
+        return response()->json($results);
+    }
+
+    public function generate($html, $type)
     {
         // Putanja do slike u public folderu
         $logoPath = public_path('img/cist-beli-logo.jpg');
@@ -256,10 +282,13 @@ class RechnungController extends Controller
             );
         }
 
+        $title = ucfirst($type) . " PDF";
+
         $fullHtml = "
         <html>
         <head>
             <meta charset='utf-8'>
+            <title>" . $title . "</title>
             <style>
             body {
                 font-family: Arial, sans-serif;
@@ -545,6 +574,73 @@ class RechnungController extends Controller
                 *{
                     -webkit-font-smoothing: none;
                     text-rendering: geometricPrecision;
+                }
+
+                .remove-item {
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    background-color: #ff4d4f;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+
+                    font-size: 18px;
+                    font-weight: bold;
+                    line-height: 1;
+                }
+
+                .remove-item:hover {
+                    background-color: #d9363e;
+                }
+
+                .autocomplete-box {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    width: 100%;          /* 🔥 KLJUČ */
+                    background: #fff;
+                    border: 1px solid #ddd;
+                    z-index: 9999;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    box-sizing: border-box;
+                }
+
+                .autocomplete-item {
+                    padding: 8px;
+                    cursor: pointer;
+                }
+
+                .autocomplete-item {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .autocomplete-item:hover {
+                    background: #f2f2f2;
+                }
+
+                .ql-editor {
+                    font-family: Arial, Helvetica, sans-serif;
+                }
+
+                #p_invoice_note p {
+                    margin: 0 0 4px 0;
+                }
+
+                #p_invoice_note ul,
+                #p_invoice_note ol {
+                    margin: 0 0 4px 15px;
+                    padding: 0;
+                }
+
+                #p_invoice_note strong {
+                    font-weight: bold;
                 }
 
 	        </style>

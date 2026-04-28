@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use Spatie\Browsershot\Browsershot;
 use App\Models\Beschreibung;
+use Illuminate\Validation\Rule;
 
 class AngeboteController extends Controller 
 {
@@ -72,11 +73,18 @@ class AngeboteController extends Controller
             'date' => 'required|date',
             'bvh' => 'nullable|string|max:255',
             'auftragsnr' => 'nullable|string|max:255',
-            'rechnung_nr' => 'nullable|string|max:50|unique:angebote,id_invoice',
+            'rechnung_nr' => [
+                'nullable',
+                'string',
+                'max:50',
+                Rule::unique('angebote', 'id_invoice')->whereNull('deleted_at'),
+            ],
             'ausführungszeit' => 'nullable|string|max:100',
             'invoice_note' => 'nullable|string',
             'total' => 'required',
             'html' => 'required|string'
+        ], [
+            'rechnung_nr.unique' => 'Angebotsnummer bereits vergeben!'
         ]);
 
         $type = "angebot";
@@ -194,7 +202,7 @@ class AngeboteController extends Controller
 
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="Angebot_'.$angebot->id_invoice.'.pdf"',
+            'Content-Disposition' => 'inline; filename="' . $angebot->id_invoice . '.pdf"',
         ]);
     }
     
@@ -204,7 +212,7 @@ class AngeboteController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Predracun je uspešno obrisan!'
+            'message' => 'Angebot erfolgreich gelöscht!'
         ]);
     }
 
@@ -227,27 +235,60 @@ class AngeboteController extends Controller
         return $filename;
     }
 
+    
     public function autocompleteFirma(Request $request)
     {
-        $term = $request->get('q');
+        $q = $request->q;
 
-        return Entity::where('firma', 'LIKE', "%$term%")
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Entity::where('firma', 'LIKE', "%{$q}%")
             ->select('firma')
             ->distinct()
             ->limit(10)
             ->pluck('firma');
+
+        return response()->json($results);
+
+        return response()->json($results);
     }
 
     public function autocompleteAdress(Request $request)
     {
-        $term = $request->get('q');
+        $q = $request->q;
 
-        return Entity::where('adress', 'LIKE', "%$term%")
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Entity::where('adress', 'LIKE', "%{$q}%")
             ->select('adress')
             ->distinct()
             ->limit(10)
             ->pluck('adress');
+
+        return response()->json($results);
     }
+    
+    public function autocompleteBeschreibung(Request $request)
+    {
+        $q = $request->q;
+
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Beschreibung::where('name', 'LIKE', "%{$q}%")
+            ->select('name')
+            ->distinct()
+            ->limit(10)
+            ->pluck('name');
+
+        return response()->json($results);
+    }
+   
     public function generate($html)
     {
         // Putanja do slike u public folderu
@@ -267,6 +308,7 @@ class AngeboteController extends Controller
         <html>
         <head>
             <meta charset='utf-8'>
+            <title>Angebot PDF</title>
             <style>
             body {
                 font-family: Arial, sans-serif;
@@ -552,6 +594,73 @@ class AngeboteController extends Controller
                 *{
                     -webkit-font-smoothing: none;
                     text-rendering: geometricPrecision;
+                }
+
+                .remove-item {
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    background-color: #ff4d4f;
+                    color: white;
+                    border: none;
+                    cursor: pointer;
+
+                    font-size: 18px;
+                    font-weight: bold;
+                    line-height: 1;
+                }
+
+                .remove-item:hover {
+                    background-color: #d9363e;
+                }
+
+                .autocomplete-box {
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    width: 100%;          /* 🔥 KLJUČ */
+                    background: #fff;
+                    border: 1px solid #ddd;
+                    z-index: 9999;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    box-sizing: border-box;
+                }
+
+                .autocomplete-item {
+                    padding: 8px;
+                    cursor: pointer;
+                }
+
+                .autocomplete-item {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .autocomplete-item:hover {
+                    background: #f2f2f2;
+                }
+
+                .ql-editor {
+                    font-family: Arial, Helvetica, sans-serif;
+                }
+
+                #p_invoice_note p {
+                    margin: 0 0 4px 0;
+                }
+
+                #p_invoice_note ul,
+                #p_invoice_note ol {
+                    margin: 0 0 4px 15px;
+                    padding: 0;
+                }
+
+                #p_invoice_note strong {
+                    font-weight: bold;
                 }
 
 	        </style>

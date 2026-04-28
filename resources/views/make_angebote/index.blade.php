@@ -55,11 +55,32 @@
 @endsection
 
 @push('footer_scripts')
+	<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+	<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 	<script>
 		$(function() {
 
-			// DATATABLES
+			// QUILL ---------------------------------------------------
+			const quill = new Quill('#editor', {
+				theme: 'snow',
+				placeholder: 'Optionaler Text...',
+				modules: {
+					toolbar: [
+						['bold', 'italic', 'underline'],
+						[{ 'size': ['small', false, 'large', 'huge'] }],
+						[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+						['clean']
+					]
+				}
+			});
+
+			quill.on('text-change', function () {
+				document.getElementById("p_invoice_note").innerHTML = quill.root.innerHTML;
+			});
+			// QUILL END -----------------------------------------------
+
+			// DATATABLES ----------------------------------------------
 			let datatableUrl = "{{ route('angebote.datatable') }}";
 			$('#exampledb').DataTable({
 				"processing": true,
@@ -80,6 +101,7 @@
 				},
 				"order": [[0, "desc"]]
 			});
+			// DATATABLES END -------------------------------------------
 
 			// OPEN MODAL
 			const modal = document.getElementById("invoiceModal");
@@ -106,7 +128,17 @@
 				const row = document.createElement("div");
 				row.classList.add("item-row","col-12");
 				row.innerHTML = `
-					<input name="items[${index}][name]" type="text" class="item-name form-control" placeholder="Beschreibung">
+					<div style="position:relative; flex: 2;">
+						<input 
+							name="items[${index}][name]" 
+							type="text" 
+							class="item-name form-control" 
+							placeholder="Beschreibung"
+							autocomplete="off"
+						>
+
+						<div class="autocomplete-box beschreibung-box"></div>
+					</div>
 					<input name="items[${index}][qty]" type="text" class="item-qty form-control" value="0">
 					<input name="items[${index}][price]" type="text" class="item-price form-control" value="0">
 					<input name="items[${index}][total]" type="text" class="item-total form-control" value="0">
@@ -151,8 +183,7 @@
 				document.getElementById("p_ausführungszeit").innerText =
 					document.getElementById("ausführungszeit").value;
 
-				document.getElementById("p_invoice_note").innerText =
-					document.getElementById("invoice_note").value;
+				document.getElementById("p_invoice_note").innerHTML = quill.root.innerHTML;
 
 				let dateValue = document.getElementById("date").value;
 				if (dateValue) {
@@ -309,7 +340,7 @@
 							auftragsnr: $("#auftragsnr").val(),
 							rechnung_nr: $("#rechnung_nr").val(),
 							ausführungszeit: $("#ausführungszeit").val(),
-							invoice_note: $("#invoice_note").val(),
+							invoice_note: quill.root.innerHTML,
 							total: $("#p_total").text(),
 							html: html,
 							items: items,
@@ -327,7 +358,18 @@
 
 						},
 						error: function(xhr){
-							console.log(xhr.responseText);
+							$('.rechnung-error').text('');
+							$('#rechnung_nr').removeClass('is-invalid');
+
+							if (xhr.status === 422) {
+
+								let errors = xhr.responseJSON.errors;
+
+								if (errors?.rechnung_nr?.length) {
+									$('#rechnung_nr').addClass('is-invalid');
+									$('.rechnung-error').text(errors.rechnung_nr[0]);
+								}
+							}
 						}
 					});
 
@@ -377,44 +419,54 @@
 				});
 				document.getElementById("ausführungszeit").dispatchEvent(new Event("input"));
 
-				// autocomplete za firmetinu
-				const companyInput = document.getElementById("customer_name");
-				const datalist = document.getElementById("firma_suggestions");
-				companyInput.addEventListener("input", function(){
-					let value = this.value;
-					if(value.length < 2) return;
+				function setupAutocomplete(inputId, boxId, url) {
+					const input = document.getElementById(inputId);
+					const box = document.getElementById(boxId);
 
-					fetch("/angebote/autocomplete/firma?q=" + value)
-						.then(res => res.json())
-						.then(data => {
-							datalist.innerHTML = "";
-							data.forEach(name => {
-								let option = document.createElement("option");
-								option.value = name;
-								datalist.appendChild(option);
-							});
-						});
-				});
+					let timeout;
 
-				// autocomplete za adresu
-				const adressInput = document.getElementById("adress");
-				const adressList = document.getElementById("adress_suggestions");
-				adressInput.addEventListener("input", function(){
-					let value = this.value;
-					if(value.length < 2) return;
+					input.addEventListener("input", function () {
+						let query = this.value;
 
-					fetch("/angebote/autocomplete/adress?q=" + value)
-						.then(res => res.json())
-						.then(data => {
-							adressList.innerHTML = "";
-							data.forEach(adress => {
-								let option = document.createElement("option");
-								option.value = adress;
-								adressList.appendChild(option);
-							});
-						});
-				});
+						clearTimeout(timeout);
 
+						if (query.length < 2) {
+							box.innerHTML = "";
+							return;
+						}
+
+						timeout = setTimeout(() => {
+							fetch(`${url}?q=${query}`)
+								.then(res => res.json())
+								.then(data => {
+									box.innerHTML = "";
+
+									data.forEach(item => {
+										let div = document.createElement("div");
+										div.classList.add("autocomplete-item");
+										div.innerText = item;
+
+										div.addEventListener("click", () => {
+											input.value = item;
+											box.innerHTML = "";
+											updatePreview();
+										});
+
+										box.appendChild(div);
+									});
+								});
+						}, 300);
+					});
+
+					document.addEventListener("click", function (e) {
+						if (!box.contains(e.target) && e.target !== input) {
+							box.innerHTML = "";
+						}
+					});
+				}
+
+				setupAutocomplete("customer_name", "firma_box", "/angebote/autocomplete/firma");
+				setupAutocomplete("adress", "adress_box", "/angebote/autocomplete/adresa");
 				////////////////////////////////////////////////////////////////////////////
 
 				// prikaz/skrivanje napomene o reverse chargeu kada se uključi/isključi MWST
@@ -450,6 +502,11 @@
 					});
 				});
 
+				$('#rechnung_nr').on('input', function () {
+					$('.rechnung-error').text('');
+					$(this).removeClass('is-invalid');
+				});
+
 				$(function(){
 					const params = new URLSearchParams(window.location.search);
 					if(params.get('openModal') === '1'){
@@ -473,6 +530,60 @@
 
 				firma.style.marginTop = inputpx.value + 'px';
 
+
+
+				// AUTOCOMPLETE BESCHREIBUNG ------------------------------------------------
+				function setupBeschreibungAutocomplete() {
+					let timeout;
+					document.addEventListener("input", function (e) {
+						if (!e.target.classList.contains("item-name")) return;
+						const input = e.target;
+						const box = input.parentElement.querySelector(".beschreibung-box");
+
+						let query = input.value;
+
+						clearTimeout(timeout);
+
+						if (query.length < 2) {
+							box.innerHTML = "";
+							return;
+						}
+
+						timeout = setTimeout(() => {
+							fetch(`/angebote/autocomplete/beschreibung?q=${encodeURIComponent(query)}`)
+								.then(res => res.json())
+								.then(data => {
+									box.innerHTML = "";
+									data.forEach(item => {
+										const div = document.createElement("div");
+										div.classList.add("autocomplete-item");
+										div.innerText = item;
+										div.addEventListener("click", () => {
+											input.value = item;
+											box.innerHTML = "";
+											updatePreview();
+										});
+										box.appendChild(div);
+									});
+								});
+						}, 300);
+					});
+
+					// zatvaranje na klik van
+					document.addEventListener("click", function (e) {
+						document.querySelectorAll(".beschreibung-box").forEach(box => {
+							const input = box.parentElement.querySelector(".item-name");
+
+							if (!box.contains(e.target) && e.target !== input) {
+								box.innerHTML = "";
+							}
+						});
+					});
+
+				}
+
+				setupBeschreibungAutocomplete();
+				// AUTOCOMPLETE BESCHREIBUNG END --------------------------------------------
 		});
 
 	</script>

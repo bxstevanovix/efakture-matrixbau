@@ -76,7 +76,7 @@ class FirmaController extends Controller
         $entity->fill($data);
         $entity->save();
         
-        return redirect()->route('firme.index')->with('success', 'Firma je uspešno sačuvana!');
+        return redirect()->route('firme.index')->with('success', __('Firma je uspešno sačuvana!'));
 
     }
     
@@ -105,7 +105,7 @@ class FirmaController extends Controller
         $entity->fill($data);
         $entity->save();
         
-        return redirect()->route('firme.index')->with('success', 'Firma je uspešno izmenjena!');
+        return redirect()->route('firme.index')->with('success', __('Firma je uspešno izmenjena!'));
     }
     
     public function delete(Entity $entity)
@@ -114,7 +114,7 @@ class FirmaController extends Controller
         
         return response()->json([
             'success' => true,
-            'message' => 'Firma je uspešno obrisana!'
+            'message' => __('Firma je uspešno obrisana!'),
         ]);
     }
 

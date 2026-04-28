@@ -9,7 +9,7 @@
     <i class="fas fa-file-pdf"></i>
     </a>
     <button style="width: 100%;" class="btn btn-danger swal-confirm"
-        data-title="{{ __('Da li ste sigurni da zelite da obrisete racun :id?', ['id' => $entity->id_invoice]) }}"
+        data-title="{{ __('Da li ste sigurni da želite da obrišete račun :id?', ['id' => $entity->id_invoice]) }}"
         data-desc="@lang('Ova stavka se neće moći vratiti!')"
         data-id="{{ $entity->id }}"
         data-url="{{route('rechnung.delete', ['entity' => $entity->id])}}"

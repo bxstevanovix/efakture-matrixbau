@@ -55,9 +55,30 @@
 @endsection
 
 @push('footer_scripts')
+	<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+	<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 	<script>
 		$(function() {
+
+			// QUILL ---------------------------------------------------
+			const quill = new Quill('#editor', {
+				theme: 'snow',
+				placeholder: 'Optionaler Text...',
+				modules: {
+					toolbar: [
+						['bold', 'italic', 'underline'],
+						[{ 'size': ['small', false, 'large', 'huge'] }],
+						[{ 'list': 'ordered'}, { 'list': 'bullet' }],
+						['clean']
+					]
+				}
+			});
+
+			quill.on('text-change', function () {
+				document.getElementById("p_invoice_note").innerHTML = `<div class="ql-editor">${quill.root.innerHTML}</div>`;
+			});
+			// QUILL END -----------------------------------------------
 
 			// DATATABLES
 			let datatableUrl = "{{ route('rechnung.datatable') }}";
@@ -106,7 +127,17 @@
 				const row = document.createElement("div");
 				row.classList.add("item-row","col-12");
 				row.innerHTML = `
-					<input name="items[${index}][name]" type="text" class="item-name form-control" placeholder="Beschreibung">
+					<div style="position:relative; flex: 2;">
+						<input 
+							name="items[${index}][name]" 
+							type="text" 
+							class="item-name form-control" 
+							placeholder="Beschreibung"
+							autocomplete="off"
+						>
+
+						<div class="autocomplete-box beschreibung-box"></div>
+					</div>
 					<input name="items[${index}][qty]" type="text" class="item-qty form-control" value="0">
 					<input name="items[${index}][price]" type="text" class="item-price form-control" value="0">
 					<input name="items[${index}][total]" type="text" class="item-total form-control" value="0">
@@ -152,8 +183,7 @@
 				document.getElementById("p_ausführungszeit").innerText =
 					document.getElementById("ausführungszeit").value;
 
-				document.getElementById("p_invoice_note").innerText =
-					document.getElementById("invoice_note").value;
+				document.getElementById("p_invoice_note").innerHTML = `<div class="ql-editor">${quill.root.innerHTML}</div>`;
 
 				let dateValue = document.getElementById("date").value;
 				if (dateValue) {
@@ -310,7 +340,7 @@
 							auftragsnr: $("#auftragsnr").val(),
 							rechnung_nr: $("#rechnung_nr").val(),
 							ausführungszeit: $("#ausführungszeit").val(),
-							invoice_note: $("#invoice_note").val(),
+							invoice_note: quill.root.innerHTML,
 							total: $("#p_total").text(),
 							html: html,
 							items: items,
@@ -328,14 +358,18 @@
 
 						},
 						error: function(xhr){
-							if(xhr.status === 422){
+							$('.rechnung-error').text('');
+							$('#rechnung_nr').removeClass('is-invalid');
+
+							if (xhr.status === 422) {
+
 								let errors = xhr.responseJSON.errors;
-								if(errors.rechnung_nr){
-									$("#rechnung_nr").addClass("is-invalid");
-									$("#rechnung_nr_error").text(errors.rechnung_nr[0]).show();
+
+								if (errors?.rechnung_nr?.length) {
+									$('#rechnung_nr').addClass('is-invalid');
+									$('.rechnung-error').text(errors.rechnung_nr[0]);
 								}
 							}
-							console.log(xhr.responseText);
 						}
 					});
 
@@ -465,6 +499,11 @@
 					});
 				});
 
+				$('#rechnung_nr').on('input', function () {
+					$('.rechnung-error').text('');
+					$(this).removeClass('is-invalid');
+				});
+
 				$(function(){
 					const params = new URLSearchParams(window.location.search);
 					if(params.get('openModal') === '1'){
@@ -473,35 +512,37 @@
 					}
 				});
 
+				function setValue(id, value){
+					let el = document.getElementById(id);
+					el.value = value || "";
+					el.dispatchEvent(new Event("input"));
+				}
 				const firmaSelect = document.getElementById("firma_select");
 
 				// kad se izabere firma iz selecta
 				$('#firma_select').on('change', function () {
 
-					let selected = this.options[this.selectedIndex];
+					let selected = $(this).find(':selected')[0];
 
-					if(!this.value){
-						return;
-					}
+					if (!this.value || !selected) return;
 
-					$('#customer_name').val(selected.dataset.name || "");
-					$('#adress').val(selected.dataset.adress || "");
-					$('#ort').val(selected.dataset.ort || "");
-					$('#uid').val(selected.dataset.uid || "");
+					setValue("customer_name", selected.dataset.name);
+					setValue("adress", selected.dataset.adress);
+					setValue("ort", selected.dataset.ort);
+					setValue("uid", selected.dataset.uid);
 
 					updatePreview();
 				});
 			
 				document.getElementById("customer_name").addEventListener("input", function(){
 
-					// makni selekciju iz dropdowna
-					document.getElementById("firma_select").value = "";
+					$('#firma_select').val(null).trigger('change'); // select2 reset
 
-					// očisti ostala polja (da ne ostanu stari podaci)
 					document.getElementById("adress").value = "";
 					document.getElementById("ort").value = "";
 					document.getElementById("uid").value = "";
 
+					updatePreview();
 				});
 
 				["adress","ort","uid"].forEach(id => {
@@ -528,6 +569,59 @@
 				});
 
 				firma.style.marginTop = inputpx.value + 'px';
+
+				// AUTOCOMPLETE BESCHREIBUNG ------------------------------------------------
+				function setupBeschreibungAutocomplete() {
+					let timeout;
+					document.addEventListener("input", function (e) {
+						if (!e.target.classList.contains("item-name")) return;
+						const input = e.target;
+						const box = input.parentElement.querySelector(".beschreibung-box");
+
+						let query = input.value;
+
+						clearTimeout(timeout);
+
+						if (query.length < 2) {
+							box.innerHTML = "";
+							return;
+						}
+
+						timeout = setTimeout(() => {
+							fetch(`/angebote/autocomplete/beschreibung?q=${encodeURIComponent(query)}`)
+								.then(res => res.json())
+								.then(data => {
+									box.innerHTML = "";
+									data.forEach(item => {
+										const div = document.createElement("div");
+										div.classList.add("autocomplete-item");
+										div.innerText = item;
+										div.addEventListener("click", () => {
+											input.value = item;
+											box.innerHTML = "";
+											updatePreview();
+										});
+										box.appendChild(div);
+									});
+								});
+						}, 300);
+					});
+
+					// zatvaranje na klik van
+					document.addEventListener("click", function (e) {
+						document.querySelectorAll(".beschreibung-box").forEach(box => {
+							const input = box.parentElement.querySelector(".item-name");
+
+							if (!box.contains(e.target) && e.target !== input) {
+								box.innerHTML = "";
+							}
+						});
+					});
+
+				}
+
+				setupBeschreibungAutocomplete();
+				// AUTOCOMPLETE BESCHREIBUNG END --------------------------------------------
 		});
 
 	</script>

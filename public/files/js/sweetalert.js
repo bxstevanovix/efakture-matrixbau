@@ -39,7 +39,7 @@ function initSweetAlert(selector = '.swal-confirm') {
                     })
                     .then(res => res.json())
                     .then(data => {
-                        Swal.fire('Gotovo!', data.message || successMsg, 'success');
+                        Swal.fire('Erledigt!', data.message || successMsg, 'success');
 
                         // Ako postoji data-table atribut, osveži DataTable
                         if (tableSelector) {
@@ -51,7 +51,7 @@ function initSweetAlert(selector = '.swal-confirm') {
                     })
                     .catch(err => {
                         console.error(err);
-                        Swal.fire('Greška!', 'Došlo je do problema', 'error');
+                        Swal.fire('Fehler!', 'Es ist ein Problem aufgetreten', 'error');
                     });
                 }
             });

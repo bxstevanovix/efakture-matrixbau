@@ -136,9 +136,7 @@
                             name="text" 
                             rows="11" 
                             placeholder="@lang('Unesite napomene vezane za fakturu')"
-                            >
-                            {{old('text', $entity->text)}}
-                        </textarea>
+                        >{{ old('text', $entity->text) }}</textarea>
                     </div>
                 </div>
             </div>

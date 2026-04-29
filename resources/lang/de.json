@@ -171,6 +171,18 @@
   "Firma je uspešno obrisana!": "Firma erfolgreich gelöscht!",
   "Firma je uspešno kreirana!": "Firma erfolgreich erstellt!",
   "Firma je uspešno izmenjena!": "Firma erfolgreich bearbeitet!",
-  "Firma je uspešno sačuvana!": "Firma erfolgreich gespeichert!"
-
+  "Firma je uspešno sačuvana!": "Firma erfolgreich gespeichert!",
+  "Faktura je uspešno sačuvana!": "Rechnung erfolgreich gespeichert!",
+  "Faktura je uspešno kreirana!": "Rechnung erfolgreich erstellt!",
+  "Faktura je uspešno izmenjena!": "Rechnung erfolgreich bearbeitet!",
+  "Faktura je uspešno obrisana!": "Rechnung erfolgreich gelöscht!",
+  "PDF nije pronađen": "PDF wurde nicht gefunden",
+  "invoice_saved": "Rechnung wurde erfolgreich gespeichert!",
+  "Račun je uspešno obrisan.": "Rechnung wurde erfolgreich gelöscht.",
+  "PDF dokument je uspešno sačuvan!": "PDF-Dokument wurde erfolgreich gespeichert!",
+  "PDF je uspešno obrisan.": "PDF wurde erfolgreich gelöscht.",
+  "Invalid start date format": "Ungültiges Startdatum-Format",
+  "Invalid end date format": "Ungültiges Enddatum-Format",
+  "Angebotsnummer bereits vergeben!": "Angebotsnummer ist bereits vergeben!",
+  "Die Zahlungsbestätigung wurde erfolgreich gespeichert!": "Die Zahlungsbestätigung wurde erfolgreich gespeichert!"
 }

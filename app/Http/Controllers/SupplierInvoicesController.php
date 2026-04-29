@@ -173,7 +173,6 @@ class SupplierInvoicesController extends Controller
 
         return response()->json($response);
     }
-
     public function viewPdf($id)
     {
         $faktura = Entity::findOrFail($id);

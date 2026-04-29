@@ -194,9 +194,11 @@ class RechnungController extends Controller
 
     public function viewPdf($id)
     {
-        $angebot = Entity::findOrFail($id);
+        $rechnung = Entity::findOrFail($id);
 
-        $path = storage_path('app/public/' . $angebot->invoice_url);
+        $filename = $rechnung->type . '-' . $rechnung->id_invoice . '.pdf';
+
+        $path = storage_path('app/public/' . $rechnung->invoice_url);
 
         if (!file_exists($path)) {
             abort(404, 'PDF nije pronađen');
@@ -204,7 +206,7 @@ class RechnungController extends Controller
 
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $angebot->id_invoice . '.pdf"',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
     

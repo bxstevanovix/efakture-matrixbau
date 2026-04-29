@@ -202,7 +202,7 @@ class AngeboteController extends Controller
 
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="' . $angebot->id_invoice . '.pdf"',
+            'Content-Disposition' => 'inline; filename="angebot-' . $angebot->id_invoice . '.pdf"',
         ]);
     }
     

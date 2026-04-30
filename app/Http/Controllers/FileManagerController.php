@@ -12,13 +12,11 @@ class FileManagerController extends Controller
     public function fileList($companyId, Request $request)
     {
         $company = Firma::findOrFail($companyId);
-
         $folderName = $company->folder_name;
 
-        // ako nema path → ROOT nivo
         $path = $request->get('path');
 
-        // ✅ ROOT: prikazi 2 glavna foldera
+        // ROOT nivo
         if (!$path) {
             return response()->json([
                 [
@@ -57,14 +55,42 @@ class FileManagerController extends Controller
             $items[] = [
                 'name' => $item,
                 'type' => $isDir ? 'Folder' : 'Fajl',
-                'size' => $isDir ? '-' : round(filesize($itemPath)/1024, 2).' KB',
+                'size' => $isDir ? '-' : round(filesize($itemPath) / 1024, 2) . ' KB',
                 'date' => date("d.m.Y H:i", filemtime($itemPath)),
                 'path' => $path . '/' . $item,
-                'is_dir' => $isDir
+                'is_dir' => $isDir,
             ];
         }
 
         return response()->json($items);
     }
+
+
+    /**
+     * ✅ PRIKAZ PDF FAJLA (za login korisnike)
+     */
+    public function viewFile(Request $request)
+{
+    $path = $request->get('path');
+
+    if (!$path) {
+        abort(404, 'Fajl nije pronađen');
+    }
+
+    $fullPath = storage_path('app/public/' . $path);
+
+    if (!file_exists($fullPath)) {
+        abort(404, 'Fajl ne postoji');
+    }
+
+    // uzmi company slug iz path-a (2-doo-stevanovic)
+    $parts = explode('/', $path);
+    $companySlug = $parts[1] ?? null;
+
+    return response()->file($fullPath, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="' . $companySlug . '-' . basename($path) . '"',
+    ]);
+}
 
 }

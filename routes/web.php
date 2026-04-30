@@ -113,6 +113,7 @@ Route::middleware('auth')->group(function () {
 
     // FILE MANAGER
     Route::get('/file-list/{company}', [FileManagerController::class, 'fileList'])->name('file-list');
+    Route::get('/file-manager/view', [FileManagerController::class, 'viewFile'])->name('filemanager_view');
 
     // PDF EDITOR
     Route::delete('/invoice-pdfs/{id}', [PDFController::class, 'destroy'])->name('invoice-pdfs.delete');

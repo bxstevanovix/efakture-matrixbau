@@ -215,7 +215,7 @@ function loadFiles(path = '') {
                     ${
                         item.is_dir
                         ? `<button class="btn btn-xs btn-info" onclick="loadFiles('${item.path}')">Otvori</button>`
-                        : `<a href="/storage/${item.path}" target="_blank" class="btn btn-sm btn-light" title="Preview">
+                        : `<a href="/file-manager/view?path=${encodeURIComponent(item.path)}" target="_blank" class="btn btn-sm btn-light" title="Preview">
                                 <i class="fa fa-eye"></i>
                            </a>`
                     }

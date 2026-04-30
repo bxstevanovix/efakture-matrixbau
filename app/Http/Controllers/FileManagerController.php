@@ -22,7 +22,7 @@ class FileManagerController extends Controller
         if (!$path) {
             return response()->json([
                 [
-                    'name' => 'Izlazne fakture',
+                    'name' => 'Ausgangsrechnungen',
                     'type' => 'Folder',
                     'size' => '-',
                     'date' => '-',
@@ -30,7 +30,7 @@ class FileManagerController extends Controller
                     'is_dir' => true
                 ],
                 [
-                    'name' => 'Ulazne fakture',
+                    'name' => 'Eingangsrechnungen',
                     'type' => 'Folder',
                     'size' => '-',
                     'date' => '-',

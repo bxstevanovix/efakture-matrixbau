@@ -7,6 +7,77 @@
         $dateEnd = '';
     }
 @endphp
+<style>
+    .mb-3 {
+        position: relative;
+    }
+
+    .autocomplete-box {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+
+        background: #fff;
+        border: 1px solid #e6e6e6;
+        border-top: none;
+
+        border-radius: 0 0 10px 10px;
+
+        max-height: 260px;
+        overflow-y: auto;
+
+        z-index: 9999;
+
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        margin-left: 15px;
+        margin-right: 15px;
+    }
+
+    .autocomplete-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        font-size: 14px;
+        color: #333;
+
+        transition: all 0.15s ease;
+        border-bottom: 1px solid #f2f2f2;
+    }
+
+    /* HOVER */
+    .autocomplete-item:hover {
+        background: #f2f6ff;
+        color: #0d6efd;
+    }
+
+    /* LAST ITEM BORDER REMOVE */
+    .autocomplete-item:last-child {
+        border-bottom: none;
+    }
+
+    /* SCROLL BAR (Chrome / Edge / Safari) */
+    .autocomplete-box::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .autocomplete-box::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 10px;
+    }
+
+    .autocomplete-box::-webkit-scrollbar-thumb:hover {
+        background: #999;
+    }
+
+    .autocomplete-item strong {
+        color: #0d6efd;
+    }
+
+    .autocomplete-item.active {
+        background: #e9f2ff;
+        color: #0d6efd;
+    }
+</style>
 
 <form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation" novalidate>
     @csrf
@@ -32,6 +103,7 @@
                         <div class="mb-3 col-md-6">
                             <label class="form-label">@lang('Adresa')</label>
                             <input 
+                                id="address-supplier"
                                 type="text" 
                                 class="form-control @errorClass('address', 'is-invalid')" 
                                 name="address" 
@@ -39,6 +111,7 @@
                                 value="{{old('address', $entity->address)}}" 
                                 required
                             >
+                            <div id="address_box" class="autocomplete-box"></div>
                             <div class="invalid-feedback">
                                 @lang('Unesite adresu posla.')
                             </div>
@@ -85,7 +158,7 @@
                                                 type="text" 
                                                 class="form-control @errorClass('id_invoice', 'is-invalid')" 
                                                 name="id_invoice" 
-                                                placeholder="@lang('Broj Fakture')" 
+                                                placeholder="023/2026" 
                                                 value="{{old('id_invoice', $entity->id_invoice)}}"
                                                 maxlength="30"
                                                 required
@@ -106,7 +179,7 @@
                                                 type="number" 
                                                 class="form-control @errorClass('price', 'is-invalid')" 
                                                 name="price" 
-                                                placeholder="@lang('Iznos Fakture')" 
+                                                placeholder="0.00" 
                                                 value="{{ old('price', $entity->price) }}" 
                                                 min="1" 
                                                 max="99999999999999999999" 
@@ -179,6 +252,104 @@ $(function() {
         $('#entity-form [name="date_end"]').val(split[0] + '-' + split[1] + '-' + end10);
 
     });
+
+    function setupAddressAutocomplete(inputId, boxId, url) {
+            const input = document.getElementById(inputId);
+            const box = document.getElementById(boxId);
+
+            let timeout;
+            let items = [];
+            let activeIndex = -1;
+
+            function renderActive() {
+                const all = box.querySelectorAll(".autocomplete-item");
+
+                all.forEach((el, i) => {
+                    el.classList.remove("active");
+                    if (i === activeIndex) {
+                        el.classList.add("active");
+                    }
+                });
+            }
+
+            input.addEventListener("input", function () {
+                let query = this.value;
+
+                clearTimeout(timeout);
+                activeIndex = -1;
+
+                if (query.length < 2) {
+                    box.innerHTML = "";
+                    return;
+                }
+
+                timeout = setTimeout(() => {
+                    fetch(url + "?q=" + encodeURIComponent(query))
+                        .then(res => res.json())
+                        .then(data => {
+                            box.innerHTML = "";
+                            items = data;
+
+                            data.forEach((item, index) => {
+                                let div = document.createElement("div");
+                                div.classList.add("autocomplete-item");
+                                div.innerText = item;
+
+                                div.addEventListener("click", () => {
+                                    input.value = item;
+                                    box.innerHTML = "";
+                                });
+
+                                box.appendChild(div);
+                            });
+                        });
+                }, 300);
+            });
+
+            // ===== KEYBOARD NAVIGATION =====
+            input.addEventListener("keydown", function (e) {
+                const list = box.querySelectorAll(".autocomplete-item");
+
+                if (!list.length) return;
+
+                // ↓
+                if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    activeIndex++;
+                    if (activeIndex >= list.length) activeIndex = 0;
+                    renderActive();
+                }
+
+                // ↑
+                else if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    activeIndex--;
+                    if (activeIndex < 0) activeIndex = list.length - 1;
+                    renderActive();
+                }
+
+                // ENTER
+                else if (e.key === "Enter") {
+                    if (activeIndex > -1) {
+                        e.preventDefault();
+                        list[activeIndex].click();
+                    }
+                }
+            });
+
+            // click outside
+            document.addEventListener("click", function (e) {
+                if (!box.contains(e.target) && e.target !== input) {
+                    box.innerHTML = "";
+                }
+            });
+        }
+
+        setupAddressAutocomplete(
+            "address-supplier",
+            "address_box",
+            "/supplier-invoices/autocomplete/address"
+        );
 });
 </script>
 @endpush

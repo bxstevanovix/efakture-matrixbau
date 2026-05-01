@@ -26,7 +26,7 @@ services:
     volumes:
       - ..:/var/www/html
     environment:
-      APP_NAME: "eFakture Matrixbau"
+      APP_NAME: "Matrixbau"
       APP_ENV: local
       APP_DEBUG: "true"
       APP_URL: http://localhost:8090

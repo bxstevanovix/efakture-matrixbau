@@ -247,9 +247,6 @@
 <script>
 $(function() {
 
-    // Ako koristiš plain HTML5 date picker sa tekstom
-   
-
     var blade = {
         datatablesAjaxUrl: "{{ route('customer-invoices.datatable') }}"
     };
@@ -402,8 +399,8 @@ $(function() {
 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Plaćeno',
-                    text: 'Faktura je uspešno plaćena.',
+                    title: "@lang('Plaćeno')",
+                    text: "@lang('Faktura je uspešno plaćena.')",
                     timer: 2000,
                     showConfirmButton: false
                 });
@@ -412,8 +409,8 @@ $(function() {
                 console.error(xhr.responseText);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Greška!',
-                    text: 'Došlo je do greške prilikom plaćanja fakture.'
+                    title: "@lang('Greška!')",
+                    text: "@lang('Došlo je do greške prilikom plaćanja fakture.')"
                 });
             }
         });

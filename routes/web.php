@@ -43,6 +43,8 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/invoice-pdfs/store', [CustomerInvoicesController::class, 'uploadMorePdf'])->name('upload_more_pdfs');
 
+        Route::get('/autocomplete/address', [CustomerInvoicesController::class, 'autocompleteAddress']);
+
         // IZVESTAJI
         Route::get('/reports', [CustomerInvoicesController::class, 'reports'])->name('reports');
         Route::post('/reports/datatable', [CustomerInvoicesController::class, 'reportsDatatable'])->name('reports_datatable');
@@ -63,6 +65,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/view/{id}', [SupplierInvoicesController::class, 'viewPdf'])->name('view');
         Route::post('/upload-pdf', [SupplierInvoicesController::class, 'uploadPdf'])->name('upload_pdf');
         Route::delete('/{entity}/delete-pdf', [SupplierInvoicesController::class, 'deletePdf'])->name('delete_pdf');
+
+        Route::get('/autocomplete/address', [SupplierInvoicesController::class, 'autocompleteAddress']);
 
         // IZVESTAJI
         Route::get('/reports', [SupplierInvoicesController::class, 'reports'])->name('reports');

@@ -16,8 +16,6 @@ class SupplierInvoice extends Model
         'text',
         'company',
         'status',
-        'driver',
-        'truck',
         'price',
         'price_part',
         'debt',

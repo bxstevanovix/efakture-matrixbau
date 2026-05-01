@@ -58,7 +58,7 @@ class DashController extends Controller
             ->groupBy('month')
             ->orderBy('month')
             ->get();
-    
+
         return view('dashboard', [
             'invoicesStatus1' => $invoicesStatus1,
             'invoicesStatus0' => $invoicesStatus0,

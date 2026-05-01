@@ -66,7 +66,7 @@ class SupplierInvoicesController extends Controller
         $entity = new Entity();
         $companies = Firma::all();
         
-        return view('customer_invoices.create', [
+        return view('supplier_invoices.create', [
             'entity' => $entity,
             'companies' => $companies
         ]);
@@ -191,7 +191,7 @@ class SupplierInvoicesController extends Controller
     public function uploadPdf(Request $request)
     {
         $request->validate([
-            'entity_id' => 'required|exists:customer_invoices,id',
+            'entity_id' => 'required|exists:supplier_invoices,id',
             'pdf_file' => 'required|file|mimes:pdf|max:102400'
         ]);
 
@@ -338,5 +338,22 @@ class SupplierInvoicesController extends Controller
 
         
         return ['pending' => $pending, 'paid' => $paid];
+    }
+
+    public function autocompleteAddress(Request $request)
+    {
+        $q = $request->q;
+
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Entity::where('address', 'LIKE', "%{$q}%")
+            ->select('address')
+            ->distinct()
+            ->limit(10)
+            ->pluck('address');
+
+        return response()->json($results);
     }
 }

@@ -186,5 +186,9 @@
   "Invalid start date format": "Ungültiges Startdatum-Format",
   "Invalid end date format": "Ungültiges Enddatum-Format",
   "Angebotsnummer bereits vergeben!": "Angebotsnummer ist bereits vergeben!",
-  "Die Zahlungsbestätigung wurde erfolgreich gespeichert!": "Die Zahlungsbestätigung wurde erfolgreich gespeichert!"
+  "Die Zahlungsbestätigung wurde erfolgreich gespeichert!": "Die Zahlungsbestätigung wurde erfolgreich gespeichert!",
+  "Editovanje Nove Firme": "Neue Firma bearbeiten",
+  "Faktura je uspešno plaćena.": "Rechnung wurde erfolgreich bezahlt."
+
+
 }

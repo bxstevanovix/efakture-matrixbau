@@ -25,7 +25,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit" onclick="return confirm('Sind Sie sicher, dass Sie den PDF löschen möchten?')" class="btn btn-danger btn-sm">
-                            Löschen PDF
+                            Haupt-PDF löschen
                         </button>
                     </form>
                 @endif

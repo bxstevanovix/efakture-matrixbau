@@ -3,6 +3,7 @@
     $pdfs = InvoicePdf::where('invoice_id', $entity->id)->where('invoice_type', 'customer')->get();
 @endphp
 
+<hr style="margin-top:60px;">
 <div class="quick-bx">
     <h4 class="card-title mb-3">@lang('Dokumenti')</h4>
     <div class="row">
@@ -67,6 +68,7 @@
 
     </div>
 </div>
+<hr>
 
 <script>
     document.addEventListener('click', function (e) {

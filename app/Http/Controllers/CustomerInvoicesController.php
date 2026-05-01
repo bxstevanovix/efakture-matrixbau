@@ -40,7 +40,7 @@ class CustomerInvoicesController extends Controller
                             ['entity' => $entity]);
             })
             ->editColumn('debt', function ($entity) {
-                return $entity-> debt . ' ' . $entity->currency;
+                return $entity-> debt . ' ' . $entity->currency . '€';
             })->editColumn('company', function ($entity) {
                 $company = Firma::withTrashed()->where('id', $entity->company)->first();    
                 return $company['name']; 
@@ -388,5 +388,22 @@ class CustomerInvoicesController extends Controller
 
         
         return ['pending' => $pending, 'paid' => $paid];
+    }
+
+    public function autocompleteAddress(Request $request)
+    {
+        $q = $request->q;
+
+        if (!$q || strlen($q) < 2) {
+            return response()->json([]);
+        }
+
+        $results = Entity::where('address', 'LIKE', "%{$q}%")
+            ->select('address')
+            ->distinct()
+            ->limit(10)
+            ->pluck('address');
+
+        return response()->json($results);
     }
 }

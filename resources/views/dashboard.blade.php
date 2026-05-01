@@ -8,8 +8,6 @@
 
 @section('content')
 
-
-
 <style>
  .card {
     width: 100%; /* Obezbeđuje da kartica zauzima punu širinu */
@@ -22,6 +20,35 @@
 .table {
     width: 100%; /* Obezbeđuje da tabela zauzima punu širinu */
 }
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    height: 300px; /* ključno */
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 220px; /* manji na mobu */
+    }
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.card-body {
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 15px;
+    }
+}
+
+
 </style>
 
 <div class="row page-titles mx-0">
@@ -126,7 +153,7 @@
 <div class="row">
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header justify-content-center text-center">
                 <h4 class="card-title">@lang('Izlazne fakture')</h4>
             </div>
             <div class="card-body">
@@ -164,7 +191,7 @@
     </div>
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header justify-content-center text-center">
                 <h4 class="card-title">@lang('Ulazne fakture')</h4>
             </div>
             <div class="card-body">
@@ -287,9 +314,9 @@
 
 <hr>
 <div class="row">
-    <div class="col-lg-6">
+    <div class="col-12 col-lg-6">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header justify-content-center text-center">
                 <h4 class="card-title">@lang('Izlazne fakture po mesecima')</h4>
             </div>
             <div class="card-body">
@@ -299,9 +326,9 @@
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
+    <div class="col-12 col-lg-6">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header justify-content-center text-center">
                 <h4 class="card-title">@lang('Ulazne fakture po mesecima')</h4>
             </div>
             <div class="card-body">
@@ -325,6 +352,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const monthlyInvoicesNotPaid = @json($monthlyInvoicesNotPaid);
     const monthlyProcurementsNotPaid = @json($monthlyProcurementsNotPaid);
 
+    console.log(monthlyInvoicesData);
+    console.log(monthlyProcurementsData);
+    console.log(monthlyInvoicesNotPaid);
+    console.log(monthlyProcurementsNotPaid);
+console.log("boooooroo");
     const months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
     function prepareData(data) {
@@ -360,6 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // 🔥 OBAVEZNO
             scales: {
                 x: { stacked: false }, // ❌ ukloni stack
                 y: { beginAtZero: true } // ✅ obavezno od nule
@@ -386,6 +419,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // 🔥 OBAVEZNO
             scales: {
                 x: { stacked: false }, // ❌ ukloni stack
                 y: { beginAtZero: true } // ✅ obavezno od nule

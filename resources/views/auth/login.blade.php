@@ -77,7 +77,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
 	<!-- FAVICONS ICON -->
-    <link rel="icon" href="{{ asset('mini-f-logo.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('f-circle.svg') }}" type="image/svg+xml">
 	<link href="{{ asset('files/vendor/bootstrap-select/css/bootstrap-select.min.css') }}" rel="stylesheet">
 	<link href="{{ asset('files/css/style.css') }}" rel="stylesheet">
 

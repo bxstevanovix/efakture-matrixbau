@@ -13,7 +13,7 @@
 
 
 <link rel="stylesheet" href="{{ asset('files/vendor/select2/css/select2.min.css') }}">
-<link rel="shortcut icon" type="image/png" href="{{ asset('mini-f-logo.svg') }}">
+<link rel="shortcut icon" type="image/png" href="{{ asset('f-circle.svg') }}">
 <link href="{{ asset('files/vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
 <link href="{{ asset('files/vendor/datatables/css/buttons.dataTables.min.css') }}" rel="stylesheet">	
 <link href="{{asset('files/vendor/datatables/responsive/responsive.css')}}" rel="stylesheet">	

@@ -79,7 +79,7 @@
     }
 </style>
 
-<form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation" novalidate>
+<form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation">
     @csrf
         <div class="form-validation">
             <div class="row">
@@ -88,7 +88,7 @@
                         <!-- Company Selection -->
                         <div class="mb-3 col-md-6">
                             <label class="form-label">@lang('Firma')</label>
-                            <select id="companySelect" name="company" class="form-control @errorClass('company', 'is-invalid')">
+                            <select id="companySelect" name="company" class="form-control @errorClass('company', 'is-invalid')" required>
                                 <option></option>
                                 @foreach($companies as $company)
                                     <option value="{{$company->id}}" data-currency="{{$company->currency}}" @if(old('company', $entity->company) == $company->id) selected @endif>
@@ -112,9 +112,12 @@
                                 required
                             >
                             <div id="address_box" class="autocomplete-box"></div>
-                            <div class="invalid-feedback">
-                                @lang('Unesite adresu posla.')
-                            </div>
+                            
+                            @error('address')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
 
                         <div class="mb-3 col-md-6">
@@ -127,10 +130,13 @@
                                 placeholder="@lang('Datum')" 
                                 value="{{old('date_start', $dateStart)}}" 
                                 style="background-color: #fff; text-align: center"
+                                required
                             >
-                            <div class="invalid-feedback">
-                                @lang('Unesite datum pocetka.')
-                            </div>
+                            @error('date_start')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
                         <div class="mb-3 col-md-6">
                             <label class="form-label">@lang('Datum Završetka')</label>
@@ -142,10 +148,13 @@
                                 placeholder="@lang('Datum')" 
                                 value="{{old('date_end', $dateEnd)}}" 
                                 style="background-color: #fff; text-align: center"
+                                required
                             >
-                            <div class="invalid-feedback">
-                                @lang('Unesite datum završetka.')
-                            </div>
+                            @error('date_end')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
                         </div>
 
                         <div class="row" style="margin-top: 35px;">
@@ -163,9 +172,11 @@
                                                 maxlength="30"
                                                 required
                                             >
-                                            <div class="invalid-feedback">
-                                                @lang('Unesite broj fakture.')
-                                            </div>
+                                            @error('id_invoice')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
                                         </div>
                                     </div>        
                                 </div>

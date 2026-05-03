@@ -1,6 +1,6 @@
 <form id="entity-form" method="post" action="" 
       enctype="multipart/form-data" autocomplete="off" 
-      class="needs-validation" novalidate>
+      class="needs-validation">
         @csrf
         <div class="card">
             <div class="card-body">

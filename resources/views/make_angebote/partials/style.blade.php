@@ -387,4 +387,37 @@
     .ql-editor {
         font-family: Arial, Helvetica, sans-serif;
     }
+
+    #p_invoice_note p {
+        margin: 0 0 4px 0;
+    }
+
+    #p_invoice_note ul,
+    #p_invoice_note ol {
+        margin: 0 0 4px 15px;
+        padding: 0;
+    }
+
+    #p_invoice_note strong {
+        font-weight: bold;
+    }
+
+    .ql-size-small {
+        font-size: 10px;
+    }
+    .ql-size-large {
+        font-size: 14px;
+    }
+    .ql-size-huge {
+        font-size: 16px;
+    }
+
+    .autocomplete-box {
+		border-radius: 0 0 10px 10px;
+		border-top: none;
+	}
+
+	.autocomplete-box {
+		box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+	}
 </style>

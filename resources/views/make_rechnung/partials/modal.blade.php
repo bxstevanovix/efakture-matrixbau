@@ -1,12 +1,5 @@
 <style>
-	.autocomplete-box {
-		border-radius: 0 0 10px 10px;
-		border-top: none;
-	}
-
-	.autocomplete-box {
-		box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-	}
+	
 	
 </style>
 <div id="invoiceModal" class="modal">

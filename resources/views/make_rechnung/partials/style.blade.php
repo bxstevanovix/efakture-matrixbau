@@ -402,13 +402,22 @@
     }
 
     .ql-size-small {
-        font-size: 12px;
+        font-size: 10px;
     }
     .ql-size-large {
-        font-size: 18px;
+        font-size: 14px;
     }
     .ql-size-huge {
-        font-size: 32px;
+        font-size: 16px;
     }
+
+    .autocomplete-box {
+		border-radius: 0 0 10px 10px;
+		border-top: none;
+	}
+
+	.autocomplete-box {
+		box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+	}
 
 </style>

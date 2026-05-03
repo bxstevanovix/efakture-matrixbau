@@ -79,7 +79,7 @@
     }
 </style>
 
-<form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation" novalidate>
+<form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation">
     @csrf
         <div class="form-validation">
             <div class="row">
@@ -88,10 +88,10 @@
                         <!-- Company Selection -->
                         <div class="mb-3 col-md-6">
                             <label class="form-label">@lang('Firma')</label>
-                            <select id="companySelect" name="company" class="form-control @errorClass('company', 'is-invalid')">
+                            <select id="companySelect" name="company" class="form-control @errorClass('company', 'is-invalid')" required>
                                 <option></option>
-                                @foreach($companies as $company)
-                                    <option value="{{$company->id}}" data-currency="{{$company->currency}}" @if(old('company', $entity->company) == $company->id) selected @endif>
+                                    @foreach($companies as $company)
+                                    <option value="{{$company->id}}" data-address="{{$company->address}}" @if(old('company', $entity->company) == $company->id) selected @endif>
                                         {{$company->name}}
                                     </option>
                                 @endforeach
@@ -253,103 +253,10 @@ $(function() {
 
     });
 
-    function setupAddressAutocomplete(inputId, boxId, url) {
-            const input = document.getElementById(inputId);
-            const box = document.getElementById(boxId);
-
-            let timeout;
-            let items = [];
-            let activeIndex = -1;
-
-            function renderActive() {
-                const all = box.querySelectorAll(".autocomplete-item");
-
-                all.forEach((el, i) => {
-                    el.classList.remove("active");
-                    if (i === activeIndex) {
-                        el.classList.add("active");
-                    }
-                });
-            }
-
-            input.addEventListener("input", function () {
-                let query = this.value;
-
-                clearTimeout(timeout);
-                activeIndex = -1;
-
-                if (query.length < 2) {
-                    box.innerHTML = "";
-                    return;
-                }
-
-                timeout = setTimeout(() => {
-                    fetch(url + "?q=" + encodeURIComponent(query))
-                        .then(res => res.json())
-                        .then(data => {
-                            box.innerHTML = "";
-                            items = data;
-
-                            data.forEach((item, index) => {
-                                let div = document.createElement("div");
-                                div.classList.add("autocomplete-item");
-                                div.innerText = item;
-
-                                div.addEventListener("click", () => {
-                                    input.value = item;
-                                    box.innerHTML = "";
-                                });
-
-                                box.appendChild(div);
-                            });
-                        });
-                }, 300);
-            });
-
-            // ===== KEYBOARD NAVIGATION =====
-            input.addEventListener("keydown", function (e) {
-                const list = box.querySelectorAll(".autocomplete-item");
-
-                if (!list.length) return;
-
-                // ↓
-                if (e.key === "ArrowDown") {
-                    e.preventDefault();
-                    activeIndex++;
-                    if (activeIndex >= list.length) activeIndex = 0;
-                    renderActive();
-                }
-
-                // ↑
-                else if (e.key === "ArrowUp") {
-                    e.preventDefault();
-                    activeIndex--;
-                    if (activeIndex < 0) activeIndex = list.length - 1;
-                    renderActive();
-                }
-
-                // ENTER
-                else if (e.key === "Enter") {
-                    if (activeIndex > -1) {
-                        e.preventDefault();
-                        list[activeIndex].click();
-                    }
-                }
-            });
-
-            // click outside
-            document.addEventListener("click", function (e) {
-                if (!box.contains(e.target) && e.target !== input) {
-                    box.innerHTML = "";
-                }
-            });
-        }
-
-        setupAddressAutocomplete(
-            "address-supplier",
-            "address_box",
-            "/supplier-invoices/autocomplete/address"
-        );
+    $('#companySelect').on('select2:select', function (e) {
+        let address = $(e.params.data.element).attr('data-address');
+        $('#address-supplier').val(address ?? '');
+    });
 });
 </script>
 @endpush

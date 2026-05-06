@@ -17,6 +17,7 @@
 <link href="{{ asset('files/vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
 <link href="{{ asset('files/vendor/datatables/css/buttons.dataTables.min.css') }}" rel="stylesheet">	
 <link href="{{asset('files/vendor/datatables/responsive/responsive.css')}}" rel="stylesheet">	
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 
 <link href="{{ asset('files/vendor/bootstrap-select/css/bootstrap-select.min.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('files/vendor/nouislider/nouislider.min.css') }}">
@@ -32,5 +33,7 @@
 <!-- CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.2/skin-vista/ui.fancytree.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+
 
 @stack('head_scripts')

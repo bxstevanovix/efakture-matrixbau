@@ -48,6 +48,11 @@ canvas {
     }
 }
 
+@media (max-width: 767px) {
+    .first-row {
+        display: none;
+    }
+}
 
 </style>
 
@@ -60,7 +65,7 @@ canvas {
 
 {{-- Broj faktura --}}
 <div class="container-fluid">
-    <div class="row">
+    <div class="row first-row">
         <div class="col-xl-6">
             <div class="row">
                 <div class="col-xl-6 col-sm-6">

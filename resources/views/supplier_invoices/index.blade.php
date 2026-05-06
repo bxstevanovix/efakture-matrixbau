@@ -141,6 +141,12 @@
         padding: 0 3px;
     }
 
+    @media (max-width: 767px) {
+        .dataTables_length {
+            display: none;
+        }
+    }
+
 </style>
 
 <div class="row page-titles mx-0">
@@ -163,7 +169,7 @@
 			</div>
 			<div class="card-body">
 				<div class="table-responsive">
-					<table id="exampledb" class="display" style="width:100%">
+                    <table id="exampledb" class="display nowrap" style="width:100%">
 						<thead>
 							<tr>
 								<th class="">@lang('ID')</th>
@@ -243,7 +249,7 @@
 @endsection
 
 @push('footer_scripts')
-
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script>
 $(function() {
 
@@ -395,9 +401,9 @@ $(function() {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-                console.log(response);
+
                 $('#myModal').modal('hide');
-                $('#exampledb').DataTable().draw('page');
+                $('#exampledb').DataTable().ajax.reload(null, false);
                 updateSummary();
 
                 Swal.fire({

@@ -239,7 +239,7 @@ class SupplierInvoicesController extends Controller
         $entity->pdf = null;
         $entity->save();
 
-        return redirect()->back()->with('success', 'PDF je uspešno obrisan.');
+        return redirect()->back()->with('success', __('PDF je uspešno obrisan.'));
     }
 
     //////////////////////////////////////////////// IZVESTAJI //////////////////////////////////////////////////

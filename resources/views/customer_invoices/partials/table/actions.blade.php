@@ -75,7 +75,7 @@
                 .then(response => {
                     if (response.success) {
                         toastr.success(response.message); // ✅ toast
-                        $('#exampledb').DataTable().ajax.reload(null, false); // ✅ osveži datatable
+                        $('#exampledb').DataTable().ajax.reload(null, false); 
                     } else {
                         toastr.error('Greška!');
                     }

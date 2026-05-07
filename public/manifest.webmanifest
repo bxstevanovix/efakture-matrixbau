@@ -1,0 +1,25 @@
+{
+  "name": "e-faktura",
+  "short_name": "e-faktura",
+  "description": "e-faktura dashboard za upravljanje fakturama.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#5746A3",
+  "icons": [
+    {
+      "src": "/f-circle.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/mini-f-logo.jpg",
+      "sizes": "400x400",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

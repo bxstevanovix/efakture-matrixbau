@@ -13,7 +13,16 @@
 
 
 <link rel="stylesheet" href="{{ asset('files/vendor/select2/css/select2.min.css') }}">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<link rel="icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
 <link rel="shortcut icon" type="image/png" href="{{ asset('f-circle.svg') }}">
+<link rel="apple-touch-icon" href="{{ asset('mini-f-logo.jpg') }}">
+<meta name="application-name" content="e-faktura">
+<meta name="apple-mobile-web-app-title" content="e-faktura">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#5746A3">
 <link href="{{ asset('files/vendor/datatables/css/jquery.dataTables.min.css')}}" rel="stylesheet">
 <link href="{{ asset('files/vendor/datatables/css/buttons.dataTables.min.css') }}" rel="stylesheet">	
 <link href="{{asset('files/vendor/datatables/responsive/responsive.css')}}" rel="stylesheet">	

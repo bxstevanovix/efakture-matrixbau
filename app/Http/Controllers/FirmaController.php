@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request as Request;
 use App\Models\Firma as Entity;
+use App\Models\CustomerInvoice;
+use App\Models\SupplierInvoice;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
@@ -35,11 +37,14 @@ class FirmaController extends Controller
                 return view('firme.partials.table.actions', 
                             ['entity' => $entity]);
             })
+            ->editColumn('name', function ($entity) {
+                return '<a href="' . route('firme.show', ['entity' => $entity->id]) . '" class="text-primary font-w600">' . e($entity->name) . '</a>';
+            })
             ->editColumn('phone', function ($entity) {
                 return $entity-> phone ? $entity->phone : '---';
             })
            
-            ->rawColumns(['actions', 'image'])
+            ->rawColumns(['name', 'actions', 'image'])
             ->setRowAttr([
                 'data-id' => function($entity) {
                     return $entity->id;
@@ -78,6 +83,47 @@ class FirmaController extends Controller
         
         return redirect()->route('firme.index')->with('success', __('Firma je uspešno sačuvana!'));
 
+    }
+
+    public function show(Entity $entity)
+    {
+        $outgoingInvoiceCount = CustomerInvoice::where('company', $entity->id)->count();
+        $incomingInvoiceCount = SupplierInvoice::where('company', $entity->id)->count();
+        $outgoingPaidInvoiceCount = CustomerInvoice::where('company', $entity->id)->where('status', 1)->count();
+        $incomingPaidInvoiceCount = SupplierInvoice::where('company', $entity->id)->where('status', 1)->count();
+        $outgoingUnpaidInvoiceCount = CustomerInvoice::where('company', $entity->id)->where('status', 0)->count();
+        $incomingUnpaidInvoiceCount = SupplierInvoice::where('company', $entity->id)->where('status', 0)->count();
+        $outgoingOpenAmount = (float) CustomerInvoice::where('company', $entity->id)->where('status', 0)->sum('debt');
+        $outgoingPaidAmount = (float) CustomerInvoice::where('company', $entity->id)->where('status', 1)->sum('price');
+        $incomingOpenAmount = (float) SupplierInvoice::where('company', $entity->id)->where('status', 0)->sum('debt');
+        $incomingPaidAmount = (float) SupplierInvoice::where('company', $entity->id)->where('status', 1)->sum('price');
+
+        if ($outgoingInvoiceCount > 0 && $incomingInvoiceCount > 0) {
+            $companyType = __('Kupac i dobavljač');
+        } elseif ($outgoingInvoiceCount > 0) {
+            $companyType = __('Kupac');
+        } elseif ($incomingInvoiceCount > 0) {
+            $companyType = __('Dobavljač');
+        } else {
+            $companyType = __('Bez faktura');
+        }
+
+        return view('firme.show', [
+            'entity' => $entity,
+            'companyType' => $companyType,
+            'outgoingOpenAmount' => $outgoingOpenAmount,
+            'outgoingPaidAmount' => $outgoingPaidAmount,
+            'incomingOpenAmount' => $incomingOpenAmount,
+            'incomingPaidAmount' => $incomingPaidAmount,
+            'openBalance' => $outgoingOpenAmount - $incomingOpenAmount,
+            'paidBalance' => $outgoingPaidAmount - $incomingPaidAmount,
+            'totalPaidAmount' => $outgoingPaidAmount + $incomingPaidAmount,
+            'totalOpenAmount' => $outgoingOpenAmount + $incomingOpenAmount,
+            'outgoingInvoiceCount' => $outgoingInvoiceCount,
+            'incomingInvoiceCount' => $incomingInvoiceCount,
+            'paidInvoiceCount' => $outgoingPaidInvoiceCount + $incomingPaidInvoiceCount,
+            'unpaidInvoiceCount' => $outgoingUnpaidInvoiceCount + $incomingUnpaidInvoiceCount,
+        ]);
     }
     
     public function edit(Entity $entity)

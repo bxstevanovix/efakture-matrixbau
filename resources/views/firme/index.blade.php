@@ -8,14 +8,168 @@
 
 @section('content')
 
+<style>
+	.companies-page .card-header {
+		gap: 12px;
+	}
+
+	.companies-page .company-index-table {
+		width: 100% !important;
+	}
+
+	.companies-page .company-index-table td,
+	.companies-page .company-index-table th {
+		vertical-align: middle;
+	}
+
+	.companies-page .company-index-table td {
+		white-space: nowrap;
+	}
+
+	.companies-page .company-index-table td:nth-child(1),
+	.companies-page .company-index-table td:nth-child(2),
+	.companies-page .company-index-table td:nth-child(6) {
+		white-space: normal;
+	}
+
+	@media (max-width: 767px) {
+		.companies-page .card-header {
+			display: block;
+		}
+
+		.companies-page .card-header .btn {
+			width: 100%;
+			margin-top: 12px;
+		}
+
+		.companies-page .card-body {
+			padding: 16px;
+		}
+
+		.companies-page .table-responsive {
+			overflow: visible;
+		}
+
+		.companies-page .dataTables_wrapper .dataTables_length,
+		.companies-page .dataTables_wrapper .dataTables_filter,
+		.companies-page .dataTables_wrapper .dataTables_info,
+		.companies-page .dataTables_wrapper .dataTables_paginate {
+			float: none;
+			text-align: left;
+			width: 100%;
+		}
+
+		.companies-page .dataTables_wrapper .dataTables_filter {
+			margin-top: 10px;
+		}
+
+		.companies-page .dataTables_wrapper .dataTables_filter label {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			width: 100%;
+			margin-bottom: 0;
+			white-space: nowrap;
+		}
+
+		.companies-page .dataTables_wrapper .dataTables_filter input {
+			flex: 1 1 auto;
+			min-width: 0;
+			width: auto;
+			margin: 0;
+		}
+
+		.companies-page .company-index-table,
+		.companies-page .company-index-table tbody,
+		.companies-page .company-index-table tr,
+		.companies-page .company-index-table td {
+			display: block;
+			width: 100% !important;
+		}
+
+		.companies-page .company-index-table thead {
+			display: none;
+		}
+
+		.companies-page .company-index-table tr {
+			border: 1px solid #eef1f7;
+			border-radius: 8px;
+			padding: 12px;
+			margin-bottom: 12px;
+			background: #fff;
+		}
+
+		.companies-page .company-index-table td {
+			display: flex;
+			justify-content: space-between;
+			align-items: flex-start;
+			gap: 14px;
+			border: 0;
+			padding: 7px 0;
+			white-space: normal;
+			text-align: right !important;
+			overflow-wrap: anywhere;
+		}
+
+		.companies-page .company-index-table td:before {
+			content: attr(data-label);
+			color: #7e7e7e;
+			font-size: 12px;
+			font-weight: 700;
+			text-align: left;
+			min-width: 96px;
+		}
+
+		.companies-page .company-index-table td:first-child {
+			display: block;
+			text-align: left !important;
+			font-size: 16px;
+			font-weight: 700;
+		}
+
+		.companies-page .company-index-table td:first-child:before {
+			display: block;
+			margin-bottom: 5px;
+			font-size: 11px;
+			font-weight: 700;
+		}
+
+		.companies-page .company-index-table td:last-child {
+			justify-content: flex-start;
+			padding-top: 12px;
+		}
+
+		.companies-page .company-index-table td:last-child:before {
+			display: none;
+		}
+
+		.companies-page .company-index-table .btn-group {
+			width: 100%;
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+		}
+
+		.companies-page .company-index-table .btn-group .btn {
+			width: 100%;
+			border-radius: 6px !important;
+		}
+
+		@media (max-width: 767px) {
+			.dataTables_length {
+				display: none;
+			}
+		}
+	}
+</style>
+
+<div class="companies-page">
 <div class="row page-titles mx-0">
 	<ol class="breadcrumb">
 		<li class="breadcrumb-item"><a href="{{route('firme.index')}}">@lang('Firme')</a></li>
 		<li class="breadcrumb-item active">@lang('Pregled')</li>
 	</ol>
 </div>
-
-{{-- @dd() --}}
 
 <!-- row -->
 <div class="row">
@@ -32,7 +186,7 @@
 			</div>
 			<div class="card-body">
 				<div class="table-responsive">
-					<table id="exampledb" class="display" style="min-width: 850px">
+					<table id="exampledb" class="display company-index-table">
 						<thead>
 							<tr>
 								<th class="">@lang('Ime firme')</th>
@@ -54,6 +208,7 @@
 	</div>
 	
 </div>
+</div>
 @endsection
 
 @push('footer_scripts')
@@ -63,6 +218,15 @@ $(function() {
 	var blade = {
 		datatablesAjaxUrl:"{{ route('firme.datatable') }}"
 	};
+	var tableLabels = [
+		@json(__('Ime firme')),
+		@json(__('Adresa')),
+		@json(__('Ort')),
+		@json(__('UID-Nummer')),
+		@json(__('Telefon')),
+		@json(__('Email')),
+		@json(__('Opcije'))
+	];
 	
 	// DATATABLES
 	$('#exampledb').DataTable({
@@ -81,6 +245,11 @@ $(function() {
 			{"data": "email", "className": ""},
 			{"data": "actions", orderable: false, searchable: false, "className": "text-right"}
 		],
+		"createdRow": function(row) {
+			$('td', row).each(function(index) {
+				$(this).attr('data-label', tableLabels[index] || '');
+			});
+		},
 		
 		"language": {
 			"search": "Suchen:",

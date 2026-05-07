@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::post('datatable', [FirmaController::class, 'datatable'])->name('datatable');
         Route::get('create', [FirmaController::class, 'create'])->name('create');
         Route::post('create', [FirmaController::class, 'store']);
+        Route::get('{entity}', [FirmaController::class, 'show'])->name('show');
         Route::get('{entity}/edit', [FirmaController::class, 'edit'])->name('edit');
         Route::post('{entity}/edit', [FirmaController::class, 'update']);
         Route::post('{entity}/delete', [FirmaController::class, 'delete'])->name('delete');

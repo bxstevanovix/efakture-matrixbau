@@ -30,31 +30,31 @@ class DashController extends Controller
         $procurementPrice0 = SupplierInvoice::where('status', 0)->sum('price');
 
         // Aggregate data by month
-        $monthlyInvoices = CustomerInvoice::selectRaw('MONTH(date_end) as month, SUM(price) as total')
+        $monthlyInvoices = CustomerInvoice::selectRaw('MONTH(date_start) as month, SUM(price) as total')
             ->where('status', 1)
-            ->whereYear('date_end', date('Y'))
+            ->whereYear('date_start', date('Y'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        $monthlyProcurements = SupplierInvoice::selectRaw('MONTH(date_end) as month, SUM(price) as total')
+        $monthlyProcurements = SupplierInvoice::selectRaw('MONTH(date_start) as month, SUM(price) as total')
             ->where('status', 1)
-            ->whereYear('date_end', date('Y'))
+            ->whereYear('date_start', date('Y'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
         // Aggregate data by month
-        $monthlyInvoicesNotPaid = CustomerInvoice::selectRaw('MONTH(date_end) as month, SUM(price) as total')
+        $monthlyInvoicesNotPaid = CustomerInvoice::selectRaw('MONTH(date_start) as month, SUM(price) as total')
             ->where('status', 0)
-            ->whereYear('date_end', date('Y'))
+            ->whereYear('date_start', date('Y'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        $monthlyProcurementsNotPaid = SupplierInvoice::selectRaw('MONTH(date_end) as month, SUM(price) as total')
+        $monthlyProcurementsNotPaid = SupplierInvoice::selectRaw('MONTH(date_start) as month, SUM(price) as total')
             ->where('status', 0)
-            ->whereYear('date_end', date('Y'))
+            ->whereYear('date_start', date('Y'))
             ->groupBy('month')
             ->orderBy('month')
             ->get();

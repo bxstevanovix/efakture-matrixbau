@@ -16,7 +16,8 @@
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <link rel="icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
 <link rel="shortcut icon" type="image/png" href="{{ asset('f-circle.svg') }}">
-<link rel="apple-touch-icon" href="{{ asset('mini-f-logo.jpg') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
 <meta name="application-name" content="e-faktura">
 <meta name="apple-mobile-web-app-title" content="e-faktura">
 <meta name="apple-mobile-web-app-capable" content="yes">

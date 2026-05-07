@@ -1,13 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
     <head>
-        <title>
-            @if(\View::hasSection('head_title'))
-            @yield('head_title')
-            |
-            @endif
-            {{config('app.name')}}
-        </title>
+        <title>MatrixBau</title>
         @include('_layouts.partials.head')
     </head>
     <body>

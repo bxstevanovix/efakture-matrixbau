@@ -1,7 +1,9 @@
-const CACHE_NAME = 'e-faktura-pwa-v1';
+const CACHE_NAME = 'e-faktura-pwa-v2';
 const STATIC_ASSETS = [
   '/f-circle.svg',
-  '/mini-f-logo.jpg',
+  '/apple-touch-icon.png',
+  '/pwa-icon-192.png',
+  '/pwa-icon-512.png',
   '/files/css/style.css',
   '/files/css/custom.css'
 ];

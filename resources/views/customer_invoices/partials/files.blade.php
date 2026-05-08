@@ -3,8 +3,44 @@
     $pdfs = InvoicePdf::where('invoice_id', $entity->id)->where('invoice_type', 'customer')->get();
 @endphp
 
+<style>
+    .invoice-documents .upload-pdf-btn {
+        min-height: 40px;
+    }
+
+    .invoice-documents .quick-bx-inner {
+        border: 1px solid #eef1f7;
+        border-radius: 8px;
+        padding: 12px;
+        min-height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .invoice-documents .quick-bx-inner h6 {
+        overflow-wrap: anywhere;
+        line-height: 1.35;
+    }
+
+    @media (max-width: 767px) {
+        .invoice-documents {
+            margin-top: 28px;
+        }
+
+        .invoice-documents .upload-pdf-btn {
+            width: 100%;
+        }
+
+        .invoice-documents .quick-bx-inner {
+            min-height: 0;
+        }
+    }
+</style>
+
 <hr style="margin-top:60px;">
-<div class="quick-bx">
+<div class="quick-bx invoice-documents">
     <h4 class="card-title mb-3">@lang('Dokumenti')</h4>
     <div class="row">
         <div class="mb-3">

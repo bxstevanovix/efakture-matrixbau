@@ -42,8 +42,13 @@ class CustomerInvoicesController extends Controller
             ->editColumn('debt', function ($entity) {
                 return $entity-> debt . ' ' . $entity->currency . '€';
             })->editColumn('company', function ($entity) {
-                $company = Firma::withTrashed()->where('id', $entity->company)->first();    
-                return $company['name']; 
+                $company = Firma::withTrashed()->where('id', $entity->company)->first();
+
+                if (!$company) {
+                    return '---';
+                }
+
+                return '<a href="' . route('firme.show', ['entity' => $company->id]) . '" class="">' . e($company->name) . '</a>';
             })->editColumn('paid', function ($entity) {
                 return view('customer_invoices.partials.table.paid_actions', 
                             ['entity' => $entity]);
@@ -53,7 +58,7 @@ class CustomerInvoicesController extends Controller
             })->editColumn('date_end',function($entity){
                 $date = Carbon::parse($entity->date_end);
                 return $date->format('d-m-Y');
-            })->rawColumns(['actions', 'image', 'drivers', 'trucks'])
+            })->rawColumns(['actions', 'company', 'image', 'drivers', 'trucks'])
             ->setRowAttr([
                 'data-id' => function($entity) {
                     return $entity->id;

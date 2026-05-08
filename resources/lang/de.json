@@ -66,7 +66,7 @@
   "Rok placanja" : "Zahlungsfrist",
   "Za uplatu" : "Zu zahlen",
   "Unesite broj fakture" : "Geben Sie die Rechnungsnummer ein",
-  "Lista izlaznih faktura" : "Liste der Ausgangsrechnungen",
+  "Lista izlaznih faktura" : "Ausgangsrechnungen",
   "Kreiraj fakturu" : "Rechnung erstellen",
   "Obriši" : "Löschen",
   "Ukupno" : "Gesamt",
@@ -78,7 +78,7 @@
   "Plaćanje fakture" : "Rechnungszahlung",
   "Pun iznos fakture" : "Voller Rechnungsbetrag",
 
-  "Lista ulaznih faktura" : "Liste der Eingangsrechnungen",
+  "Lista ulaznih faktura" : "Eingangsrechnungen",
 
   "Kreiranje Fakture" : "Rechnung erstellen",
   "Nova faktura" : "Neue Rechnung",
@@ -302,7 +302,11 @@
   "Pregled po istim stavkama kao u karticama": "Übersicht nach denselben Positionen wie in den Karten",
   "Firmenbuchnummer": "Firmenbuchnummer",
   "Plz Ort Land": "PLZ Ort Land",
-  "E-mail": "E-Mail"
+  "E-mail": "E-Mail",
+  "Dokumenti": "Dokumente",
+  "Nema dokumenata": "Keine Dokumente",
+  "Greška!": "Fehler!",
+  "Došlo je do greške prilikom plaćanja fakture.": "Beim Bezahlen der Rechnung ist ein Fehler aufgetreten."
 
 
 

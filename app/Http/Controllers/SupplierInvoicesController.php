@@ -41,8 +41,13 @@ class SupplierInvoicesController extends Controller
             ->editColumn('debt', function ($entity) {
                 return $entity-> debt . ' ' . $entity->currency;
             })->editColumn('company', function ($entity) {
-                $company = Firma::withTrashed()->where('id', $entity->company)->first();    
-                return $company['name']; 
+                $company = Firma::withTrashed()->where('id', $entity->company)->first();
+
+                if (!$company) {
+                    return '---';
+                }
+
+                return '<a href="' . route('firme.show', ['entity' => $company->id]) . '" class="">' . e($company->name) . '</a>';
             })->editColumn('paid', function ($entity) {
                 return view('supplier_invoices.partials.table.paid_actions', 
                             ['entity' => $entity]);
@@ -52,7 +57,7 @@ class SupplierInvoicesController extends Controller
             })->editColumn('date_end',function($entity){
                 $date = Carbon::parse($entity->date_end);
                 return $date->format('d-m-Y');
-            })->rawColumns(['actions', 'image', 'drivers', 'trucks'])
+            })->rawColumns(['actions', 'company', 'image', 'drivers', 'trucks'])
             ->setRowAttr([
                 'data-id' => function($entity) {
                     return $entity->id;
@@ -205,7 +210,7 @@ class SupplierInvoicesController extends Controller
         // folder fakture
         $invoiceFolder = str_replace(['/', ' '], '-', $invoice->id_invoice);
 
-        $folder = 'izlazne-fakture/' . $companyFolder . '/' . $invoiceFolder;
+        $folder = 'ulazne-fakture/' . $companyFolder . '/' . $invoiceFolder;
 
         // originalno ime fajla
         $originalName = $request->file('pdf_file')->getClientOriginalName();

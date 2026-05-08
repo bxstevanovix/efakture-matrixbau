@@ -77,13 +77,66 @@
         background: #e9f2ff;
         color: #0d6efd;
     }
+
+    .invoice-form .invoice-inline-field {
+        display: flex;
+        align-items: center;
+    }
+
+    .invoice-form .invoice-inline-field label {
+        white-space: nowrap;
+    }
+
+    .invoice-form .invoice-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        padding-top: 8px;
+        border-top: 1px solid #eef1f7;
+    }
+
+    @media (max-width: 767px) {
+        .invoice-form .autocomplete-box {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .invoice-form .notes-column {
+            margin-top: 0;
+        }
+
+        .invoice-form textarea {
+            min-height: 150px;
+        }
+
+        .invoice-form .invoice-inline-row {
+            margin-top: 10px !important;
+        }
+
+        .invoice-form .invoice-inline-field {
+            display: block;
+        }
+
+        .invoice-form .invoice-inline-field label {
+            display: block;
+            margin-bottom: 6px !important;
+            white-space: normal;
+        }
+
+        .invoice-form .invoice-form-actions {
+            display: block;
+        }
+
+        .invoice-form .invoice-form-actions .btn {
+            width: 100%;
+        }
+    }
 </style>
 
-<form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation">
+<form id="entity-form" method="post" action="" enctype="multipart/form-data" autocomplete="off" class="needs-validation invoice-form">
     @csrf
         <div class="form-validation">
             <div class="row">
-                <div class="mb-3 col-md-7">
+                <div class="mb-3 col-lg-7">
                     <div class="row">
                         <!-- Company Selection -->
                         <div class="mb-3 col-md-6">
@@ -148,9 +201,9 @@
                             </div>
                         </div>
 
-                        <div class="row" style="margin-top: 35px;">
+                        <div class="row invoice-inline-row" style="margin-top: 35px;">
                             <div class="mb-3 col-md-6">
-                                <div class="d-flex align-items-center">
+                                <div class="invoice-inline-field">
                                     <label class="form-label me-2 mb-0" style="white-space: nowrap;">@lang('Broj Fakture')</label>
                                     <div class="flex-grow-1">
                                         <div class="input-group">
@@ -171,7 +224,7 @@
                                 </div>
                             </div>
                             <div class="mb-3 col-md-6">
-                                <div class="d-flex align-items-center">
+                                <div class="invoice-inline-field">
                                     <label class="form-label me-2 mb-0" style="white-space: nowrap;">@lang('Iznos Fakture'):</label>
                                     <div class="flex-grow-1">
                                         <div class="input-group">
@@ -201,7 +254,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="mb-3 col-md-5">
+                <div class="mb-3 col-lg-5 notes-column">
                     <div class="mb-3 col-md-12">
                         <label class="form-label">@lang('Napomene')</label>
                         <textarea 
@@ -209,16 +262,16 @@
                             name="text" 
                             rows="11" 
                             placeholder="@lang('Unesite napomene vezane za fakturu')"
-                            >
-                            {{old('text', $entity->text)}}
-                        </textarea>
+                        >{{ old('text', $entity->text) }}</textarea>
                     </div>
                 </div>
             </div>
         </div>
-    <button style="float: right;" type="submit" class="btn btn-success waves-effect waves-light">
-        <i class="fa fa-save"></i> @lang('Sačuvaj')
-    </button>
+    <div class="invoice-form-actions">
+        <button type="submit" class="btn btn-success waves-effect waves-light">
+            <i class="fa fa-save"></i> @lang('Sačuvaj')
+        </button>
+    </div>
 </form>
 
 @push('footer_scripts')

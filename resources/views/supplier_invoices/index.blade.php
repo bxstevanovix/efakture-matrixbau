@@ -13,6 +13,18 @@
         margin-bottom: 30px;
     }
 
+    .supplier-invoices-page .card-header {
+        gap: 12px;
+    }
+
+    .supplier-invoices-page .invoice-create-text {
+        margin-left: 4px;
+    }
+
+    .supplier-invoices-page .invoice-index-table {
+        width: 100% !important;
+    }
+
     .dropdown-menu {
         padding: 10px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -50,7 +62,8 @@
         white-space: nowrap; 
     }
 
-    th, td {
+    .supplier-invoices-page th,
+    .supplier-invoices-page td {
         white-space: nowrap;
     }
     
@@ -118,6 +131,10 @@
         border-radius: 10px !important;
     }
 
+    #myModal .modal-dialog {
+        margin-top: 110px;
+    }
+
     .rounded-swal {
         border-radius: 10px;
     }
@@ -141,14 +158,258 @@
         padding: 0 3px;
     }
 
-    @media (max-width: 767px) {
-        .dataTables_length {
-            display: none;
-        }
+    .supplier-invoices-page .invoice-paid-btn {
+        min-width: 152px;
+        justify-content: center;
+        white-space: nowrap;
     }
 
+    @media (max-width: 767px) {
+        .supplier-invoices-page .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .supplier-invoices-page .card-header .btn {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .supplier-invoices-page .invoice-create-text {
+            display: none;
+        }
+
+        .supplier-invoices-page .card-body {
+            padding: 16px;
+        }
+
+        .supplier-invoices-page .dataTables_length {
+            display: none;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_filter,
+        .supplier-invoices-page .dataTables_wrapper .dataTables_info,
+        .supplier-invoices-page .dataTables_wrapper .dataTables_paginate {
+            float: none;
+            text-align: left;
+            width: 100%;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_filter {
+            margin-top: 10px;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_filter label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_filter input {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: auto;
+            margin: 0;
+        }
+
+        .supplier-invoices-page .table-responsive {
+            overflow: visible;
+        }
+
+        .supplier-invoices-page .invoice-index-table,
+        .supplier-invoices-page .invoice-index-table tbody,
+        .supplier-invoices-page .invoice-index-table tr,
+        .supplier-invoices-page .invoice-index-table td {
+            display: block;
+            width: 100% !important;
+        }
+
+        .supplier-invoices-page .invoice-index-table thead {
+            display: none;
+        }
+
+        .supplier-invoices-page .invoice-index-table tr {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            column-gap: 12px;
+            row-gap: 0;
+            border: 1px solid #eef1f7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #fff;
+        }
+
+        .supplier-invoices-page .invoice-index-table td {
+            border: 0;
+            box-shadow: none !important;
+            max-width: none !important;
+            overflow: visible !important;
+            padding: 0;
+            white-space: normal;
+            text-align: left !important;
+            overflow-wrap: anywhere;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:before {
+            display: none;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:first-child {
+            grid-column: 1;
+            grid-row: 1;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1.2;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(6) {
+            grid-column: 2;
+            grid-row: 1;
+            align-self: start;
+            font-size: 16px;
+            font-weight: 800;
+            color: #1f2937;
+            text-align: right !important;
+            white-space: nowrap;
+            justify-self: end;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(2) {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(3) {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            margin-top: 4px;
+            color: #7e7e7e;
+            font-size: 13px;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(4),
+        .supplier-invoices-page .invoice-index-table td:nth-child(5) {
+            grid-row: 4;
+            margin-top: 12px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            background: #f6f7fb;
+            font-size: 12px;
+            font-weight: 700;
+            color: #3f4b5b;
+            min-width: 0;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(4) {
+            grid-column: 1;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(5) {
+            grid-column: 2;
+            text-align: left !important;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(4):before,
+        .supplier-invoices-page .invoice-index-table td:nth-child(5):before {
+            display: block;
+            content: attr(data-label);
+            margin-bottom: 4px;
+            color: #9aa1ad;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .supplier-invoices-page .invoice-index-table .date-highlight {
+            display: inline-flex;
+            width: auto;
+            max-width: 100%;
+            padding: 3px 6px;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(7),
+        .supplier-invoices-page .invoice-index-table td:nth-child(8) {
+            grid-column: 1 / -1;
+            display: block;
+            text-align: left !important;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid #eef1f7;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(7) {
+            grid-row: 5;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(8) {
+            grid-row: 6;
+            margin-top: 0;
+            border-top: 0;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(7):before,
+        .supplier-invoices-page .invoice-index-table td:nth-child(8):before {
+            display: none;
+        }
+
+        .supplier-invoices-page .invoice-index-table .btn-group {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .supplier-invoices-page .invoice-index-table td:nth-child(8) .btn-group {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .supplier-invoices-page .invoice-index-table .btn-group .btn {
+            width: 100% !important;
+            border-radius: 6px !important;
+        }
+
+        .supplier-invoices-page .invoice-paid-btn {
+            min-width: 0;
+        }
+
+        .supplier-invoices-page .summary-box {
+            font-size: 16px;
+            padding: 16px;
+        }
+
+        .supplier-invoices-page .modal-footer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .supplier-invoices-page .modal-footer .btn {
+            width: 100%;
+            margin: 0;
+        }
+
+        #myModal .modal-dialog {
+            margin-top: 118px;
+        }
+    }
+    
 </style>
 
+<div class="supplier-invoices-page">
 <div class="row page-titles mx-0">
 	<ol class="breadcrumb">
 		<li class="breadcrumb-item"><a href="{{route('supplier-invoices.index')}}">@lang('Ulazne fakture')</a></li>
@@ -164,12 +425,12 @@
                 
                 <a href="{{route('supplier-invoices.create')}}" class="btn btn-primary">
 					<i class="fa fa-plus"></i>
-					@lang('Kreiraj fakturu')
+					<span class="invoice-create-text">@lang('Kreiraj fakturu')</span>
 				</a>
 			</div>
 			<div class="card-body">
 				<div class="table-responsive">
-                    <table id="exampledb" class="display nowrap" style="width:100%">
+					<table id="exampledb" class="display invoice-index-table">
 						<thead>
 							<tr>
 								<th class="">@lang('ID')</th>
@@ -243,6 +504,7 @@
         </div>
     </div>
 </div>
+</div>
 
 
 
@@ -253,12 +515,19 @@
 <script>
 $(function() {
 
-    // Ako koristiš plain HTML5 date picker sa tekstom
-   
-
     var blade = {
         datatablesAjaxUrl: "{{ route('supplier-invoices.datatable') }}"
     };
+    var tableLabels = [
+        @json(__('ID')),
+        @json(__('Firma')),
+        @json(__('Adresa')),
+        @json(__('Datum')),
+        @json(__('Rok placanja')),
+        @json(__('Za uplatu')),
+        '',
+        @json(__('Opcije'))
+    ];
 
     // Function to update summary values
     function updateSummary() {
@@ -280,8 +549,8 @@ $(function() {
     // DATATABLES
     $('#exampledb').DataTable({
         "stateSave": true,
-        "responsive": true,
-        "autoWidth": true,
+        "responsive": false,
+        "autoWidth": false,
         "processing": true,
         "serverSide": true,
         "ajax": {
@@ -298,6 +567,11 @@ $(function() {
             {"data": "paid", orderable: false, searchable: false, "className": "", responsivePriority: 2},
             {"data": "actions", orderable: false, searchable: false, "className": "text-right", responsivePriority: 5}
         ],
+        "createdRow": function(row) {
+            $('td', row).each(function(index) {
+                $(this).attr('data-label', tableLabels[index] || '');
+            });
+        },
         "order": [[0, "asc"]],
         "rowCallback": function(row, data, index) {
             var today = moment();
@@ -336,7 +610,7 @@ $(function() {
             "infoFiltered": "(gefiltert von _MAX_ gesamten Einträgen)",
             "lengthMenu": "Zeige _MENU_ Einträge",
             "zeroRecords": "Keine passenden Einträge gefunden",
-            "search": "Geben Sie die Rechnungsnummer ein:",
+            "search": "Suche:  ",
             "paginate": {
                 "previous": '<i class="fa-solid fa-angle-left"></i>', // Strelica levo
                 "next": '<i class="fa-solid fa-angle-right"></i>' // Strelica desno
@@ -394,14 +668,14 @@ $(function() {
         };
 
         $.ajax({
-            url: "{{ route('supplier-invoices.paid') }}",
+            url: '{{ route('supplier-invoices.paid') }}',
             method: 'POST',
             data: data,
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             success: function(response) {
-
+                
                 $('#myModal').modal('hide');
                 $('#exampledb').DataTable().ajax.reload(null, false);
                 updateSummary();

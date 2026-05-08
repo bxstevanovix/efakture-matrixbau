@@ -305,9 +305,14 @@
         }
 
         .company-profile .profile-actions .btn {
-            width: 100%;
-            margin-bottom: 8px;
+            width: calc(50% - 4px);
+            margin-bottom: 0;
             margin-right: 0 !important;
+        }
+
+        .company-profile .profile-actions {
+            display: flex;
+            gap: 8px;
         }
 
         .company-profile .profile-title {
@@ -320,16 +325,27 @@
         }
 
         .company-profile .profile-meta {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 7px;
-            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
         }
 
         .company-profile .profile-meta-item {
-            width: 100%;
-            min-height: 38px;
-            padding: 9px 10px;
+            width: auto;
+            max-width: 100%;
+            min-height: 30px;
+            padding: 6px 8px;
+            font-size: 12px;
+            gap: 6px;
+        }
+
+        .company-profile .profile-meta-item i {
+            font-size: 12px;
+        }
+
+        .company-profile .profile-meta-firmenbuch {
+            display: none;
         }
 
         .company-profile .finance-section {
@@ -522,7 +538,7 @@
                             <i class="fa fa-id-card text-primary"></i>
                             <span>@lang('UID-Nummer'): {{ $entity->uid }}</span>
                         </div>
-                        <div class="profile-meta-item">
+                        <div class="profile-meta-item profile-meta-firmenbuch">
                             <i class="fa fa-hashtag text-primary"></i>
                             <span>@lang('Firmenbuchnummer'): {{ $entity->jib }}</span>
                         </div>

@@ -3,7 +3,7 @@
     <button 
         id="openModalBtn" 
         type="button"
-        class="btn btn-success"
+        class="btn btn-success invoice-paid-btn"
         data-id="{{$entity->id}}"
         data-id-invoice="{{$entity->id_invoice}}"
         data-price="{{$entity->price}}"
@@ -18,9 +18,8 @@
     @if($entity->date_done)
     <div class="btn-group">
         <button 
-                style="font-size: 12.5px;"
                 type="button"
-                class="btn btn-light"
+                class="btn btn-light invoice-paid-btn"
                 disabled
             >
             @lang('Placeno'): {{ \Carbon\Carbon::parse($entity->date_done)->format('d-m-Y') }}

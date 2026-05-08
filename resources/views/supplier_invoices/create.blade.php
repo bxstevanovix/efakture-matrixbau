@@ -8,6 +8,37 @@
 
 @section('content')
 
+<style>
+    .supplier-invoice-form-page .card-header {
+        gap: 12px;
+    }
+
+    @media (max-width: 767px) {
+        .supplier-invoice-form-page .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .supplier-invoice-form-page .card-header .btn {
+            width: auto;
+            margin-top: 0;
+            white-space: nowrap;
+        }
+
+        .supplier-invoice-form-page .card-title {
+            min-width: 0;
+            margin-right: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .supplier-invoice-form-page .card-body {
+            padding: 18px;
+        }
+    }
+</style>
+
+<div class="supplier-invoice-form-page">
 <div class="row page-titles mx-0">
 	<ol class="breadcrumb">
 		<li class="breadcrumb-item"><a href="{{route('supplier-invoices.index')}}">@lang('Ulazne fakture')</a></li>
@@ -25,16 +56,13 @@
                     <i class="fa fa-arrow-left"></i>
                     @lang('Nazad')
                 </a>
-			</div>
+            </div>
             <div class="card-body">
-                <div class="card-body">
-                    <div class="form-validation">
-                        @include('supplier_invoices.partials.form', ['entity' => $entity])
-                    </div>
-                </div>
+                @include('supplier_invoices.partials.form', ['entity' => $entity])
             </div>
         </div>
     </div>
+</div>
 </div>
 
 @endsection

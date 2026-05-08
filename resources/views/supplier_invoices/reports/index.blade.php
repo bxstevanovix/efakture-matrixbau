@@ -65,11 +65,29 @@
         color: white;
     }
     .summary-box {
-        padding: 20px;
-        border-radius: 10px;
-        color: black;
+        padding: 16px 18px;
+        border-radius: 8px;
         text-align: center;
-        font-size: 20px;
+        font-size: 17px;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        border: 1px solid #eef1f7;
+        margin-bottom: 18px;
+    }
+
+    .summary-box div {
+        white-space: nowrap;
+    }
+
+    .summary-box a {
+        color: inherit;
+        font-size: 14px;
+        font-weight: 400;
+        text-transform: uppercase;
+    }
+
+    .summary-box span {
+        font-size: 18px;
+        font-weight: 800;
     }
 
     .summary-eur {
@@ -90,6 +108,22 @@
 
     .dataTables_length {
         margin-bottom: 10px;
+    }
+
+    @media (max-width: 767px) {
+        .summary-box {
+            padding: 13px 14px;
+            font-size: 16px;
+        }
+
+        .summary-box a {
+            font-size: 13px;
+        }
+
+        .summary-box span {
+            font-size: 16px;
+            font-weight: 700;
+        }
     }
 </style>
 
@@ -197,7 +231,7 @@
     </div>
     <div class="col-md-5">
         <div class="summary-box summary-eur">
-            <div class="text-success"><a>@lang('Ukupno uplaceno')</a>: <span id="paid-eur">0</span> EUR</div>
+            <div class="text-success"><a>@lang('Bezahlt')</a>: <span id="paid-eur">0</span> EUR</div>
         </div>
     </div>
 </div>

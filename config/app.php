@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'E-faktura - Matrix'),
+    'name' => env('APP_NAME', 'E-faktura | Matrix'),
 
     /*
     |--------------------------------------------------------------------------

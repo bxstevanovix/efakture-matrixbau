@@ -12,7 +12,7 @@
                 <div class="item3"></div>
                 <div class="item4"></div>
             </div>
-            <h3 class="dz-loader-h">E-fakture</h3>
+            <h3 class="dz-loader-h">E-faktura</h3>
         </div>
 
         <div id="main-wrapper">

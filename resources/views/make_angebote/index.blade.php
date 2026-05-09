@@ -9,6 +9,273 @@
 
 	@include('make_angebote.partials.style')
 
+	<style>
+		.angebote-page .card-header {
+			gap: 12px;
+		}
+
+		.angebote-page .card-body {
+			padding: 20px !important;
+			padding-bottom: 30px !important;
+		}
+
+		.angebote-page .angebote-index-table {
+			width: 100% !important;
+		}
+
+		.angebote-page .angebote-index-table th,
+		.angebote-page .angebote-index-table td {
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+
+		.angebote-page #openModal,
+		.angebote-page button {
+			float: none;
+		}
+
+		.angebote-page .angebote-create-text {
+			margin-left: 4px;
+		}
+
+		.angebote-page .btn-group {
+			display: inline-flex;
+			gap: 8px;
+			max-height: none !important;
+		}
+
+		.angebote-page .btn-group .btn {
+			min-width: 44px;
+			border-radius: 6px !important;
+		}
+
+		@media (max-width: 767px) {
+			.angebote-page .card-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.angebote-page .card-header .btn {
+				width: 42px;
+				height: 42px;
+				min-width: 42px;
+				padding: 0;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.angebote-page .angebote-create-text {
+				display: none;
+			}
+
+			.angebote-page .card-body {
+				padding: 16px !important;
+			}
+
+			.angebote-page .dataTables_length {
+				display: none;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_filter,
+			.angebote-page .dataTables_wrapper .dataTables_info,
+			.angebote-page .dataTables_wrapper .dataTables_paginate {
+				float: none;
+				text-align: left;
+				width: 100%;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_filter {
+				margin-top: 10px;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_filter label {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				width: 100%;
+				margin-bottom: 0;
+				white-space: nowrap;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_filter input {
+				flex: 1 1 auto;
+				min-width: 0;
+				width: auto;
+				margin: 0;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_paginate {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+				margin-top: 14px;
+				white-space: nowrap;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_paginate span {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+				min-width: 34px;
+				height: 34px;
+				padding: 0 !important;
+				margin: 0 !important;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 6px !important;
+				font-size: 13px;
+			}
+
+			.angebote-page .dataTables_wrapper .dataTables_paginate span .paginate_button:not(.current):not(:first-child):not(:last-child),
+			.angebote-page .dataTables_wrapper .dataTables_paginate .ellipsis {
+				display: none !important;
+			}
+
+			.angebote-page .table-responsive {
+				overflow: visible;
+			}
+
+			.angebote-page .angebote-index-table,
+			.angebote-page .angebote-index-table tbody,
+			.angebote-page .angebote-index-table tr,
+			.angebote-page .angebote-index-table td {
+				display: block;
+				width: 100% !important;
+			}
+
+			.angebote-page .angebote-index-table thead {
+				display: none;
+			}
+
+			.angebote-page .angebote-index-table tr {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+				column-gap: 12px;
+				row-gap: 0;
+				border: 1px solid #eef1f7;
+				border-radius: 8px;
+				padding: 12px;
+				margin-bottom: 12px;
+				background: #fff;
+			}
+
+			.angebote-page .angebote-index-table td {
+				border: 0 !important;
+				box-shadow: none !important;
+				max-width: none !important;
+				overflow: visible !important;
+				padding: 0;
+				white-space: normal;
+				text-align: left !important;
+				overflow-wrap: anywhere;
+			}
+
+			.angebote-page .angebote-index-table td:before {
+				display: none;
+			}
+
+			.angebote-page .angebote-index-table td:first-child {
+				grid-column: 1;
+				grid-row: 1;
+				font-size: 16px;
+				font-weight: 700;
+				color: #1f2937;
+				line-height: 1.2;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(6) {
+				grid-column: 2;
+				grid-row: 1;
+				align-self: start;
+				justify-self: end;
+				font-size: 16px;
+				font-weight: 800;
+				color: #1f2937;
+				text-align: right !important;
+				white-space: nowrap;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(2) {
+				grid-column: 1 / -1;
+				grid-row: 2;
+				margin-top: 10px;
+				font-size: 14px;
+				font-weight: 700;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(3) {
+				grid-column: 1 / -1;
+				grid-row: 3;
+				margin-top: 4px;
+				color: #7e7e7e;
+				font-size: 13px;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(4),
+			.angebote-page .angebote-index-table td:nth-child(5) {
+				grid-row: 4;
+				margin-top: 12px;
+				padding: 8px 10px;
+				border-radius: 6px;
+				background: #f6f7fb;
+				font-size: 12px;
+				font-weight: 700;
+				color: #3f4b5b;
+				min-width: 0;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(4) {
+				grid-column: 1;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(5) {
+				grid-column: 2;
+				text-align: left !important;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(4):before,
+			.angebote-page .angebote-index-table td:nth-child(5):before {
+				display: block;
+				content: attr(data-label);
+				margin-bottom: 4px;
+				color: #9aa1ad;
+				font-size: 10px;
+				font-weight: 700;
+				text-transform: uppercase;
+			}
+
+			.angebote-page .angebote-index-table td:nth-child(7) {
+				grid-column: 1 / -1;
+				grid-row: 5;
+				margin-top: 12px;
+			}
+
+			.angebote-page .angebote-index-table .btn-group {
+				width: 100%;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+			}
+
+			.angebote-page .angebote-index-table .btn-group .btn {
+				width: 100%;
+				min-height: 42px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 6px !important;
+			}
+		}
+	</style>
+
+	<div class="angebote-page">
 	<div class="row page-titles mx-0">
 		<ol class="breadcrumb">
 			<li class="breadcrumb-item"><a href="{{route('angebote.index')}}">@lang('Ponude')</a></li>
@@ -26,12 +293,12 @@
 						class="btn btn-primary"
 						title="@lang('Kreiraj ponudu')"
 					>
-						<i class="fa fa-plus"></i> @lang('Kreiraj ponudu')
+						<i class="fa fa-plus"></i><span class="angebote-create-text">@lang('Kreiraj ponudu')</span>
 					</button>
 				</div>
 				<div class="card-body">
 					<div class="table-responsive">
-						<table id="exampledb" class="display w-100">
+						<table id="exampledb" class="display w-100 angebote-index-table">
 							<thead>
 								<tr>
 									<th>@lang('Ponuda Br.')</th>
@@ -49,6 +316,7 @@
 				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	@include('make_angebote.partials.modal')
@@ -82,9 +350,20 @@
 
 			// DATATABLES ----------------------------------------------
 			let datatableUrl = "{{ route('angebote.datatable') }}";
+			let tableLabels = [
+				@json(__('Ponuda Br.')),
+				@json(__('Firma')),
+				@json(__('Adresa')),
+				@json(__('Datum')),
+				@json(__('Kreirao')),
+				@json(__('Cijena')),
+				@json(__('Opcije'))
+			];
 			$('#exampledb').DataTable({
 				"processing": true,
 				"serverSide": true,
+				"responsive": false,
+				"autoWidth": false,
 				"ajax": { url: datatableUrl, type: "post" },
 				"columns": [
 					{"data": "id_invoice", "name" : "id_invoice", width: "10%"},
@@ -99,7 +378,22 @@
 					"search": "Suchen:",
 					"paginate": { "previous": '<i class="fa-solid fa-angle-left"></i>', "next": '<i class="fa-solid fa-angle-right"></i>' }
 				},
-				"order": [[0, "desc"]]
+				"order": [[0, "desc"]],
+				"createdRow": function(row) {
+					$('td', row).each(function(index) {
+						$(this).attr('data-label', tableLabels[index] || '');
+					});
+				},
+				"drawCallback": function() {
+					let api = this.api();
+					let pageInfo = api.page.info();
+
+					if (pageInfo.pages <= 1) {
+						$(api.table().container()).find('.dataTables_paginate').hide();
+					} else {
+						$(api.table().container()).find('.dataTables_paginate').show();
+					}
+				}
 			});
 			// DATATABLES END -------------------------------------------
 

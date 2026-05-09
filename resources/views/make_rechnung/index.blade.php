@@ -9,6 +9,276 @@
 
 	@include('make_rechnung.partials.style')
 
+	<style>
+		.rechnung-page .card-header {
+			gap: 12px;
+		}
+
+		.rechnung-page .card-body {
+			padding: 20px !important;
+			padding-bottom: 30px !important;
+		}
+
+		.rechnung-page .rechnung-index-table {
+			width: 100% !important;
+		}
+
+		.rechnung-page .rechnung-index-table th,
+		.rechnung-page .rechnung-index-table td {
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+
+		.rechnung-page #openModal {
+			float: none;
+		}
+
+		.rechnung-page button {
+			float: none;
+		}
+
+		.rechnung-page .rechnung-create-text {
+			margin-left: 4px;
+		}
+
+		.rechnung-page .btn-group {
+			display: inline-flex;
+			gap: 8px;
+			max-height: none !important;
+		}
+
+		.rechnung-page .btn-group .btn {
+			min-width: 44px;
+			border-radius: 6px !important;
+		}
+
+		@media (max-width: 767px) {
+			.rechnung-page .card-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.rechnung-page .card-header .btn {
+				width: 42px;
+				height: 42px;
+				min-width: 42px;
+				padding: 0;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.rechnung-page .rechnung-create-text {
+				display: none;
+			}
+
+			.rechnung-page .card-body {
+				padding: 16px !important;
+			}
+
+			.rechnung-page .dataTables_length {
+				display: none;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_filter,
+			.rechnung-page .dataTables_wrapper .dataTables_info,
+			.rechnung-page .dataTables_wrapper .dataTables_paginate {
+				float: none;
+				text-align: left;
+				width: 100%;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_filter {
+				margin-top: 10px;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_filter label {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				width: 100%;
+				margin-bottom: 0;
+				white-space: nowrap;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_filter input {
+				flex: 1 1 auto;
+				min-width: 0;
+				width: auto;
+				margin: 0;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_paginate {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 6px;
+				margin-top: 14px;
+				white-space: nowrap;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_paginate span {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+				min-width: 34px;
+				height: 34px;
+				padding: 0 !important;
+				margin: 0 !important;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 6px !important;
+				font-size: 13px;
+			}
+
+			.rechnung-page .dataTables_wrapper .dataTables_paginate span .paginate_button:not(.current):not(:first-child):not(:last-child),
+			.rechnung-page .dataTables_wrapper .dataTables_paginate .ellipsis {
+				display: none !important;
+			}
+
+			.rechnung-page .table-responsive {
+				overflow: visible;
+			}
+
+			.rechnung-page .rechnung-index-table,
+			.rechnung-page .rechnung-index-table tbody,
+			.rechnung-page .rechnung-index-table tr,
+			.rechnung-page .rechnung-index-table td {
+				display: block;
+				width: 100% !important;
+			}
+
+			.rechnung-page .rechnung-index-table thead {
+				display: none;
+			}
+
+			.rechnung-page .rechnung-index-table tr {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+				column-gap: 12px;
+				row-gap: 0;
+				border: 1px solid #eef1f7;
+				border-radius: 8px;
+				padding: 12px;
+				margin-bottom: 12px;
+				background: #fff;
+			}
+
+			.rechnung-page .rechnung-index-table td {
+				border: 0 !important;
+				box-shadow: none !important;
+				max-width: none !important;
+				overflow: visible !important;
+				padding: 0;
+				white-space: normal;
+				text-align: left !important;
+				overflow-wrap: anywhere;
+			}
+
+			.rechnung-page .rechnung-index-table td:before {
+				display: none;
+			}
+
+			.rechnung-page .rechnung-index-table td:first-child {
+				grid-column: 1;
+				grid-row: 1;
+				font-size: 16px;
+				font-weight: 700;
+				color: #1f2937;
+				line-height: 1.2;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(6) {
+				grid-column: 2;
+				grid-row: 1;
+				align-self: start;
+				justify-self: end;
+				font-size: 16px;
+				font-weight: 800;
+				color: #1f2937;
+				text-align: right !important;
+				white-space: nowrap;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(2) {
+				grid-column: 1 / -1;
+				grid-row: 2;
+				margin-top: 10px;
+				font-size: 14px;
+				font-weight: 700;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(3) {
+				grid-column: 1 / -1;
+				grid-row: 3;
+				margin-top: 4px;
+				color: #7e7e7e;
+				font-size: 13px;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(4),
+			.rechnung-page .rechnung-index-table td:nth-child(5) {
+				grid-row: 4;
+				margin-top: 12px;
+				padding: 8px 10px;
+				border-radius: 6px;
+				background: #f6f7fb;
+				font-size: 12px;
+				font-weight: 700;
+				color: #3f4b5b;
+				min-width: 0;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(4) {
+				grid-column: 1;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(5) {
+				grid-column: 2;
+				text-align: left !important;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(4):before,
+			.rechnung-page .rechnung-index-table td:nth-child(5):before {
+				display: block;
+				content: attr(data-label);
+				margin-bottom: 4px;
+				color: #9aa1ad;
+				font-size: 10px;
+				font-weight: 700;
+				text-transform: uppercase;
+			}
+
+			.rechnung-page .rechnung-index-table td:nth-child(7) {
+				grid-column: 1 / -1;
+				grid-row: 5;
+				margin-top: 12px;
+			}
+
+			.rechnung-page .rechnung-index-table .btn-group {
+				width: 100%;
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 8px;
+			}
+
+			.rechnung-page .rechnung-index-table .btn-group .btn {
+				width: 100%;
+				min-height: 42px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 6px !important;
+			}
+		}
+	</style>
+
+	<div class="rechnung-page">
 	<div class="row page-titles mx-0">
 		<ol class="breadcrumb">
 			<li class="breadcrumb-item"><a href="{{route('rechnung.index')}}">@lang('Racuni')</a></li>
@@ -26,12 +296,12 @@
 						class="btn btn-primary"
 						title="@lang('Kreiraj racun')"
 					>
-						<i class="fa fa-plus"></i> @lang('Kreiraj racun')
+						<i class="fa fa-plus"></i><span class="rechnung-create-text">@lang('Kreiraj racun')</span>
 					</button>
 				</div>
 				<div class="card-body">
 					<div class="table-responsive">
-						<table id="exampledb" class="display w-100">
+						<table id="exampledb" class="display w-100 rechnung-index-table">
 							<thead>
 								<tr>
 									<th>@lang('ID')</th>
@@ -49,6 +319,7 @@
 				</div>
 			</div>
 		</div>
+	</div>
 	</div>
 
 	@include('make_rechnung.partials.modal')
@@ -82,9 +353,20 @@
 
 			// DATATABLES
 			let datatableUrl = "{{ route('rechnung.datatable') }}";
+			let tableLabels = [
+				@json(__('ID')),
+				@json(__('Firma')),
+				@json(__('Adresa')),
+				@json(__('Datum')),
+				@json(__('Kreirao')),
+				@json(__('Cijena')),
+				@json(__('Opcije'))
+			];
 			$('#exampledb').DataTable({
 				"processing": true,
 				"serverSide": true,
+				"responsive": false,
+				"autoWidth": false,
 				"ajax": { url: datatableUrl, type: "post" },
 				"columns": [
 					{"data": "id_invoice", "name": "id_invoice", width: "10%"},
@@ -99,7 +381,22 @@
 					"search": "Suchen:",
 					"paginate": { "previous": '<i class="fa-solid fa-angle-left"></i>', "next": '<i class="fa-solid fa-angle-right"></i>' }
 				},
-				"order": [[0, "desc"]]
+				"order": [[0, "desc"]],
+				"createdRow": function(row) {
+					$('td', row).each(function(index) {
+						$(this).attr('data-label', tableLabels[index] || '');
+					});
+				},
+				"drawCallback": function() {
+					let api = this.api();
+					let pageInfo = api.page.info();
+
+					if (pageInfo.pages <= 1) {
+						$(api.table().container()).find('.dataTables_paginate').hide();
+					} else {
+						$(api.table().container()).find('.dataTables_paginate').show();
+					}
+				}
 			});
 
 			// OPEN MODAL

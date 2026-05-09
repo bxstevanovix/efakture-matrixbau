@@ -195,14 +195,30 @@ class AngeboteController extends Controller
         $angebot = Entity::findOrFail($id);
 
         $path = storage_path('app/public/' . $angebot->invoice_url);
+        $filename = 'angebot-' . Str::slug(str_replace('/', '-', $angebot->id_invoice), '-') . '.pdf';
 
         if (!file_exists($path)) {
             abort(404, 'PDF nije pronađen');
         }
 
+        if ($this->request->boolean('download')) {
+            return response()->download($path, $filename, [
+                'Content-Type' => 'application/pdf',
+            ]);
+        }
+
+        if (! $this->request->boolean('raw')) {
+            return view('pdf.viewer', [
+                'title' => __('Angebot') . ' ' . $angebot->id_invoice,
+                'fileName' => $filename,
+                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
+                'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
+            ]);
+        }
+
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="angebot-' . $angebot->id_invoice . '.pdf"',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
     }
     

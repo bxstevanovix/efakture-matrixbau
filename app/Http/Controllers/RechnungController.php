@@ -196,12 +196,27 @@ class RechnungController extends Controller
     {
         $rechnung = Entity::findOrFail($id);
 
-        $filename = $rechnung->type . '-' . $rechnung->id_invoice . '.pdf';
+        $filename = $rechnung->type . '-' . Str::slug(str_replace('/', '-', $rechnung->id_invoice), '-') . '.pdf';
 
         $path = storage_path('app/public/' . $rechnung->invoice_url);
 
         if (!file_exists($path)) {
             abort(404, 'PDF nije pronađen');
+        }
+
+        if ($this->request->boolean('download')) {
+            return response()->download($path, $filename, [
+                'Content-Type' => 'application/pdf',
+            ]);
+        }
+
+        if (! $this->request->boolean('raw')) {
+            return view('pdf.viewer', [
+                'title' => __('Rechnung') . ' ' . $rechnung->id_invoice,
+                'fileName' => $filename,
+                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
+                'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
+            ]);
         }
 
         return response()->file($path, [

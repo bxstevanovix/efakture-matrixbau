@@ -205,6 +205,38 @@
             margin-top: 10px;
         }
 
+        .supplier-invoices-page .dataTables_wrapper .dataTables_paginate {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 14px;
+            white-space: nowrap;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_paginate span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_paginate .paginate_button {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px !important;
+            font-size: 13px;
+        }
+
+        .supplier-invoices-page .dataTables_wrapper .dataTables_paginate span .paginate_button:not(.current):not(:first-child):not(:last-child),
+        .supplier-invoices-page .dataTables_wrapper .dataTables_paginate .ellipsis {
+            display: none !important;
+        }
+
         .supplier-invoices-page .dataTables_wrapper .dataTables_filter label {
             display: flex;
             align-items: center;

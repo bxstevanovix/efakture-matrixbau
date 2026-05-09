@@ -183,7 +183,8 @@ class CustomerInvoicesController extends Controller
     public function viewPdf($id)
     {
         $faktura = Entity::findOrFail($id);
-        $path = public_path('storage/' . $faktura->pdf);
+        $pdfPath = $this->normalizePublicPdfPath($faktura->pdf);
+        $path = Storage::disk('public')->path($pdfPath);
         $filename = 'Rechnung_' . Str::slug(str_replace('/', '-', $faktura->id_invoice), '-') . '.pdf';
 
         if (!file_exists($path)) {
@@ -200,7 +201,7 @@ class CustomerInvoicesController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Rechnung') . ' ' . $faktura->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => asset('storage/' . $faktura->pdf),
+                'pdfUrl' => asset(Storage::disk('public')->url($pdfPath)),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }
@@ -209,6 +210,19 @@ class CustomerInvoicesController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
+    }
+
+    private function normalizePublicPdfPath(?string $path): string
+    {
+        $path = ltrim((string) $path, '/');
+
+        foreach (['storage/', 'public/'] as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                $path = substr($path, strlen($prefix));
+            }
+        }
+
+        return $path;
     }
 
     public function uploadPdf(Request $request)

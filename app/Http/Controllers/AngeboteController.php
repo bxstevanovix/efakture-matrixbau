@@ -194,7 +194,8 @@ class AngeboteController extends Controller
     {
         $angebot = Entity::findOrFail($id);
 
-        $path = storage_path('app/public/' . $angebot->invoice_url);
+        $pdfPath = $this->normalizePublicPdfPath($angebot->invoice_url);
+        $path = Storage::disk('public')->path($pdfPath);
         $filename = 'angebot-' . Str::slug(str_replace('/', '-', $angebot->id_invoice), '-') . '.pdf';
 
         if (!file_exists($path)) {
@@ -211,7 +212,7 @@ class AngeboteController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Angebot') . ' ' . $angebot->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => asset('storage/' . $angebot->invoice_url),
+                'pdfUrl' => asset(Storage::disk('public')->url($pdfPath)),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }
@@ -220,6 +221,19 @@ class AngeboteController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
+    }
+
+    private function normalizePublicPdfPath(?string $path): string
+    {
+        $path = ltrim((string) $path, '/');
+
+        foreach (['storage/', 'public/'] as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                $path = substr($path, strlen($prefix));
+            }
+        }
+
+        return $path;
     }
     
     public function delete(Entity $entity)

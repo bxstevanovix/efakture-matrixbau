@@ -198,7 +198,8 @@ class RechnungController extends Controller
 
         $filename = $rechnung->type . '-' . Str::slug(str_replace('/', '-', $rechnung->id_invoice), '-') . '.pdf';
 
-        $path = storage_path('app/public/' . $rechnung->invoice_url);
+        $pdfPath = $this->normalizePublicPdfPath($rechnung->invoice_url);
+        $path = Storage::disk('public')->path($pdfPath);
 
         if (!file_exists($path)) {
             abort(404, 'PDF nije pronađen');
@@ -214,7 +215,7 @@ class RechnungController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Rechnung') . ' ' . $rechnung->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => asset('storage/' . $rechnung->invoice_url),
+                'pdfUrl' => asset(Storage::disk('public')->url($pdfPath)),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }
@@ -223,6 +224,19 @@ class RechnungController extends Controller
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="' . $filename . '"',
         ]);
+    }
+
+    private function normalizePublicPdfPath(?string $path): string
+    {
+        $path = ltrim((string) $path, '/');
+
+        foreach (['storage/', 'public/'] as $prefix) {
+            if (str_starts_with($path, $prefix)) {
+                $path = substr($path, strlen($prefix));
+            }
+        }
+
+        return $path;
     }
     
     public function delete(Entity $entity)

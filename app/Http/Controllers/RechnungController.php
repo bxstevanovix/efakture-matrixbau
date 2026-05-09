@@ -214,7 +214,7 @@ class RechnungController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Rechnung') . ' ' . $rechnung->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
+                'pdfUrl' => asset('storage/' . $rechnung->invoice_url),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }

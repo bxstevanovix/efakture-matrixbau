@@ -103,37 +103,8 @@
             box-shadow: 0 8px 30px rgba(31, 41, 55, 0.08);
         }
 
-        .pdf-canvas-viewer {
-            display: none;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .pdf-page {
-            display: block;
-            width: 100%;
-            height: auto;
-            margin: 0 auto 12px;
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 6px 22px rgba(31, 41, 55, 0.12);
-        }
-
-        .pdf-loading {
-            display: none;
-            padding: 12px;
-            margin-bottom: 8px;
-            text-align: center;
-            color: #5f6b7a;
-            font-size: 13px;
-            background: #fff;
-            border-radius: 6px;
-        }
-
         .pdf-fallback {
-            display: none;
+            display: block;
             padding: 16px;
             margin-top: 8px;
             text-align: center;
@@ -141,22 +112,6 @@
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 6px 22px rgba(31, 41, 55, 0.08);
-        }
-
-        .pdf-viewer-page.use-canvas .pdf-frame {
-            display: none;
-        }
-
-        .pdf-viewer-page.use-canvas .pdf-canvas-viewer {
-            display: block;
-        }
-
-        .pdf-viewer-page.use-canvas.loading .pdf-loading {
-            display: block;
-        }
-
-        .pdf-viewer-page.viewer-failed .pdf-fallback {
-            display: block;
         }
 
         @media (max-width: 767px) {
@@ -224,93 +179,18 @@
 
         <div class="pdf-frame-wrap">
             <iframe class="pdf-frame" src="{{ $pdfUrl }}" title="{{ $title }}"></iframe>
-            <div class="pdf-loading">@lang('PDF wird geladen...')</div>
-            <div class="pdf-canvas-viewer" id="pdfCanvasViewer"></div>
             <div class="pdf-fallback">
-                <p class="mb-3">@lang('PDF Vorschau konnte auf diesem Gerät nicht geladen werden.')</p>
                 <a href="{{ $pdfUrl }}" class="btn btn-primary me-2">@lang('PDF öffnen')</a>
                 <a href="{{ $downloadUrl }}" class="btn btn-primary light">@lang('Download')</a>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         const pdfUrl = @json($pdfUrl);
         const downloadUrl = @json($downloadUrl);
         const fileName = @json($fileName);
         const title = @json($title);
-        const viewerPage = document.querySelector('.pdf-viewer-page');
-
-        const isAppleMobile = /iPad|iPhone|iPod/.test(navigator.userAgent)
-            || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isStandalone = window.navigator.standalone === true
-            || window.matchMedia('(display-mode: standalone)').matches;
-
-        async function renderPdfForApplePwa() {
-            if (!isAppleMobile) {
-                return;
-            }
-
-            const canvasViewer = document.getElementById('pdfCanvasViewer');
-            viewerPage.classList.add('use-canvas', 'loading');
-            canvasViewer.innerHTML = '';
-
-            try {
-                if (!window.pdfjsLib) {
-                    throw new Error('PDF.js nije učitan.');
-                }
-
-                const pdfResponse = await fetch(pdfUrl, {
-                    credentials: 'same-origin',
-                    cache: 'no-store'
-                });
-
-                if (!pdfResponse.ok) {
-                    throw new Error('PDF nije dostupan.');
-                }
-
-                const pdf = await pdfjsLib.getDocument({
-                    data: await pdfResponse.arrayBuffer(),
-                    disableWorker: true
-                }).promise;
-
-                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                    const page = await pdf.getPage(pageNumber);
-                    const wrapWidth = Math.max(canvasViewer.clientWidth || window.innerWidth - 16, 320);
-                    const initialViewport = page.getViewport({ scale: 1 });
-                    const scale = Math.min((wrapWidth - 8) / initialViewport.width, 1.6);
-                    const viewport = page.getViewport({ scale: scale });
-                    const outputScale = Math.min(window.devicePixelRatio || 1, 1.5);
-
-                    const canvas = document.createElement('canvas');
-                    canvas.className = 'pdf-page';
-                    canvas.width = Math.floor(viewport.width * outputScale);
-                    canvas.height = Math.floor(viewport.height * outputScale);
-                    canvas.style.width = Math.floor(viewport.width) + 'px';
-                    canvas.style.height = Math.floor(viewport.height) + 'px';
-
-                    const context = canvas.getContext('2d');
-                    context.setTransform(outputScale, 0, 0, outputScale, 0, 0);
-
-                    canvasViewer.appendChild(canvas);
-
-                    await page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    }).promise;
-
-                    if (pageNumber === 1) {
-                        viewerPage.classList.remove('loading');
-                    }
-                }
-
-                viewerPage.classList.remove('loading');
-            } catch (error) {
-                viewerPage.classList.remove('loading');
-                viewerPage.classList.add('viewer-failed');
-            }
-        }
 
         document.getElementById('sharePdf').addEventListener('click', async function () {
             try {
@@ -336,8 +216,6 @@
                 alert(@json(__('Link je kopiran.')));
             } catch (error) {}
         });
-
-        renderPdfForApplePwa();
     </script>
 </body>
 </html>

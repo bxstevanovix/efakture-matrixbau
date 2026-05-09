@@ -200,7 +200,7 @@ class CustomerInvoicesController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Rechnung') . ' ' . $faktura->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
+                'pdfUrl' => asset('storage/' . $faktura->pdf),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }

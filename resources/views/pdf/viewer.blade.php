@@ -8,7 +8,8 @@
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <link rel="icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <meta name="apple-mobile-web-app-title" content="Matrix">
+    <meta name="application-name" content="E-faktura | Matrixbau">
+    <meta name="apple-mobile-web-app-title" content="E-faktura | Matrixbau">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#5746A3">
     <link href="{{ asset('files/vendor/bootstrap-select/css/bootstrap-select.min.css') }}" rel="stylesheet">

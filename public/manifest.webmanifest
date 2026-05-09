@@ -1,6 +1,6 @@
 {
-  "name": "e-faktura",
-  "short_name": "e-faktura",
+  "name": "E-faktura - Matrixbau",
+  "short_name": "E-faktura - Matrixbau",
   "description": "e-faktura dashboard za upravljanje fakturama.",
   "id": "/dashboard",
   "start_url": "/dashboard",

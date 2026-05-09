@@ -52,7 +52,7 @@
 
 <head>
     <!-- PAGE TITLE HERE -->
-	<title>E-fakture | Login</title>
+	<title>E-faktura | Matrixbau</title>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="author" content="DexignZone">
@@ -75,6 +75,15 @@
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+	<link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+	<meta name="application-name" content="E-faktura - Matrixbau">
+	<meta name="apple-mobile-web-app-title" content="E-faktura - Matrixbau">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<meta name="apple-mobile-web-app-status-bar-style" content="default">
+	<meta name="mobile-web-app-capable" content="yes">
+	<meta name="theme-color" content="#5746A3">
 	
 	<!-- FAVICONS ICON -->
     <link rel="icon" href="{{ asset('f-circle.svg') }}" type="image/svg+xml">

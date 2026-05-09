@@ -23,12 +23,11 @@
             height: 100%;
             margin: 0;
             background: #f4f6fb;
-            overflow: hidden;
         }
 
         .pdf-viewer-page {
-            height: 100%;
-            min-height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             color: #1f2937;
@@ -89,29 +88,26 @@
         }
 
         .pdf-frame-wrap {
-            flex: 1 1 auto;
-            min-height: 0;
-            padding: 14px;
+            width: 100%;
+            height: calc(100vh - 64px);
+            height: calc(100dvh - 64px);
+            padding: 0;
+            background: #fff;
         }
 
         .pdf-frame {
             width: 100%;
             height: 100%;
             border: 0;
-            border-radius: 8px;
             background: #fff;
-            box-shadow: 0 8px 30px rgba(31, 41, 55, 0.08);
+            display: block;
         }
 
         .pdf-fallback {
-            display: block;
-            padding: 16px;
-            margin-top: 8px;
+            padding: 8px 10px;
             text-align: center;
             color: #5f6b7a;
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 6px 22px rgba(31, 41, 55, 0.08);
         }
 
         @media (max-width: 767px) {
@@ -140,12 +136,8 @@
             }
 
             .pdf-frame-wrap {
-                padding: 8px;
-                padding-bottom: max(8px, env(safe-area-inset-bottom));
-            }
-
-            .pdf-frame {
-                border-radius: 6px;
+                height: calc(100vh - 58px);
+                height: calc(100dvh - 58px);
             }
         }
 
@@ -178,11 +170,11 @@
         </div>
 
         <div class="pdf-frame-wrap">
-            <iframe class="pdf-frame" src="{{ $pdfUrl }}" title="{{ $title }}"></iframe>
-            <div class="pdf-fallback">
-                <a href="{{ $pdfUrl }}" class="btn btn-primary me-2">@lang('PDF öffnen')</a>
-                <a href="{{ $downloadUrl }}" class="btn btn-primary light">@lang('Download')</a>
-            </div>
+            <iframe class="pdf-frame" src="{{ $pdfUrl }}#toolbar=1&navpanes=0" title="{{ $title }}"></iframe>
+        </div>
+        <div class="pdf-fallback">
+            <a href="{{ $pdfUrl }}" class="btn btn-primary me-2">@lang('PDF öffnen')</a>
+            <a href="{{ $downloadUrl }}" class="btn btn-primary light">@lang('Download')</a>
         </div>
     </div>
 

@@ -89,25 +89,22 @@
 
         .pdf-frame-wrap {
             width: 100%;
-            height: calc(100vh - 64px);
-            height: calc(100dvh - 64px);
+            flex: 1 1 auto;
+            min-height: calc(100vh - 64px);
+            min-height: calc(100dvh - 64px);
             padding: 0;
             background: #fff;
         }
 
+        .pdf-object,
         .pdf-frame {
             width: 100%;
             height: 100%;
+            min-height: calc(100vh - 64px);
+            min-height: calc(100dvh - 64px);
             border: 0;
             background: #fff;
             display: block;
-        }
-
-        .pdf-fallback {
-            padding: 8px 10px;
-            text-align: center;
-            color: #5f6b7a;
-            background: #fff;
         }
 
         @media (max-width: 767px) {
@@ -136,8 +133,14 @@
             }
 
             .pdf-frame-wrap {
-                height: calc(100vh - 58px);
-                height: calc(100dvh - 58px);
+                min-height: calc(100vh - 58px);
+                min-height: calc(100dvh - 58px);
+            }
+
+            .pdf-object,
+            .pdf-frame {
+                min-height: calc(100vh - 58px);
+                min-height: calc(100dvh - 58px);
             }
         }
 
@@ -170,11 +173,9 @@
         </div>
 
         <div class="pdf-frame-wrap">
-            <iframe class="pdf-frame" src="{{ $pdfUrl }}#toolbar=1&navpanes=0" title="{{ $title }}"></iframe>
-        </div>
-        <div class="pdf-fallback">
-            <a href="{{ $pdfUrl }}" class="btn btn-primary me-2">@lang('PDF öffnen')</a>
-            <a href="{{ $downloadUrl }}" class="btn btn-primary light">@lang('Download')</a>
+            <object class="pdf-object" data="{{ $pdfUrl }}" type="application/pdf">
+                <iframe class="pdf-frame" src="{{ $pdfUrl }}" title="{{ $title }}"></iframe>
+            </object>
         </div>
     </div>
 

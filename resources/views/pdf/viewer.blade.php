@@ -123,17 +123,24 @@
 
         .pdf-loading {
             display: none;
-            padding: 18px;
+            padding: 12px;
+            margin-bottom: 8px;
             text-align: center;
             color: #5f6b7a;
             font-size: 13px;
+            background: #fff;
+            border-radius: 6px;
         }
 
         .pdf-fallback {
             display: none;
             padding: 16px;
+            margin-top: 8px;
             text-align: center;
             color: #5f6b7a;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 6px 22px rgba(31, 41, 55, 0.08);
         }
 
         .pdf-viewer-page.use-canvas .pdf-frame {
@@ -146,10 +153,6 @@
 
         .pdf-viewer-page.use-canvas.loading .pdf-loading {
             display: block;
-        }
-
-        .pdf-viewer-page.use-canvas.loading .pdf-canvas-viewer {
-            display: none;
         }
 
         .pdf-viewer-page.viewer-failed .pdf-fallback {
@@ -224,7 +227,9 @@
             <div class="pdf-loading">@lang('PDF wird geladen...')</div>
             <div class="pdf-canvas-viewer" id="pdfCanvasViewer"></div>
             <div class="pdf-fallback">
-                <a href="{{ $downloadUrl }}" class="btn btn-primary">@lang('Download')</a>
+                <p class="mb-3">@lang('PDF Vorschau konnte auf diesem Gerät nicht geladen werden.')</p>
+                <a href="{{ $pdfUrl }}" class="btn btn-primary me-2">@lang('PDF öffnen')</a>
+                <a href="{{ $downloadUrl }}" class="btn btn-primary light">@lang('Download')</a>
             </div>
         </div>
     </div>
@@ -249,28 +254,34 @@
 
             const canvasViewer = document.getElementById('pdfCanvasViewer');
             viewerPage.classList.add('use-canvas', 'loading');
+            canvasViewer.innerHTML = '';
 
             try {
                 if (!window.pdfjsLib) {
                     throw new Error('PDF.js nije učitan.');
                 }
 
-                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                const pdfResponse = await fetch(pdfUrl, {
+                    credentials: 'same-origin',
+                    cache: 'no-store'
+                });
+
+                if (!pdfResponse.ok) {
+                    throw new Error('PDF nije dostupan.');
+                }
 
                 const pdf = await pdfjsLib.getDocument({
-                    url: pdfUrl,
-                    withCredentials: true
+                    data: await pdfResponse.arrayBuffer(),
+                    disableWorker: true
                 }).promise;
-
-                canvasViewer.innerHTML = '';
 
                 for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
                     const page = await pdf.getPage(pageNumber);
-                    const wrapWidth = Math.max(canvasViewer.clientWidth || window.innerWidth, 320);
+                    const wrapWidth = Math.max(canvasViewer.clientWidth || window.innerWidth - 16, 320);
                     const initialViewport = page.getViewport({ scale: 1 });
-                    const scale = Math.min((wrapWidth - 4) / initialViewport.width, 2);
+                    const scale = Math.min((wrapWidth - 8) / initialViewport.width, 1.6);
                     const viewport = page.getViewport({ scale: scale });
-                    const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+                    const outputScale = Math.min(window.devicePixelRatio || 1, 1.5);
 
                     const canvas = document.createElement('canvas');
                     canvas.className = 'pdf-page';
@@ -288,6 +299,10 @@
                         canvasContext: context,
                         viewport: viewport
                     }).promise;
+
+                    if (pageNumber === 1) {
+                        viewerPage.classList.remove('loading');
+                    }
                 }
 
                 viewerPage.classList.remove('loading');

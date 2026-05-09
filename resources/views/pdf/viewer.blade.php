@@ -163,6 +163,9 @@
                 <span>{{ $fileName }}</span>
             </div>
             <div class="pdf-actions">
+                <button class="btn btn-danger" id="backPdf" type="button" title="@lang('Zurück')" aria-label="@lang('Zurück')">
+                    <i class="fa fa-arrow-left"></i>
+                </button>
                 <a class="btn btn-primary light" href="{{ $downloadUrl }}" title="@lang('Download')" aria-label="@lang('Download')">
                     <i class="fa fa-download"></i>
                 </a>
@@ -184,6 +187,10 @@
         const downloadUrl = @json($downloadUrl);
         const fileName = @json($fileName);
         const title = @json($title);
+
+        document.getElementById('backPdf').addEventListener('click', function () {
+            window.history.back();
+        });
 
         document.getElementById('sharePdf').addEventListener('click', async function () {
             try {

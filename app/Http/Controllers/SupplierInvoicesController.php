@@ -199,7 +199,7 @@ class SupplierInvoicesController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Rechnung') . ' ' . $faktura->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => asset(Storage::disk('public')->url($pdfPath)),
+                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }

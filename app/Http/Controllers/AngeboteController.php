@@ -212,7 +212,7 @@ class AngeboteController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Angebot') . ' ' . $angebot->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => asset(Storage::disk('public')->url($pdfPath)),
+                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }

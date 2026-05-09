@@ -199,9 +199,26 @@ class SupplierInvoicesController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Rechnung') . ' ' . $faktura->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
+                'pdfUrl' => route('supplier-invoices.pdf', $faktura->id),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
+    }
+
+    public function pdfFile($id)
+    {
+        $faktura = Entity::findOrFail($id);
+        $pdfPath = $this->normalizePublicPdfPath($faktura->pdf);
+        $path = Storage::disk('public')->path($pdfPath);
+        $filename = 'Rechnung_' . Str::slug(str_replace('/', '-', $faktura->id_invoice), '-') . '.pdf';
+
+        if (!file_exists($path)) {
+            abort(404, 'PDF nije pronađen');
         }
 
         return response()->file($path, [

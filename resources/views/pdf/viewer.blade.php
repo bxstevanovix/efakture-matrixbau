@@ -162,6 +162,7 @@
                 <strong>{{ $title }}</strong>
                 <span>{{ $fileName }}</span>
             </div>
+            @dd($downloadUrl, $pdfUrl)
             <div class="pdf-actions">
                 <a class="btn btn-primary light" href="{{ $downloadUrl }}" title="@lang('Download')" aria-label="@lang('Download')">
                     <i class="fa fa-download"></i>

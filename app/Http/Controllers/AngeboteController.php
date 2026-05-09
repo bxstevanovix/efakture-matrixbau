@@ -212,7 +212,7 @@ class AngeboteController extends Controller
             return view('pdf.viewer', [
                 'title' => __('Angebot') . ' ' . $angebot->id_invoice,
                 'fileName' => $filename,
-                'pdfUrl' => $this->request->fullUrlWithQuery(['raw' => 1]),
+                'pdfUrl' => route('angebote.pdf', $angebot->id),
                 'downloadUrl' => $this->request->fullUrlWithQuery(['download' => 1]),
             ]);
         }
@@ -223,6 +223,23 @@ class AngeboteController extends Controller
         ]);
     }
 
+    public function pdfFile($id)
+    {
+        $angebot = Entity::findOrFail($id);
+        $pdfPath = $this->normalizePublicPdfPath($angebot->invoice_url);
+        $path = Storage::disk('public')->path($pdfPath);
+        $filename = 'angebot-' . Str::slug(str_replace('/', '-', $angebot->id_invoice), '-') . '.pdf';
+
+        if (!file_exists($path)) {
+            abort(404, 'PDF nije pronađen');
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
+    }
+    
     private function normalizePublicPdfPath(?string $path): string
     {
         $path = ltrim((string) $path, '/');

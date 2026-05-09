@@ -37,6 +37,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{entity}/delete', [CustomerInvoicesController::class, 'delete'])->name('delete');
         Route::post('/paid', [CustomerInvoicesController::class, 'paid'])->name('paid');
         Route::get('/summary', [CustomerInvoicesController::class, 'getSummary'])->name('summary');
+        Route::get('/pdf/{id}', [CustomerInvoicesController::class, 'pdfFile'])->name('pdf');
         Route::get('/view/{id}', [CustomerInvoicesController::class, 'viewPdf'])->name('view');
         Route::post('/upload-pdf', [CustomerInvoicesController::class, 'uploadPdf'])->name('upload_pdf');
         Route::delete('/{entity}/delete-pdf', [CustomerInvoicesController::class, 'deletePdf'])->name('delete_pdf');
@@ -62,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/{entity}/delete', [SupplierInvoicesController::class, 'delete'])->name('delete');
         Route::post('/paid', [SupplierInvoicesController::class, 'paid'])->name('paid');
         Route::get('/summary', [SupplierInvoicesController::class, 'getSummary'])->name('summary');
+        Route::get('/pdf/{id}', [SupplierInvoicesController::class, 'pdfFile'])->name('pdf');
         Route::get('/view/{id}', [SupplierInvoicesController::class, 'viewPdf'])->name('view');
         Route::post('/upload-pdf', [SupplierInvoicesController::class, 'uploadPdf'])->name('upload_pdf');
         Route::delete('/{entity}/delete-pdf', [SupplierInvoicesController::class, 'deletePdf'])->name('delete_pdf');
@@ -92,6 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/datatable', [AngeboteController::class, 'datatable'])->name('datatable');
         Route::post('/create', [AngeboteController::class, 'save'])->name('store');
         Route::post('/{entity}/delete', [AngeboteController::class, 'delete'])->name('delete');
+        Route::get('/pdf/{id}', [AngeboteController::class, 'pdfFile'])->name('pdf');
         Route::get('/view/{id}', [AngeboteController::class, 'viewPdf'])->name('view');
         // Autocomplete za firma i adress
         Route::get('/autocomplete/firma', [AngeboteController::class, 'autocompleteFirma']);
@@ -105,6 +108,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/datatable', [RechnungController::class, 'datatable'])->name('datatable');
         Route::post('/create', [RechnungController::class, 'save'])->name('store');
         Route::post('/{entity}/delete', [RechnungController::class, 'delete'])->name('delete');
+        Route::get('/pdf/{id}', [RechnungController::class, 'pdfFile'])->name('pdf');
         Route::get('/view/{id}', [RechnungController::class, 'viewPdf'])->name('view');
         // Autocomplete za firma i adress
         Route::get('/autocomplete/firma', [RechnungController::class, 'autocompleteFirma']);

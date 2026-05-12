@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
     <head>
-        <title>E-faktura - Matrixbau</title>
+        <title>E-faktura | Matrixbau</title>
         @include('_layouts.partials.head')
     </head>
     <body>

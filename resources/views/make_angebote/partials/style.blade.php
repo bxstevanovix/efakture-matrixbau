@@ -356,7 +356,7 @@
     }
 
     .invoice-table-head {
-        margin-bottom: 3px;
+        margin-bottom: 6px;
     }
 
     .invoice-table col.col-desc {

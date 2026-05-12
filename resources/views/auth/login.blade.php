@@ -75,9 +75,9 @@
 
 	<!-- MOBILE SPECIFIC -->
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-	<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-	<link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+	<link rel="manifest" href="{{ asset('manifest.webmanifest') }}?v=10">
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
+	<link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
 	<meta name="application-name" content="E-faktura - Matrixbau">
 	<meta name="apple-mobile-web-app-title" content="E-faktura - Matrixbau">
 	<meta name="apple-mobile-web-app-capable" content="yes">
@@ -86,7 +86,7 @@
 	<meta name="theme-color" content="#5746A3">
 	
 	<!-- FAVICONS ICON -->
-    <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png" sizes="32x32">
+    <link rel="icon" href="{{ asset('matrix-m-favicon.png') }}" type="image/png" sizes="32x32">
 	<link href="{{ asset('files/vendor/bootstrap-select/css/bootstrap-select.min.css') }}" rel="stylesheet">
 	<link href="{{ asset('files/css/style.css') }}" rel="stylesheet">
 

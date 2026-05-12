@@ -1,7 +1,7 @@
 <div class="nav-header">
     <a href="{{ url('/') }}" class="brand-logo d-flex align-items-center">
 
-        <img src="{{ asset('f-circle.svg') }}" alt="logo" style="width:42px; height:42px; border-radius:10px;">
+        <img src="{{ asset('matrix-m-icon-192.png') }}" alt="logo" style="width:42px; height:42px; border-radius:10px;">
 
         <div>
             <div class="brand-title">

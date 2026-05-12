@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title }}</title>
-    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}?v=10">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('matrix-m-favicon.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
     <meta name="application-name" content="E-faktura | Matrixbau">
     <meta name="apple-mobile-web-app-title" content="E-faktura | Matrixbau">
     <meta name="apple-mobile-web-app-capable" content="yes">

@@ -14,12 +14,12 @@
 
 <link rel="stylesheet" href="{{ asset('files/vendor/select2/css/select2.min.css') }}">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}?v=10">
-<link rel="icon" type="image/png" sizes="32x32" href="{{ asset('matrix-m-favicon.png') }}">
-<link rel="shortcut icon" type="image/png" href="{{ asset('matrix-m-favicon.png') }}">
+<link rel="icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
+<link rel="shortcut icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
 <link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
-<meta name="application-name" content="E-faktura | Matrixbau">
-<meta name="apple-mobile-web-app-title" content="E-faktura | Matrixbau">
+<meta name="application-name" content="Matrix-Bau">
+<meta name="apple-mobile-web-app-title" content="Matrix-Bau">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">

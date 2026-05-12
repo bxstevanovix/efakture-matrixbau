@@ -86,7 +86,7 @@
 	<meta name="theme-color" content="#5746A3">
 	
 	<!-- FAVICONS ICON -->
-    <link rel="icon" href="{{ asset('matrix-m-favicon.png') }}" type="image/png" sizes="32x32">
+    <link rel="icon" href="{{ asset('f-circle.svg') }}" type="image/svg+xml">
 	<link href="{{ asset('files/vendor/bootstrap-select/css/bootstrap-select.min.css') }}" rel="stylesheet">
 	<link href="{{ asset('files/css/style.css') }}" rel="stylesheet">
 

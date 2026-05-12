@@ -7,7 +7,7 @@
 
         <title>E-faktura | Matrixbau</title>
 
-        <link rel="icon" href="{{ asset('matrix-m-favicon.png') }}" type="image/png" sizes="32x32">
+        <link rel="icon" href="{{ asset('f-circle.svg') }}" type="image/svg+xml">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

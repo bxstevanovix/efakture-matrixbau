@@ -75,3 +75,11 @@ select[name="exampledb_length"] option {
         box-shadow: none !important;
     }
 }
+
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}

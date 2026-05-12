@@ -107,6 +107,12 @@
             display: block;
         }
 
+         @media (min-width: 767px) {
+            .pdf-toolbar {
+                display: none;
+            }
+        }
+
         @media (max-width: 767px) {
             .pdf-toolbar {
                 min-height: 58px;

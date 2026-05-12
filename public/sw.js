@@ -1,4 +1,4 @@
-const CACHE_NAME = 'e-faktura-pwa-v5';
+const CACHE_NAME = 'e-faktura-pwa-v6';
 const STATIC_ASSETS = [
   '/f-circle.svg',
   '/apple-touch-icon.png',
@@ -28,8 +28,14 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const request = event.request;
+  const url = new URL(request.url);
 
   if (request.method !== 'GET') {
+    return;
+  }
+
+  if (url.pathname.includes('/autocomplete/')) {
+    event.respondWith(fetch(request));
     return;
   }
 
@@ -51,8 +57,11 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
 
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+        if (STATIC_ASSETS.includes(url.pathname)) {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
+        }
+
         return response;
       });
     })

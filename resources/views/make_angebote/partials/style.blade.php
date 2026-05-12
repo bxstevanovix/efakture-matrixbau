@@ -1,81 +1,247 @@
 <style>
-    button {
-        padding: 8px 14px;
-        cursor: pointer;
-        float: right;
-    }
-
-    .modal {
+    .angebot-modal {
         display: none;
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.6);
         z-index: 999;
-        color: black;
+        overflow: hidden;
+        color: #111827;
+        background: rgba(17, 24, 39, 0.62);
     }
 
-    .modal-content {
-        background: #fff;
-        width: 95%;
-        height: 95%;
-        margin: 2% auto;
+    .angebot-modal .modal-content {
+        width: 96%;
+        height: 94vh;
+        margin: 3vh auto;
+        overflow: hidden;
+        border: 0;
         border-radius: 10px;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 15px;
-        background: #f1f1f1;
-    }
-
-    .modal-body {
-        flex: 1;
-        display: flex;
-        overflow: hidden;
-        height: 100%;
-    }
-
-    .modal-left {
-        width: 50%;
-        padding: 10px;
         background: #fff;
+        box-shadow: 0 18px 60px rgba(15, 23, 42, 0.26);
+    }
+
+    .angebot-modal .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #eef1f7;
+        background: #fff;
+    }
+
+    .angebot-modal .modal-title {
+        margin: 0;
+        color: #111827;
+        font-weight: 700;
+    }
+
+    .angebot-modal .modal-body {
+        height: calc(94vh - 67px);
+        display: flex;
+        gap: 0;
+        overflow: hidden;
+        padding: 0;
+        background: #f5f6fa;
+    }
+
+    .angebot-modal .modal-left,
+    .angebot-modal .modal-right {
+        min-width: 0;
+        height: 100%;
         overflow-y: auto;
     }
 
-    .modal-right {
+    .angebot-modal .modal-left {
         width: 50%;
-        padding: 10px;
-        overflow: auto;
+        padding: 14px;
+        background: #fff;
+        border-right: 1px solid #eef1f7;
+    }
+
+    .angebot-modal .modal-right {
+        width: 50%;
+        padding: 18px 14px 28px;
         display: flex;
         justify-content: center;
+        background: #f5f6fa;
     }
 
-    .modal-right p{
-        font-size: 12px;
+    .angebot-modal .card {
+        height: auto !important;
+        margin-bottom: 0;
+        border-radius: 8px;
+        box-shadow: none;
     }
 
-    .a4-wrapper {
-        zoom: 1;
+    .angebot-modal .card-body {
+        padding: 16px !important;
+        padding-bottom: 24px !important;
+    }
+
+    .angebot-modal button,
+    .angebot-modal #openModal {
+        float: none;
+    }
+
+    .angebot-field-row {
+        align-items: end;
+    }
+
+    .spacing-control .form-label {
+        white-space: nowrap;
+    }
+
+    .item-row {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) 95px 110px 110px 34px;
+        gap: 8px;
+        align-items: center;
+        margin-bottom: 8px;
+        position: relative;
+    }
+
+    .item-qty,
+    .item-price,
+    .item-total {
+        text-align: center;
+    }
+
+    .item-total {
+        font-weight: 500;
+        text-align: right;
+    }
+
+    .item-qty::-webkit-inner-spin-button,
+    .item-qty::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .item-qty {
+        -moz-appearance: textfield;
+    }
+
+    .remove-item {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+        border-radius: 6px;
+        background: #ff4d4f;
+        color: #fff;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .remove-item:hover {
+        background: #d9363e;
+    }
+
+    .add-item-btn {
+        width: 100%;
+        max-width: 500px;
+        display: block;
+        margin: 18px auto;
+        text-align: center;
+    }
+
+    .angebot-submit-btn {
+        width: 100%;
+        min-height: 44px;
+        margin-top: 32px;
+    }
+
+    .autocomplete-box {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        width: auto;
+        min-width: 0;
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-top: 0;
+        border-radius: 0 0 10px 10px;
+        background: #fff;
+        box-shadow: 0 6px 15px rgba(15, 23, 42, 0.1);
+        box-sizing: border-box;
+    }
+
+    .angebot-field-row > [class*="col-"] > .autocomplete-box {
+        left: 15px;
+        right: 15px;
+    }
+
+    .autocomplete-box:empty {
+        display: none;
+    }
+
+    .autocomplete-item {
+        padding: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .autocomplete-item:hover,
+    .autocomplete-item.is-active {
+        background: #f2f2f2;
+    }
+
+    .ql-editor {
+        min-height: 135px;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+    }
+
+    .a4-wrapper,
+    .angebot-preview-pages {
+        width: 794px;
+        transform-origin: top center;
+    }
+
+    .angebot-preview-pages {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
     }
 
     .a4-preview {
         width: 794px;
-        min-height: 1120px;
-        background: #fff;
-        padding: 5mm 20mm 20mm 20mm;
+        height: 1123px;
+        padding: 5mm 16mm 22mm 16mm;
         box-sizing: border-box;
-        box-shadow: 0 0 15px rgba(0,0,0,0.15);
-        position: relative;  
+        overflow: hidden;
+        position: relative;
+        background: #fff;
         color: #000 !important;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+        font-weight: 350;
+        letter-spacing: 0.08px;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
+        box-shadow: 0 0 15px rgba(15, 23, 42, 0.18);
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .angebot-page-content {
+        position: relative;
+        z-index: 1;
+        max-height: calc(1123px - 5mm - 42mm);
+        padding-bottom: 24mm;
     }
 
     .header-a4 {
-        height: 210px;
+        height: 215px;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
@@ -84,40 +250,40 @@
 
     .company-logo {
         width: 285px;
-        margin-left: auto; /* guramo logo desno */
-    }
-
-    .company-logo img {
-        transform: translateY(-5px);
+        margin-left: auto;
+        margin-right: 4mm;
     }
 
     .company-logo img {
         width: 100%;
         display: block;
+        transform: translateY(-5px);
     }
 
     .company-text {
+        width: 330px;
         display: flex;
-        justify-content: flex-end;
-        width: 100%;
-        font-size: 10px;
-        gap: 2%;
+        justify-content: center;
+        gap: 8px;
+        margin-left: auto;
+        transform: translateX(4mm);
     }
 
     .company-text-left {
-        width: 16%;
+        width: 154px;
     }
 
     .company-text-right {
-        width: 23%;
+        width: 176px;
     }
 
     .company-text-left p,
     .company-text-right p {
         margin: 3px 0;
-        line-height: 1.2;
         color: #1a64a2;
-        font-size: 10px;
+        font-size: 9pt;
+        line-height: 1.2;
+        text-align: center;
     }
 
     .firma {
@@ -125,299 +291,400 @@
     }
 
     .customer-lead {
-        font-size: 12px;
-        text-align: left;
-        font-weight: bold;
-        margin-bottom: 5px;
+        max-width: 350px;
+        margin: 0 0 8px 0;
+        font-size: 10pt;
+        font-weight: 700;
+        word-wrap: break-word;
+    }
+
+    .customer-address {
+        margin: 4px 0 0 0;
+        font-size: 10pt;
+        line-height: 1.08;
+    }
+
+    .customer-address + .customer-address {
+        margin-top: 2px;
     }
 
     .firma-hr {
         width: 350px;
         max-width: 100%;
         height: 1px;
-        background-color: black;
-        margin: 5px 0;
+        margin: 2px 0 6px;
+        background-color: #000;
     }
 
-    .invoice-table{
-        width:100%;
-        table-layout:fixed;
-        border-collapse:collapse;
-        border: 1px solid black;
+    .customer-meta {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0;
+        font-size: 10pt;
     }
 
-    /* širine kolona */
-    .invoice-table col.col-desc{
-        width: calc(100% - 300px);
+    .customer {
+        margin-top: 5px;
+        font-size: 10pt;
     }
 
-    .invoice-table col.col-qty{
-        width: 100px;
+    .customer p {
+        margin: 0 0 4px 0;
+        line-height: 1.05;
     }
 
-    .invoice-table col.col-price{
-        width: 100px;
+    .angebot-title-line {
+        font-weight: 700;
     }
 
-    .invoice-table col.col-total{
-        width: 100px;
-    }
-
-    /* cell stil */
-    .invoice-table th,
-    .invoice-table td{
-        padding:4px 8px;
-        border-bottom: 1px solid black;
-        line-height: 1.25;
-        vertical-align:middle;
-    }
-
-    /* alignment */
-    .invoice-table td:nth-child(2),
-    .invoice-table td:nth-child(3),
-    .invoice-table td:nth-child(4){
-        text-align:center;
-        white-space:nowrap;
-        border-left: 1px solid black;
-    }
-
-    /* opis kolona */
-    .invoice-table td:nth-child(1){
-        text-align:left;
-        word-break: break-word; /* KLJUČNO */
+    .page-continuation {
+        margin: 0 0 10px 0;
+        color: #555;
+        font-size: 10pt;
+        font-weight: 500;
+        text-align: right;
     }
 
     .invoice-table {
-        font-family: Arial, sans-serif;
-        font-size: 12px;
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        border: 0.6px solid #333;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+        font-weight: 350;
+    }
+
+    .invoice-table-head {
+        margin-bottom: 3px;
+    }
+
+    .invoice-table col.col-desc {
+        width: calc(100% - 300px);
+    }
+
+    .invoice-table col.col-qty,
+    .invoice-table col.col-price,
+    .invoice-table col.col-total {
+        width: 100px;
+    }
+
+    .invoice-table th,
+    .invoice-table td {
+        padding: 3px 8px;
+        border-bottom: 0.6px solid #333;
+        line-height: 1.25;
+        vertical-align: middle;
+    }
+
+    .invoice-table th {
+        font-weight: 500;
     }
 
     .invoice-table th:not(:first-child),
-    .invoice-table td:not(:first-child){
-        border-left: 1px solid black;
+    .invoice-table td:not(:first-child) {
+        border-left: 0.6px solid #333;
     }
 
-    .item-row{
-        display:flex;
-        align-items:center;
-        gap:10px;
-        width:100%;
-        margin-bottom:8px;
-        }
-
-    .item-name{
-    flex:1;
+    .invoice-table th:first-child,
+    .invoice-table td:first-child {
+        text-align: left !important;
+        word-break: break-word;
     }
 
-    .item-qty{
-    width:125px;
-    flex-shrink:0;
-    text-align:center;
-    }
-
-    .item-price{
-    width:120px;
-    flex-shrink:0;
-    text-align:center;
-    }
-
-    .item-total{
-    width:115px;
-    flex-shrink:0;
-    text-align:right;
-    font-weight:600;
-    padding-right:10px;	
-    }
-
-    .remove-item{
-    width:34px;
-    height:34px;
-    border:none;
-    border-radius:6px;
-    background:#e74c3c;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.2s;
-    }
-
-    .remove-item:hover{
-    background:#c0392b;
-    }
-
-    .qty-group{
-    display:flex;
-    width:175px;
-    }
-
-    .item-qty{
-    width:110px;
-    text-align:center;
-    }
-
-    .item-unit{
-    width:70px;
-    border-left:0;
-    }
-
-    /* uklanja strelice u Chrome, Edge, Safari */
-    .item-qty::-webkit-inner-spin-button,
-    .item-qty::-webkit-outer-spin-button{
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    /* uklanja strelice u Firefox */
-    .item-qty{
-        -moz-appearance: textfield;
-    }
-    
-    /* Reverse VAT Note */
-    #reverse_vat_note {
-        width: 100%;
-        margin-top: 50px; /* 50px ispod tabele */
-        font-size: 10px;
-        color: #666;
+    .invoice-table td:nth-child(2),
+    .invoice-table td:nth-child(3),
+    .invoice-table td:nth-child(4) {
         text-align: center;
-    }
-
-    /* Footer */
-    .invoice-footer {
-        position: absolute;
-        bottom: 10mm;
-        left: 20mm;
-        right: 20mm;
-        font-size: 10px;
-        text-align: center;
-        color: #666;
-    }
-
-    .form-control {
-        color: black !important;
-    }
-
-    .card {
-        height: auto !important;
-    }
-    .card-body {
-        padding: 5px !important;
-        padding-bottom: 30px !important;
-    }
-
-    .doc-card{
-        border:1px solid #ddd;
-        border-radius:8px;
-        padding:12px;
-        text-align:center;
-        cursor:pointer;
-        transition:all .2s;
-        background:#fff;
-    }
-
-    .doc-card:hover{
-        border-color:#0d6efd;
-    }
-
-    .doc-card.active{
-        border:2px solid #0d6efd;
-        background:#f3f7ff;
-        color:#0d6efd;
-    }
-
-    .a4-preview{
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-
-    *{
-        -webkit-font-smoothing: none;
-        text-rendering: geometricPrecision;
-    }
-
-
-    .remove-item {
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        background-color: #ff4d4f;
-        color: white;
-        border: none;
-        cursor: pointer;
-
-        font-size: 18px;
-        font-weight: bold;
-        line-height: 1;
-    }
-
-    .remove-item:hover {
-        background-color: #d9363e;
-    }
-
-    .autocomplete-box {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        width: 100%;          /* 🔥 KLJUČ */
-        background: #fff;
-        border: 1px solid #ddd;
-        z-index: 9999;
-        max-height: 200px;
-        overflow-y: auto;
-        box-sizing: border-box;
-    }
-
-    .autocomplete-item {
-        padding: 8px;
-        cursor: pointer;
-    }
-
-    .autocomplete-item {
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
-    .autocomplete-item:hover {
-        background: #f2f2f2;
+    .invoice-table .amount-cell {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
     }
 
-    .ql-editor {
+    .offer-summary-wrap {
+        margin-right: 9px;
+    }
+
+    .offer-summary {
+        width: fit-content;
+        min-width: 300px;
+        max-width: 100%;
+        margin-top: 18px;
+        margin-left: auto;
+        font-size: 10pt;
+    }
+
+    .summary-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: baseline;
+        column-gap: 14px;
+        margin-bottom: 2px;
+    }
+
+    .summary-row > span:first-child {
+        margin-left: 50px;
+    }
+
+    .summary-divider {
+        margin-left: 50px;
+    }
+
+    .summary-amount {
+        min-width: 100px;
+        width: max-content;
+        display: inline-grid;
+        grid-template-columns: auto auto;
+        justify-content: end;
+        justify-self: end;
+        white-space: nowrap;
+    }
+
+    .summary-running-total {
+        margin-top: -1px;
+        margin-bottom: 5px;
+    }
+
+    .summary-running-total .summary-amount {
+        padding-top: 2px;
+        border-top: 1px solid #777;
+    }
+
+    .summary-total {
+        font-weight: 500;
+        font-size: 11pt;
+    }
+
+    .summary-total-value {
+        column-gap: 8px;
+    }
+
+    .summary-total-value {
+        padding-bottom: 2px;
+        border-bottom: 2px double #000;
+        white-space: nowrap;
+    }
+
+    .description-left {
+        width: 385px;
+        margin-top: 18px;
+        margin-left: 24px;
+        padding: 0;
+        color: #000;
         font-family: Arial, Helvetica, sans-serif;
+        font-size: 10pt;
+        font-weight: 350;
+        line-height: 1.25;
+        overflow-wrap: break-word;
     }
 
-    #p_invoice_note p {
+    .a4-preview .description-left.preview-note {
+        min-height: 0;
+    }
+
+    .description-left p,
+    .a4-preview .description-left.preview-note p {
         margin: 0 0 4px 0;
     }
 
-    #p_invoice_note ul,
-    #p_invoice_note ol {
-        margin: 0 0 4px 15px;
-        padding: 0;
+    .description-left ul,
+    .description-left ol,
+    .a4-preview .description-left.preview-note ul,
+    .a4-preview .description-left.preview-note ol {
+        margin: 0 0 4px 0;
+        padding-left: 20px;
+        list-style-position: outside;
     }
 
-    #p_invoice_note strong {
-        font-weight: bold;
+    .description-left ul,
+    .a4-preview .description-left.preview-note ul {
+        list-style-type: disc;
     }
 
-    .ql-size-small {
-        font-size: 10px;
-    }
-    .ql-size-large {
-        font-size: 14px;
-    }
-    .ql-size-huge {
-        font-size: 16px;
+    .description-left ol,
+    .a4-preview .description-left.preview-note ol {
+        list-style-type: decimal;
     }
 
-    .autocomplete-box {
-		border-radius: 0 0 10px 10px;
-		border-top: none;
-	}
+    .description-left li,
+    .a4-preview .description-left.preview-note li {
+        display: list-item;
+        margin: 0 0 3px 0;
+        padding-left: 2px;
+        list-style: inherit;
+    }
 
-	.autocomplete-box {
-		box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-	}
+    .description-left strong,
+    .description-left b,
+    .a4-preview .description-left.preview-note strong,
+    .a4-preview .description-left.preview-note b {
+        font-weight: 700 !important;
+    }
+
+    .description-left em,
+    .description-left i,
+    .a4-preview .description-left.preview-note em,
+    .a4-preview .description-left.preview-note i {
+        font-style: italic !important;
+    }
+
+    .description-left u,
+    .a4-preview .description-left.preview-note u {
+        text-decoration: underline !important;
+    }
+
+    .description-left .ql-size-small,
+    .a4-preview .description-left.preview-note .ql-size-small {
+        font-size: 8pt;
+    }
+
+    .description-left .ql-size-large,
+    .a4-preview .description-left.preview-note .ql-size-large {
+        font-size: 13pt;
+    }
+
+    .description-left .ql-size-huge,
+    .a4-preview .description-left.preview-note .ql-size-huge {
+        font-size: 18pt;
+    }
+
+    .a4-preview .description-left.preview-note ol > li::before,
+    .a4-preview .description-left.preview-note ul > li::before {
+        content: none !important;
+    }
+
+    .reverse-vat-note {
+        width: 100%;
+        margin-top: 50px;
+        color: #000;
+        font-size: 9pt;
+        text-align: center;
+    }
+
+    .invoice-footer {
+        position: absolute;
+        bottom: 14mm;
+        left: 16mm;
+        right: 16mm;
+        min-height: 8mm;
+        z-index: 50;
+        color: #000;
+        background: #fff;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 9pt;
+        font-weight: 350;
+        line-height: 1.2;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        text-align: center;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
+    }
+
+    .page-counter {
+        position: absolute;
+        right: 0;
+        bottom: -5mm;
+        display: none;
+        color: #888;
+        text-align: right;
+    }
+
+    @media (max-width: 1199px) {
+        .angebot-modal .modal-body {
+            display: block;
+            overflow-y: auto;
+        }
+
+        .angebot-modal .modal-left,
+        .angebot-modal .modal-right {
+            width: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
+        .angebot-modal .modal-left {
+            border-right: 0;
+            border-bottom: 1px solid #eef1f7;
+        }
+
+        .angebot-modal .modal-right {
+            min-height: 420px;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .angebot-modal .modal-content {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .angebot-modal .modal-header {
+            padding: 12px 14px;
+        }
+
+        .angebot-modal .modal-body {
+            height: calc(100vh - 61px);
+        }
+
+        .angebot-modal .modal-left {
+            padding: 12px;
+        }
+
+        .angebot-modal .modal-right {
+            padding: 14px 0 28px;
+        }
+
+        .angebot-modal .card-body {
+            padding: 14px !important;
+        }
+
+        .item-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            padding: 10px;
+            border: 1px solid #eef1f7;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .item-row > div:first-child {
+            grid-column: 1 / -1;
+        }
+
+        .item-qty,
+        .item-price,
+        .item-total {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .item-qty {
+            grid-column: 1;
+        }
+
+        .item-price {
+            grid-column: 2;
+        }
+
+        .item-total {
+            grid-column: 3;
+        }
+
+        .remove-item {
+            width: 100%;
+            grid-column: 1 / -1;
+        }
+
+        .angebot-submit-btn {
+            margin-top: 40px;
+        }
+    }
 </style>

@@ -1,468 +1,230 @@
-<style>
-	.autocomplete-box {
-		border-radius: 0 0 10px 10px;
-		border-top: none;
-	}
+<div id="invoiceModal" class="modal angebot-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="createInvoiceModalLabel">@lang('Kreiranje ponude')</h5>
+            <button type="button" id="closeModal" class="btn btn-secondary">@lang('Zatvori')</button>
+        </div>
 
-	.autocomplete-box {
-		box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-	}
-	
-</style>
-<div id="invoiceModal" class="modal">
-		<div class="modal-content">
-			<!-- HEADER -->
-			<div style="background-color: white !important;" class="modal-header">
-				<h5 style="color:black; float: left;" class="modal-title" id="createInvoiceModalLabel">@lang('Kreiranje predracuna')</h5>
-				<button type="button" id="closeModal" class="btn btn-secondary">@lang('Zatvori')</button>
-			</div>
+        <div class="modal-body">
+            <div class="modal-left">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-validation">
+                            <div class="row angebot-field-row">
+                                <div class="mb-3 col-md-8" style="position: relative;">
+                                    <label for="customer_name" class="form-label">@lang('Ime firme')</label>
+                                    <input
+                                        id="customer_name"
+                                        type="text"
+                                        class="form-control @errorClass('name', 'is-invalid')"
+                                        name="name"
+                                        placeholder="@lang('Ime firme')"
+                                        maxlength="155"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                    <div id="firma_box" class="autocomplete-box"></div>
+                                    <div class="invalid-feedback">
+                                        Bitte geben Sie den Namen der Firma ein.
+                                    </div>
+                                </div>
 
-			<!-- BODY -->
-			<div class="modal-body">
+                                <div class="mb-3 col-md-4 spacing-control">
+                                    <label for="spacing_input" class="form-label">Abstand Logo/Titel px</label>
+                                    <input
+                                        type="number"
+                                        id="spacing_input"
+                                        class="form-control"
+                                        min="0"
+                                        max="160"
+                                        value="20"
+                                        style="text-align:center;"
+                                    >
+                                </div>
 
-				<!-- LIJEVA STRANA -->
-				<div class="modal-left">
-					<div class="card">
-						<div class="card-body">
-							<div class="form-validation">
-								<div class="row">
-									<!-- firma -->
-									<div class="mb-3 row align-items-center">
-										<label for="customer_name" class="col-sm-2 col-form-label">@lang('Ime firme')</label>
-										<div class="col-sm-8" style="position: relative;">
-											<input 
-												id="customer_name"
-												type="text" 
-												class="form-control @errorClass('name', 'is-invalid')" 
-												name="name" 
-												placeholder="@lang('Ime firme')" 
-												value=""
-												maxlength="155"
-												autocomplete="off"
-												required
-											>
+                                <div class="mb-3 col-md-6" style="position: relative;">
+                                    <label for="adress" class="form-label">@lang('Adresa')</label>
+                                    <input
+                                        id="adress"
+                                        type="text"
+                                        class="form-control @errorClass('adress', 'is-invalid')"
+                                        name="adress"
+                                        placeholder="@lang('Adresa')"
+                                        maxlength="155"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                    <div id="adress_box" class="autocomplete-box"></div>
+                                    <div class="invalid-feedback">
+                                        Bitte geben Sie die Adresse ein.
+                                    </div>
+                                </div>
 
-											<div style="margin-left: 15px; width: 95%;" id="firma_box" class="autocomplete-box"></div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="ort" class="form-label">@lang('Plz Ort Land')</label>
+                                    <input
+                                        id="ort"
+                                        type="text"
+                                        class="form-control @errorClass('ort', 'is-invalid')"
+                                        name="ort"
+                                        placeholder="@lang('Plz/Ort/Land')"
+                                        maxlength="155"
+                                        autocomplete="off"
+                                    >
+                                </div>
 
-											<div class="invalid-feedback">
-												Bitte geben Sie den Namen der Firma ein.
-											</div>
-										</div>
-										<div class="col-sm-2">
-											<input 
-												type="number" 
-												id="spacing_input"
-												class="form-control"
-												min="0"
-												max="100"
-												value="0"
-												style="text-align:center;"
-											>
-										</div>
-									</div>
-									<!-- adresa -->
-									<div class="mb-3 col-md-6">
-										<label class="col-sm-6 col-form-label">@lang('Adresa')</label>
-										<div class="col-sm-12" style="position: relative;">
-											<input 
-												id="adress"
-												type="text" 
-												class="form-control @errorClass('adress', 'is-invalid')" 
-												name="adress" 
-												placeholder="@lang('Adresa')" 
-												value=""
-												maxlength="155"
-												autocomplete="off"
-												required
-											>
+                                <div class="mb-3 col-md-4">
+                                    <label for="uid" class="form-label">@lang('UID-Nummer')</label>
+                                    <input
+                                        id="uid"
+                                        type="text"
+                                        class="form-control @errorClass('uid', 'is-invalid')"
+                                        name="uid"
+                                        placeholder="@lang('UID-Nummer')"
+                                        maxlength="30"
+                                        autocomplete="off"
+                                    >
+                                </div>
 
-											<div id="adress_box" class="autocomplete-box"></div>
+                                <div class="mb-3 col-md-4">
+                                    <label for="date" class="form-label">@lang('Datum')</label>
+                                    <input
+                                        id="date"
+                                        type="date"
+                                        class="form-control text-center @errorClass('date', 'is-invalid')"
+                                        name="date"
+                                        value="{{ now()->format('Y-m-d') }}"
+                                        autocomplete="off"
+                                        required
+                                    >
+                                </div>
 
-											<div class="invalid-feedback">
-												Bitte geben Sie die Adresse ein.
-											</div>
-										</div>
-									</div>
-									<!-- plt ort -->
-									<div class="mb-3 col-md-6">
-										<label class="col-sm-3 col-form-label">@lang('Plz Ort Land')</label>
-										<div class="col-sm-12">
-											<input 
-												id="ort"
-												type="text" 
-												class="form-control @errorClass('ort', 'is-invalid')" 
-												name="ort" 
-												placeholder="@lang('Plz/Ort/Land')" 
-												value=""
-												maxlength="155"
-												autocomplete="off"
-												>
-											<div class="invalid-feedback">
-												Please enter a ort.
-											</div>
-										</div>
-									</div>
-									<!-- uid -->
-									<div class="mb-3 col-md-4">
-										<label class="form-label">@lang('UID-Nummer')</label>
-										<div class="col-sm-12">
-										<input 
-											id="uid"
-											type="text" 
-											class="form-control @errorClass('uid', 'is-invalid')" 
-											name="uid" 
-											placeholder="@lang('UID-Nummer')" 
-											value=""
-											maxlength="30"
-											autocomplete="off"
-										>
-										<div class="invalid-feedback">
-											Bitte geben Sie den UID-Nummer ein.
-										</div>
-										</div>
-									</div>
-									<!-- datum -->
-									<div class="mb-3 col-md-4">
-										<label class="form-label">@lang('Datum')</label>
-										<div class="col-sm-12">
-										<input 
-											style="text-align: center;"
-											id="date"
-											type="date" 
-											class="form-control @errorClass('date', 'is-invalid')" 
-											name="date" 
-											placeholder="@lang('Datum')" 
-											value="{{ now()->format('Y-m-d') }}"
-											maxlength="30"
-											autocomplete="off"
-											required
-										>
-										</div>
-										<div class="invalid-feedback">
-											Bitte geben Sie das Datum ein.
-										</div>
-									</div>
-									<!-- bvh -->
-									<div class="mb-3 col-md-4">
-										<label class="col-sm-12">BVH</label>
-										<div class="col-sm-12">
-											<input 
-												id="bvh"
-												type="text"
-												class="form-control"
-												name="bvh"
-												placeholder="z.B. 11000 Ort, Straße 11"
-												value=""
-												maxlength="255"
-												autocomplete="off"
-											>
-										</div>
-									</div>
-									<!-- auftragsnr -->
-									<div class="mb-3 col-md-4">
-										<label class="col-sm-12 col-form-label">&nbsp;</label>
-										<div class="col-sm-12">
-											<input 
-												id="auftragsnr"
-												type="text"
-												class="form-control"
-												name=""
-												placeholder="Obj. Nr. 123/36WE, Auftragsnr. 123/989/38/1"
-												value=""
-												maxlength="255"
-												autocomplete="off"
-											>
-										</div>
-									</div>
-									<!-- rechnung_nr -->
-									<div class="mb-3 col-md-4">
-										<label class="col-sm-12 col-form-label">Angebot Nr</label>
-										<div class="col-sm-12">
-											<input 
-												id="rechnung_nr"
-												type="text"
-												class="form-control"
-												name="rechnung_nr"
-												placeholder="Angebot Nr."
-												value=""
-												maxlength="255"
-												autocomplete="off"
-											>
-										</div>
-										<div class="text-danger rechnung-error"></div>
-									</div>
-									<!-- Ausführungszeit -->
-									<div class="mb-3 col-md-4">
-										<label class="col-sm-12 col-form-label">Ausführungszeit</label>
-										<div class="col-sm-12">
-											<input 
-												id="ausführungszeit"
-												type="text"
-												class="form-control"
-												name=""
-												placeholder="KW: 32/25"
-												value=""
-												maxlength="255"
-												autocomplete="off"
-											>
-										</div>
-									</div>
+                                <div class="mb-3 col-md-4">
+                                    <label for="bvh" class="form-label">BVH</label>
+                                    <input
+                                        id="bvh"
+                                        type="text"
+                                        class="form-control"
+                                        name="bvh"
+                                        placeholder="z.B. 11000 Ort, Straße 11"
+                                        maxlength="255"
+                                        autocomplete="off"
+                                    >
+                                </div>
 
-									<hr>
+                                <div class="mb-3 col-md-4">
+                                    <label for="auftragsnr" class="form-label">Objekt / Auftragsnr.</label>
+                                    <input
+                                        id="auftragsnr"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Obj. Nr. 123/36WE, Auftragsnr. 123/989/38/1"
+                                        maxlength="255"
+                                        autocomplete="off"
+                                    >
+                                </div>
 
-									<div class="row" id="items">
-										<!-- PRVI RED (stalni) -->
-										<div class="item-row col-12 first-row" style="position:relative;">
-											<div style="position:relative; flex: 2;">
-												<input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
-												<div class="autocomplete-box beschreibung-box"></div>
-											</div>
-											<input name="items[0][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">
-											<input name="items[0][price]" type="text" class="item-price form-control" value="0" autocomplete="off">
-											<input name="items[0][total]" type="text" class="item-total form-control" value="0" autocomplete="off">
-											<button style="background-color:#ddd;" disabled type="button" class="remove-item"></button>
-										</div>
-									</div>
-									<!-- DODAJ STAVKU -->
-									<button style="max-width:500px; width:100%; display:block; margin:20px auto; text-align:center;" type="button" id="addItem">
-										Hinzufügen
-									</button>
+                                <div class="mb-3 col-md-4">
+                                    <label for="rechnung_nr" class="form-label">Angebot Nr.</label>
+                                    <input
+                                        id="rechnung_nr"
+                                        type="text"
+                                        class="form-control"
+                                        name="rechnung_nr"
+                                        placeholder="A-001"
+                                        maxlength="15"
+                                        autocomplete="off"
+                                    >
+                                    <div class="text-danger rechnung-error"></div>
+                                </div>
 
-									<div class="row" style="margin-top:15px; align-items:end;">
-										<!-- NACHLASS % -->
-										<div class="col-md-2 mb-3">
-											<label class="form-label">Nachlass %</label>
-											<input 
-												type="number" 
-												id="discount_percent" 
-												class="form-control"
-												value="0"
-												min="0"
-												step="1"
-												style="text-align:center;"
-												autocomplete="off"
-											>
-										</div>
-										<!-- NACHLASS PAUSCHALE -->
-										<div class="col-md-3 mb-3">
-											<label class="form-label">Nachlass Pauschale €</label>
-											<input 
-												type="number" 
-												id="discount_fixed" 
-												class="form-control"
-												value="0"
-												min="0"
-												step="1"
-												style="text-align:center;"
-												autocomplete="off"
-											>
-										</div>
-										<!-- DECKUNGSRÜCKLASS -->
-										<div class="col-md-3 mb-3">
-											<label class="form-label">Deckungsrücklass %</label>
-											<input 
-												type="number" 
-												id="deckungsrucklass_percent" 
-												class="form-control"
-												value="0"
-												min="0"
-												step="1"
-												style="text-align:center;"
-												autocomplete="off"
-											>
-										</div>
-										<!-- MWST -->
-										<div class="col-md-2 mb-3 d-flex align-items-center" style="margin-top:32px;">
-											<input type="checkbox" id="use_tax" style="margin-bottom: 15px; margin-left: 20px;" autocomplete="off">
-											<label style="margin-left: 15px; margin-bottom: 15px;" class="form-check-label" for="use_tax">20% MwSt</label>
-										</div>
-										<!-- ABZUG TR 1 -->
-										<div class="col-md-2 mb-3">
-											<label class="form-label">Abz. TR 1 €</label>
-											<input 
-												type="number" 
-												id="abzug_tr1" 
-												class="form-control"
-												value="0"
-												min="0"
-												step="1"
-												style="text-align:center;"
-												autocomplete="off"
-											>
-										</div>
-									</div>
+                                <div class="mb-3 col-md-4">
+                                    <label for="ausführungszeit" class="form-label">Ausführungszeit</label>
+                                    <input
+                                        id="ausführungszeit"
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="KW: 32/25"
+                                        maxlength="100"
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
 
-									<!-- textarea -->
-									<div class="mb-3 col-md-8">
-										<div id="editor"></div>
-									</div>
-									<!-- sacuvaj button -->
-									<div class="mb-3 col-md-4">
-										<button id="createInvoice" style="margin-top: 80px; margin-right: 10px;" type="submit" class="btn btn-success waves-effect waves-light">
-											<i class="fa fa-save"></i>
-											Rechnung erstellen
-										</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
+                            <hr>
 
-				<!-- DESNA STRANA -->
-				<div class="modal-right">
-					<div id="a4wrapper" class="a4-wrapper">
-						<div class="a4-preview" id="invoicePreview">
-							<!-- HEADER -->
-							<div class="header-a4">
-								<!-- LOGO -->
-								<div class="company-logo">
-									<img src="img/cist-beli-logo.jpg" alt="Matrix Bau Logo">
-								</div>
-								<div class="company-text">
-									<div class="company-text-left">
-										<p>MaTrix Bau GmbH</p>
-										<p>UID: ATU82609768</p> 
-										<p>Tel: 0676/480 46 49</p> 
-									</div>
-									<div class="company-text-right">
-										<p>Zetschegasse 3/12, 1230 Wien</p>
-										<p>Firmenbuchnummer: 658176</p> 
-										<p>E-mail: office@matrix-bau.at</p> 
-									</div>
-								</div>
-							</div>
+                            <div class="row" id="items">
+                                <div class="item-row col-12 first-row">
+                                    <div style="position:relative;">
+                                        <input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
+                                        <div class="autocomplete-box beschreibung-box"></div>
+                                    </div>
+                                    <input name="items[0][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">
+                                    <input name="items[0][price]" type="text" class="item-price form-control" value="0" autocomplete="off">
+                                    <input name="items[0][total]" type="text" class="item-total form-control" value="0" autocomplete="off">
+                                    <button style="background-color:#ddd;" disabled type="button" class="remove-item"></button>
+                                </div>
+                            </div>
 
-							<!-- FIRMA -->
-							<div id="firma_block" class="firma">
-								<p style="font-size:12px; max-width:350px; word-wrap:break-word;" class="customer-lead">
-									<strong id="p_customer_name"></strong>
-								</p>
-								<p style="line-height: 0; margin-top: 10px;" id="p_adress"></p>
-								<p style="line-height: 0;" id="p_ort"></p>
-							</div>
-							<div class="firma-hr"></div>
-							
-							<div style="display:flex; justify-content:space-between; margin-top:10px;">
-								<p>
-									<span id="uid_line" style="display:none;">
-										UID-Nummer: <span id="p_uid"></span>
-									</span>
-								</p>
-								<p class="company-date">
-									Datum: <span id="p_date"></span>
-								</p>
-							</div>
-							<div style="margin-top: 5px;" class="customer">
-								<p id="bvh_line" style="line-height:0; display:none;">BVH. <span id="p_bvh"></span></p>
-								<p style="line-height: 0;"><span id="p_auftragsnr"></span></p>
-								
-								<p style="line-height: 0;">
-									<strong>
-										<span id="rechnung-line">Angebote</span>
-										<span id="p_rechnung_nr"></span>
-									</strong>
-									<span id="ausführungszeit_line" style="display: none;">, Ausführungszeit: </span>
-									<span id="p_ausführungszeit"></span>
-								</p>
-							</div>
+                            <button type="button" id="addItem" class="btn btn-primary light add-item-btn">
+                                <i class="fa fa-plus me-1"></i>Hinzufügen
+                            </button>
 
-							<!-- TABELA -->
-							<table class="invoice-table">
-								<colgroup>
-									<col class="col-desc">
-									<col class="col-qty">
-									<col class="col-price">
-									<col class="col-total">
-								</colgroup>
+                            <div class="row angebot-field-row">
+                                <div class="col-md-2 mb-3">
+                                    <label for="discount_percent" class="form-label">Nachlass %</label>
+                                    <input type="number" id="discount_percent" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
+                                </div>
 
-								<thead style="font-size:12px;">
-									<tr>
-										<th>Beschreibung</th>
-										<th>Menge</th>
-										<th>Einzelpreis</th>
-										<th>Betrag</th>
-									</tr>
-								</thead>
-								<tbody style="font-size: 12px;" id="previewItems">
-									<tr>
-										<td></td>
-										<td></td>
-										<td></td>
-										<td></td>
-									</tr>
-								</tbody>
-							</table>
+                                <div class="col-md-2 mb-3">
+                                    <label for="discount_fixed" class="form-label">Nachlass Pauschale €</label>
+                                    <input type="number" id="discount_fixed" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
+                                </div>
 
-							<!-- TOTALI DESNO -->
-							<div style="margin-top:30px; width:300px; margin-left:auto;">
+                                <div class="col-md-2 mb-3">
+                                    <label for="deckungsrucklass_percent" class="form-label">Deckungsrücklass %</label>
+                                    <input type="number" id="deckungsrucklass_percent" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
+                                </div>
 
-								<div style="display:flex; justify-content:space-between; font-size: 12px;">
-									<span style="margin-left: 50px;">Zwischensumme</span>
-									<span style="margin-right:9px;" id="p_subtotal">0.00 €</span>
-								</div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="abzug_tr_label" class="form-label">Abz. TR Text</label>
+                                    <input type="text" id="abzug_tr_label" class="form-control text-center" value="Abz. TR 1" maxlength="40" autocomplete="off">
+                                </div>
 
-								<div id="discount_row" style="display:none; justify-content:space-between; font-size: 12px;">
-									<span style="margin-left: 50px;">- 10% Nachlass</span>
-									<span style="margin-right:9px;" id="p_discount">0.00</span>
-								</div>
+                                <div class="col-md-2 mb-3">
+                                    <label for="abzug_tr1" class="form-label">Abz. TR €</label>
+                                    <input type="number" id="abzug_tr1" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
+                                </div>
 
-								<div id="discount_fixed_row" style="display:none; justify-content:space-between; font-size: 12px;">
-									<span style="margin-left: 50px;">- Pauschale</span>
-									<span style="margin-right:9px;" id="p_discount_fixed">0.00</span>
-								</div>
+                                <div class="col-md-2 mb-3">
+                                    <div class="form-check mt-md-4 pt-md-2">
+                                        <input type="checkbox" id="use_tax" class="form-check-input" autocomplete="off">
+                                        <label class="form-check-label" for="use_tax">20% MwSt</label>
+                                    </div>
+                                </div>
+                            </div>
 
-								<div id="deckungsrucklass_row" style="display:none; justify-content:space-between; font-size: 12px;">
-									<span style="margin-left: 50px;">- Deckungsrücklass</span>
-									<span style="margin-right:9px;" id="p_deckungsrucklass">0.00</span>
-								</div>
+                            <div class="row">
+                                <div class="mb-3 col-md-8">
+                                    <div id="editor"></div>
+                                </div>
+                                <div class="mb-3 col-md-4">
+                                    <button id="createInvoice" type="button" class="btn btn-success waves-effect waves-light angebot-submit-btn">
+                                        <i class="fa fa-save me-1"></i>
+                                        @lang('Kreiraj ponudu')
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-								<div id="tax_row" style="display:none; justify-content:space-between; font-size: 12px;">
-									<span style="margin-left: 50px;">+ 20% MwSt</span>
-									<span style="margin-right:9px;" id="p_tax">0.00</span>
-								</div>
-
-								<div id="abzug_tr1_row" style="display:none; justify-content:space-between; font-size:12px;">
-									<span contenteditable="true" style="margin-left:50px;">- Abz. TR 1</span>
-									<span style="margin-right:9px;" id="p_abzug_tr1"></span>
-								</div>
-
-								<hr style="margin-left: 50px;">
-
-								<div style="display:flex; justify-content:space-between; font-weight:bold; font-size:14px;">
-									<span style="margin-left: 50px;">Gesamtbetrag</span>
-
-									<span style="border-bottom:2px double #000; padding-bottom:2px;">
-										<span>€ &nbsp;&nbsp;</span>
-										<span id="p_total">0.00</span>
-									</span>
-								</div>
-							</div>
-
-							<div class="description-left">
-								<div class="description-left">
-									<div 
-										id="p_invoice_note"
-										style="
-											font-size:10px;
-											font-family: inherit;
-											width:385px;
-											color:black;
-											white-space: normal;
-										">
-									</div>
-								</div>
-							</div>
-
-							<div id="reverse_vat_note">
-								<p>Bauleistung ohne USt. (MwSt. zahlt Empfänger gemäß §19 Abs. 1a UStG 1994)</p>
-							</div>
-							<div class="invoice-footer">
-								Bankverbindung: Volksbank Niederösterreich AG, BIC: VBOEATWWNOM, IBAN: AT32 4715 0120 1679 0000
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+            <div class="modal-right">
+                <div id="a4wrapper" class="a4-wrapper">
+                    <div id="previewPages" class="angebot-preview-pages"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

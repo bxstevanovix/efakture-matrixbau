@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 
 class Angebot extends Model
@@ -40,6 +42,17 @@ class Angebot extends Model
 
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 2, ',', '.');
+        return number_format((float) $this->price, 2, ',', '.');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(Beschreibung::class, 'invoice_id')
+            ->where('invoice_type', 'angebot');
     }
 }

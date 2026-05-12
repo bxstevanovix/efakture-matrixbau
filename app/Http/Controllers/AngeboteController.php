@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use Spatie\Browsershot\Browsershot;
 use App\Models\Beschreibung;
 use App\Models\Firma;
 use App\Services\DocxAngebotService;
@@ -89,7 +88,6 @@ class AngeboteController extends Controller
             'ausführungszeit' => 'nullable|string|max:100',
             'invoice_note' => 'nullable|string',
             'total' => 'required|string',
-            'html' => 'required|string',
             'discount_percent' => 'nullable|numeric|min:0|max:100',
             'discount_fixed' => 'nullable',
             'deckungsrucklass_percent' => 'nullable|numeric|min:0|max:100',
@@ -98,7 +96,7 @@ class AngeboteController extends Controller
             'abzug_tr_label' => 'nullable|string|max:40',
             'spacing_top' => 'nullable|integer|min:0|max:160',
             'items' => 'nullable|array',
-            'items.*.name' => 'nullable|string|max:1000',
+            'items.*.name' => 'nullable|string|max:255',
             'items.*.qty' => 'nullable',
             'items.*.price' => 'nullable',
             'items.*.total' => 'nullable',
@@ -131,9 +129,7 @@ class AngeboteController extends Controller
         $timestamp = Carbon::now()->format('dm-Hi');
 
         $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
-        $html = $this->sanitizePdfHtml($data['html']);
         $pdfBinary = $this->generateOfferPdfBinary(
-            $html,
             $data,
             $items,
             $totalValue,
@@ -414,7 +410,6 @@ class AngeboteController extends Controller
     }
 
     private function generateOfferPdfBinary(
-        string $html,
         array $data,
         array $items,
         float $totalValue,
@@ -428,14 +423,6 @@ class AngeboteController extends Controller
                 'angebot_number' => $rechnungNr,
                 'error' => $exception->getMessage(),
             ]);
-
-            if (filter_var(env('ANGEBOTE_PDF_HTML_FALLBACK', false), FILTER_VALIDATE_BOOLEAN)) {
-                Log::warning('Falling back to HTML PDF for Angebot.', [
-                    'angebot_number' => $rechnungNr,
-                ]);
-
-                return $this->generate($html);
-            }
 
             throw $exception;
         }
@@ -466,31 +453,29 @@ class AngeboteController extends Controller
         $profileDir = $workDir . '/lo-profile';
 
         try {
-            app(DocxAngebotService::class)->createFromData($docxPath, $this->buildDocxOfferData(
+            $docxData = $this->buildDocxOfferData(
                 $data,
                 $items,
                 $totalValue,
-                $rechnungNr
-            ));
+                $rechnungNr,
+                false
+            );
 
-            $process = new Process([
-                $soffice,
-                '-env:UserInstallation=file://' . $profileDir,
-                '--headless',
-                '--convert-to',
-                'pdf',
-                '--outdir',
-                $workDir,
-                $docxPath,
-            ]);
-            $process->setTimeout(60);
-            $process->run();
-
-            if (! $process->isSuccessful() || ! file_exists($pdfPath)) {
-                throw new \RuntimeException($process->getErrorOutput() ?: 'DOCX to PDF konverzija nije uspjela.');
-            }
-
+            app(DocxAngebotService::class)->createFromData($docxPath, $docxData);
+            $this->convertDocxToPdf($soffice, $profileDir, $workDir, $docxPath, $pdfPath);
             $pdf = file_get_contents($pdfPath);
+
+            if ($this->countPdfPages($pdf) > 1) {
+                $docxData['show_page_numbers'] = true;
+                app(DocxAngebotService::class)->createFromData($docxPath, $docxData);
+
+                if (file_exists($pdfPath)) {
+                    unlink($pdfPath);
+                }
+
+                $this->convertDocxToPdf($soffice, $profileDir, $workDir, $docxPath, $pdfPath);
+                $pdf = file_get_contents($pdfPath);
+            }
         } finally {
             $this->deleteDirectory($workDir);
         }
@@ -498,7 +483,69 @@ class AngeboteController extends Controller
         return $pdf;
     }
 
-    private function buildDocxOfferData(array $data, array $items, float $totalValue, string $rechnungNr): array
+    private function convertDocxToPdf(string $soffice, string $profileDir, string $workDir, string $docxPath, string $pdfPath): void
+    {
+        $process = new Process([
+            $soffice,
+            '-env:UserInstallation=file://' . $profileDir,
+            '--headless',
+            '--convert-to',
+            'pdf',
+            '--outdir',
+            $workDir,
+            $docxPath,
+        ]);
+        $process->setTimeout(60);
+        $process->run();
+
+        if (! $process->isSuccessful() || ! file_exists($pdfPath)) {
+            throw new \RuntimeException($process->getErrorOutput() ?: 'DOCX to PDF konverzija nije uspjela.');
+        }
+    }
+
+    private function countPdfPages(string $pdf): int
+    {
+        $searchablePdf = $pdf . "\n" . $this->decodedPdfStreams($pdf);
+
+        if (preg_match_all('/\/Type\s*\/Page(?!s)\b/', $searchablePdf, $matches) > 0) {
+            return count($matches[0]);
+        }
+
+        if (preg_match_all('/\/Count\s+(\d+)/', $searchablePdf, $matches) > 0) {
+            return max(array_map('intval', $matches[1]));
+        }
+
+        return 1;
+    }
+
+    private function decodedPdfStreams(string $pdf): string
+    {
+        if (! preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $pdf, $matches)) {
+            return '';
+        }
+
+        $decoded = '';
+
+        foreach ($matches[1] as $stream) {
+            $inflated = @gzuncompress($stream);
+
+            if ($inflated === false) {
+                $inflated = @zlib_decode($stream);
+            }
+
+            if ($inflated === false) {
+                $inflated = @gzinflate($stream);
+            }
+
+            if ($inflated !== false && strlen($inflated) <= 500000) {
+                $decoded .= "\n" . $inflated;
+            }
+        }
+
+        return $decoded;
+    }
+
+    private function buildDocxOfferData(array $data, array $items, float $totalValue, string $rechnungNr, bool $showPageNumbers = false): array
     {
         $subtotal = collect($items)->sum(fn ($item) => $this->parseMoney($item['total']));
         $discountPercent = (float) ($data['discount_percent'] ?? 0);
@@ -569,6 +616,7 @@ class AngeboteController extends Controller
             'ausfuehrungszeit' => trim((string) ($data['ausführungszeit'] ?? '')),
             'spacing_top' => (int) ($data['spacing_top'] ?? 20),
             'use_tax' => $useTax,
+            'show_page_numbers' => $showPageNumbers,
             'note_html' => (string) ($data['invoice_note'] ?? ''),
             'items' => collect($items)->map(fn ($item) => [
                 $item['name'],
@@ -637,12 +685,6 @@ class AngeboteController extends Controller
         @rmdir($directory);
     }
 
-    private function sanitizePdfHtml(string $html): string
-    {
-        return preg_replace('#<script\b[^>]*>.*?</script>#is', '', $html) ?? $html;
-    }
-
-    
     public function autocompleteFirma(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
@@ -774,463 +816,5 @@ class AngeboteController extends Controller
             ['ae', 'oe', 'ue', 'ss'],
             $value
         );
-    }
-   
-    public function generate($html = null)
-    {
-        $isHttpRequest = $html === null;
-        $html = $isHttpRequest ? (string) $this->request->input('html', '') : (string) $html;
-
-        if ($html === '') {
-            abort(422, 'HTML dokument nije poslat.');
-        }
-
-        // Putanja do slike u public folderu
-        $logoPath = public_path('img/cist-beli-logo.jpg');
-
-        // Pretvori sliku u Base64 za PDF
-        if (file_exists($logoPath)) {
-            $logoBase64 = base64_encode(file_get_contents($logoPath));
-            $html = str_replace(
-                'img/cist-beli-logo.jpg',
-                'data:image/png;base64,' . $logoBase64,
-                $html
-            );
-        }
-
-        $fullHtml = <<<HTML
-<!doctype html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Angebot PDF</title>
-    <style>
-        @page {
-            size: A4;
-            margin: 0;
-        }
-
-        html,
-        body {
-            width: 794px;
-            margin: 0;
-            padding: 0;
-            background: #fff;
-            color: #000;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            font-weight: 350;
-            letter-spacing: 0.08px;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: geometricPrecision;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        .a4-wrapper,
-        .angebot-preview-pages {
-            width: 794px;
-        }
-
-        .a4-preview {
-            width: 794px;
-            height: 1123px;
-            padding: 5mm 16mm 22mm 16mm;
-            box-sizing: border-box;
-            background: #fff;
-            color: #000;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            font-weight: 350;
-            letter-spacing: 0.08px;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: geometricPrecision;
-            position: relative;
-            overflow: hidden;
-            box-shadow: none !important;
-            page-break-after: always;
-            break-after: page;
-        }
-
-        .a4-preview:last-child {
-            page-break-after: auto;
-            break-after: auto;
-        }
-
-        .angebot-page-content {
-            position: relative;
-            z-index: 1;
-            max-height: calc(1123px - 5mm - 42mm);
-            padding-bottom: 24mm;
-        }
-
-        .header-a4 {
-            height: 215px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            position: relative;
-        }
-
-        .company-logo {
-            width: 285px;
-            margin-left: auto;
-            margin-right: 4mm;
-        }
-
-        .company-logo img {
-            width: 100%;
-            display: block;
-        }
-
-        .company-text {
-            display: flex;
-            justify-content: flex-end;
-            width: 100%;
-            transform: translateX(6mm);
-        }
-
-        .company-text-left {
-            width: 18%;
-        }
-
-        .company-text-right {
-            width: 29%;
-        }
-
-        .company-text-left p,
-        .company-text-right p {
-            margin: 3px 0;
-            line-height: 1.2;
-            color: #1a64a2;
-            font-size: 11px;
-        }
-
-        .firma {
-            margin-top: 5px;
-        }
-
-        .customer-lead {
-            max-width: 350px;
-            margin: 0 0 5px 0;
-            font-size: 10pt;
-            font-weight: 700;
-            word-wrap: break-word;
-        }
-
-        .customer-address {
-            margin: 6px 0 0 0;
-            line-height: 1.08;
-            font-size: 10pt;
-        }
-
-        .customer-address + .customer-address {
-            margin-top: 2px;
-        }
-
-        .firma-hr {
-            width: 350px;
-            max-width: 100%;
-            height: 1px;
-            background-color: #000;
-            margin: 5px 0;
-        }
-
-        .customer-meta {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            font-size: 10pt;
-        }
-
-        .customer {
-            margin-top: 5px;
-            font-size: 10pt;
-        }
-
-        .customer p {
-            margin: 0 0 4px 0;
-            line-height: 1.05;
-        }
-
-        .angebot-title-line {
-            font-weight: 700;
-        }
-
-        .page-continuation {
-            margin: 0 0 10px 0;
-            font-size: 10pt;
-            font-weight: 500;
-            text-align: right;
-            color: #555;
-        }
-
-        .invoice-table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-            border: 0.6px solid #333;
-            font-size: 10pt;
-            font-family: Arial, Helvetica, sans-serif;
-            font-weight: 350;
-        }
-
-        .invoice-table col.col-desc {
-            width: calc(100% - 300px);
-        }
-
-        .invoice-table col.col-qty,
-        .invoice-table col.col-price,
-        .invoice-table col.col-total {
-            width: 100px;
-        }
-
-        .invoice-table th,
-        .invoice-table td {
-            padding: 4px 8px;
-            border-bottom: 0.6px solid #333;
-            line-height: 1.25;
-            vertical-align: middle;
-        }
-
-        .invoice-table th {
-            font-weight: 500;
-        }
-
-        .invoice-table th:not(:first-child),
-        .invoice-table td:not(:first-child) {
-            border-left: 0.6px solid #333;
-        }
-
-        .invoice-table th:first-child,
-        .invoice-table td:first-child {
-            text-align: left !important;
-            word-break: break-word;
-        }
-
-        .invoice-table td:nth-child(2),
-        .invoice-table td:nth-child(3),
-        .invoice-table td:nth-child(4) {
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .invoice-table .amount-cell {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-        }
-
-        .offer-summary-wrap {
-            margin-right: 9px;
-        }
-
-        .offer-summary {
-            width: fit-content;
-            min-width: 300px;
-            max-width: 100%;
-            margin-top: 30px;
-            margin-left: auto;
-            font-size: 10pt;
-        }
-
-        .summary-row {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            align-items: baseline;
-            column-gap: 14px;
-            margin-bottom: 2px;
-        }
-
-        .summary-row > span:first-child {
-            margin-left: 50px;
-        }
-
-        .summary-divider {
-            margin-left: 50px;
-        }
-
-        .summary-amount {
-            min-width: 100px;
-            width: max-content;
-            display: inline-grid;
-            grid-template-columns: auto auto;
-            justify-content: end;
-            justify-self: end;
-            white-space: nowrap;
-        }
-
-        .summary-running-total {
-            margin-top: -1px;
-            margin-bottom: 5px;
-        }
-
-        .summary-running-total .summary-amount {
-            padding-top: 2px;
-            border-top: 1px solid #777;
-        }
-
-        .summary-total {
-            font-weight: 500;
-            font-size: 11pt;
-        }
-
-        .summary-total-value {
-            column-gap: 8px;
-        }
-
-        .summary-total-value {
-            border-bottom: 2px double #000;
-            padding-bottom: 2px;
-            white-space: nowrap;
-        }
-
-        .description-left {
-            margin-top: 18px;
-            margin-left: 24px;
-            padding: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            width: 385px;
-            color: #000;
-            font-weight: 350;
-            line-height: 1.25;
-            overflow-wrap: break-word;
-        }
-
-        .a4-preview .description-left.preview-note {
-            min-height: 0;
-        }
-
-        .description-left p,
-        .a4-preview .description-left.preview-note p {
-            margin: 0 0 4px 0;
-        }
-
-        .description-left ul,
-        .description-left ol,
-        .a4-preview .description-left.preview-note ul,
-        .a4-preview .description-left.preview-note ol {
-            margin: 0 0 4px 0;
-            padding-left: 20px;
-            list-style-position: outside;
-        }
-
-        .description-left ul,
-        .a4-preview .description-left.preview-note ul {
-            list-style-type: disc;
-        }
-
-        .description-left ol,
-        .a4-preview .description-left.preview-note ol {
-            list-style-type: decimal;
-        }
-
-        .description-left li,
-        .a4-preview .description-left.preview-note li {
-            display: list-item;
-            margin: 0 0 3px 0;
-            padding-left: 2px;
-            list-style: inherit;
-        }
-
-        .description-left strong,
-        .description-left b,
-        .a4-preview .description-left.preview-note strong,
-        .a4-preview .description-left.preview-note b {
-            font-weight: 700 !important;
-        }
-
-        .description-left em,
-        .description-left i,
-        .a4-preview .description-left.preview-note em,
-        .a4-preview .description-left.preview-note i {
-            font-style: italic !important;
-        }
-
-        .description-left u,
-        .a4-preview .description-left.preview-note u {
-            text-decoration: underline !important;
-        }
-
-        .description-left .ql-size-small,
-        .a4-preview .description-left.preview-note .ql-size-small {
-            font-size: 8pt;
-        }
-
-        .description-left .ql-size-large,
-        .a4-preview .description-left.preview-note .ql-size-large {
-            font-size: 13pt;
-        }
-
-        .description-left .ql-size-huge,
-        .a4-preview .description-left.preview-note .ql-size-huge {
-            font-size: 18pt;
-        }
-
-        .a4-preview .description-left.preview-note ol > li::before,
-        .a4-preview .description-left.preview-note ul > li::before {
-            content: none !important;
-        }
-
-        .reverse-vat-note {
-            width: 100%;
-            margin-top: 50px;
-            font-size: 9pt;
-            color: #000;
-            text-align: center;
-        }
-
-        .invoice-footer {
-            position: absolute;
-            bottom: 14mm;
-            left: 16mm;
-            right: 16mm;
-            min-height: 8mm;
-            z-index: 50;
-            background: #fff;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 9pt;
-            font-weight: 350;
-            line-height: 1.2;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            text-align: center;
-            color: #000;
-            -webkit-font-smoothing: antialiased;
-            text-rendering: geometricPrecision;
-        }
-
-        .page-counter {
-            position: absolute;
-            right: 0;
-            bottom: -5mm;
-            display: none;
-            color: #888;
-            text-align: right;
-        }
-    </style>
-</head>
-<body>
-    {$html}
-</body>
-</html>
-HTML;
-
-        $pdf = Browsershot::html($fullHtml)
-                ->noSandbox()
-                ->format('A4')
-                ->showBackground()
-                ->pdf();
-
-        if ($isHttpRequest) {
-            return response($pdf, 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="angebot.pdf"',
-            ]);
-        }
-
-        return $pdf;
     }
 }

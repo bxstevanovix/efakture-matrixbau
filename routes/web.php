@@ -18,7 +18,6 @@ Route::get('/', function () {
 });
 
 Route::get('/invoice/download', [AngeboteController::class, 'downloadPdf'])->name('angebote.download');
-Route::post('/generate-pdf', [AngeboteController::class, 'generate']);
 
 Route::get('/dashboard', [DashController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::post('/dashboard/datatable-customers', [DashController::class, 'datatableCustomers'])->name('datatable_customers');

@@ -156,7 +156,7 @@
                             <div class="row" id="items">
                                 <div class="item-row col-12 first-row">
                                     <div style="position:relative;">
-                                        <input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
+                                        <input name="items[0][name]" type="text" class="item-name form-control" placeholder="Beschreibung" maxlength="255" autocomplete="off">
                                         <div class="autocomplete-box beschreibung-box"></div>
                                     </div>
                                     <input name="items[0][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">

@@ -406,7 +406,7 @@
 				row.classList.add("item-row", "col-12");
 				row.innerHTML = `
 					<div style="position:relative;">
-						<input name="items[${itemIndex}][name]" type="text" class="item-name form-control" placeholder="Beschreibung" autocomplete="off">
+						<input name="items[${itemIndex}][name]" type="text" class="item-name form-control" placeholder="Beschreibung" maxlength="255" autocomplete="off">
 						<div class="autocomplete-box beschreibung-box"></div>
 					</div>
 					<input name="items[${itemIndex}][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">
@@ -469,7 +469,7 @@
 
 				previewPages.innerHTML = '';
 
-				let page = createPage(data, false);
+				let page = createPage(data, false, true);
 				let tbody = page.querySelector('.preview-items');
 
 				previewItems.forEach(item => {
@@ -478,7 +478,7 @@
 
 					if (pageIsOverflowing(page) && tbody.children.length > 1) {
 						row.remove();
-						page = createPage(data, true);
+						page = createPage(data, true, true);
 						tbody = page.querySelector('.preview-items');
 						tbody.appendChild(row);
 					}
@@ -489,7 +489,7 @@
 
 				if (pageIsOverflowing(page) && items.length > 0) {
 					summary.remove();
-					page = createPage(data, true);
+					page = createPage(data, true, false);
 					page.querySelector('.angebot-page-content').appendChild(summary);
 				}
 
@@ -519,13 +519,14 @@
 				};
 			}
 
-			function createPage(data, isContinuation) {
+			function createPage(data, isContinuation, includeItemsTable = true) {
 				const page = document.createElement('div');
 				page.className = 'a4-preview';
 				page.innerHTML = `
 					<div class="angebot-page-content">
 						${renderHeader(data)}
 						${isContinuation ? '<div class="page-continuation">Fortsetzung</div>' : ''}
+						${includeItemsTable ? `
 						<table class="invoice-table invoice-table-head">
 							<colgroup>
 								<col class="col-desc">
@@ -550,7 +551,7 @@
 								<col class="col-total">
 							</colgroup>
 							<tbody class="preview-items"></tbody>
-						</table>
+						</table>` : ''}
 					</div>
 					<div class="invoice-footer">
 						Bankverbindung: Volksbank Niederösterreich AG, BIC: VBOEATWWNOM, IBAN: AT32 4715 0120 1679 0000
@@ -738,8 +739,12 @@
 
 				const content = page.querySelector('.angebot-page-content');
 				const footer = page.querySelector('.invoice-footer');
+				const children = Array.from(content.children).filter(child => child.getClientRects().length);
+				const contentBottom = children.length
+					? Math.max(...children.map(child => child.getBoundingClientRect().bottom))
+					: content.getBoundingClientRect().bottom;
 
-				return content.getBoundingClientRect().bottom > footer.getBoundingClientRect().top - 10;
+				return contentBottom > footer.getBoundingClientRect().top - 10;
 			}
 
 			function updatePageCounters() {

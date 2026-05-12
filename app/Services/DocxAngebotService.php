@@ -14,6 +14,12 @@ class DocxAngebotService
     private const EMU_PER_PIXEL = 9525;
     private const TABLE_WIDTH = 10092;
     private const TABLE_COLUMNS = [5592, 1500, 1500, 1500];
+    private const PAGE_HEIGHT = 16838;
+    private const PAGE_TOP_MARGIN = 3628;
+    private const PAGE_BOTTOM_MARGIN = 1587;
+    private const PAGE_BODY_HEIGHT = self::PAGE_HEIGHT - self::PAGE_TOP_MARGIN - self::PAGE_BOTTOM_MARGIN;
+    private const TABLE_ROW_HEIGHT = 360;
+    private const SUMMARY_PAGE_RESERVE = 760;
 
     public function create(string $path): string
     {
@@ -36,15 +42,18 @@ class DocxAngebotService
 
         $logoPath = public_path('img/cist-beli-logo.jpg');
         $hasLogo = is_file($logoPath);
+        $showPageNumbers = ! empty($data['show_page_numbers']);
 
         $zip->addFromString('[Content_Types].xml', $this->contentTypes($hasLogo));
         $zip->addFromString('_rels/.rels', $this->rootRels());
         $zip->addFromString('word/_rels/document.xml.rels', $this->documentRels($hasLogo));
         $zip->addFromString('word/styles.xml', $this->styles());
-        $zip->addFromString('word/footer1.xml', $this->footer());
+        $zip->addFromString('word/header1.xml', $this->header($hasLogo));
+        $zip->addFromString('word/footer1.xml', $this->footer($showPageNumbers));
         $zip->addFromString('word/document.xml', $this->document($data, $hasLogo));
 
         if ($hasLogo) {
+            $zip->addFromString('word/_rels/header1.xml.rels', $this->headerRels());
             $zip->addFromString('word/media/logo.jpg', file_get_contents($logoPath));
         }
 
@@ -65,6 +74,10 @@ class DocxAngebotService
             $tableRows .= $this->tableRow(['', '', '', '']);
         }
 
+        $summaryBreaksToNewPage = $this->shouldBreakBeforeSummary($data);
+        $summaryPageLead = $summaryBreaksToNewPage
+            ? $this->pageBreak() . $this->repeatedCustomerBlock($data)
+            : $this->spacer(180);
         $spacingTop = (int) ($data['spacing_top'] ?? 20);
         $bvh = trim((string) ($data['bvh'] ?? ''));
         $auftragsnr = trim((string) ($data['auftragsnr'] ?? ''));
@@ -87,8 +100,6 @@ class DocxAngebotService
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
   <w:body>
-    ' . ($hasLogo ? $this->logoParagraph() : '') . '
-    ' . $this->companyInfoTable() . '
     ' . $this->spacer($this->pxToTwips($spacingTop)) . '
     ' . $this->paragraph((string) ($data['customer_name'] ?? ''), ['bold' => true, 'after' => 70]) . '
     ' . $this->paragraph((string) ($data['address'] ?? ''), ['after' => 10]) . '
@@ -98,17 +109,16 @@ class DocxAngebotService
     ' . ($bvh !== '' ? $this->paragraph('BVH. ' . $bvh, ['before' => 200, 'after' => 30]) : '') . '
     ' . ($auftragsnr !== '' ? $this->paragraph($auftragsnr, ['after' => 30]) : '') . '
     ' . $this->paragraph($title, ['bold' => true, 'after' => 70]) . '
-    ' . $this->table($this->tableHeader()) . '
-    ' . $this->spacer(30) . '
-    ' . $this->table($tableRows) . '
-    ' . $this->spacer(180) . '
+    ' . $this->table($this->tableHeader() . $tableRows) . '
+    ' . $summaryPageLead . '
     ' . $this->summary($data['summary'] ?? []) . '
     ' . $note . '
     ' . $reverseVat . '
     <w:sectPr>
+      <w:headerReference w:type="default" r:id="rIdHeader1"/>
       <w:footerReference w:type="default" r:id="rIdFooter1"/>
       <w:pgSz w:w="11906" w:h="16838"/>
-      <w:pgMar w:top="' . $this->mmToTwips(5) . '" w:right="' . $this->mmToTwips(16) . '" w:bottom="' . $this->mmToTwips(28) . '" w:left="' . $this->mmToTwips(16) . '" w:header="250" w:footer="' . $this->mmToTwips(14) . '" w:gutter="0"/>
+      <w:pgMar w:top="' . $this->mmToTwips(64) . '" w:right="' . $this->mmToTwips(16) . '" w:bottom="' . $this->mmToTwips(28) . '" w:left="' . $this->mmToTwips(16) . '" w:header="' . $this->mmToTwips(4) . '" w:footer="' . $this->mmToTwips(14) . '" w:gutter="0"/>
     </w:sectPr>
   </w:body>
 </w:document>';
@@ -146,6 +156,15 @@ class DocxAngebotService
     ' . $this->plainCell(['Datum: ' . $date], 5200, ['align' => 'right']) . '
   </w:tr>
 </w:tbl>';
+    }
+
+    private function repeatedCustomerBlock(array $data): string
+    {
+        return $this->spacer(100)
+            . $this->paragraph((string) ($data['customer_name'] ?? ''), ['bold' => true, 'after' => 70])
+            . $this->paragraph((string) ($data['address'] ?? ''), ['after' => 10])
+            . $this->paragraph((string) ($data['ort'] ?? ''), ['after' => 0])
+            . $this->horizontalLine(3500);
     }
 
     private function tableHeader(): string
@@ -250,6 +269,7 @@ class DocxAngebotService
     private function summaryRow(string $label, string $value, bool $overline = false, bool $total = false): string
     {
         $size = 22;
+        $keepNext = ! $total;
         $amountBorders = $overline
             ? '<w:tcBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="777777"/></w:tcBorders>'
             : '';
@@ -261,13 +281,14 @@ class DocxAngebotService
         $topSpacing = $total ? 220 : 0;
 
         return '<w:tr>
+  <w:trPr><w:cantSplit/></w:trPr>
   <w:tc>
     <w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr>
-    ' . $this->paragraph($label, ['bold' => $total, 'size' => $size, 'before' => $topSpacing, 'after' => 20]) . '
+    ' . $this->paragraph($label, ['bold' => $total, 'size' => $size, 'before' => $topSpacing, 'after' => 20, 'keep_next' => $keepNext]) . '
   </w:tc>
   <w:tc>
     <w:tcPr><w:tcW w:w="3000" w:type="dxa"/>' . $amountBorders . '</w:tcPr>
-    ' . $this->paragraph($value, ['bold' => $total, 'size' => $size, 'align' => 'right', 'before' => $topSpacing, 'after' => 20]) . '
+    ' . $this->paragraph($value, ['bold' => $total, 'size' => $size, 'align' => 'right', 'before' => $topSpacing, 'after' => 20, 'keep_next' => $keepNext]) . '
   </w:tc>
 </w:tr>';
     }
@@ -495,6 +516,7 @@ class DocxAngebotService
         $align = $options['align'] ?? 'left';
         $before = (int) ($options['before'] ?? 0);
         $after = (int) ($options['after'] ?? 40);
+        $keepNext = ! empty($options['keep_next']) ? '<w:keepNext/>' : '';
         $indent = '';
 
         if (! empty($options['left'])) {
@@ -504,7 +526,7 @@ class DocxAngebotService
         }
 
         return '<w:p>
-  <w:pPr><w:jc w:val="' . $align . '"/><w:spacing w:before="' . $before . '" w:after="' . $after . '"/>' . $indent . '</w:pPr>
+  <w:pPr>' . $keepNext . '<w:jc w:val="' . $align . '"/><w:spacing w:before="' . $before . '" w:after="' . $after . '"/>' . $indent . '</w:pPr>
   ' . implode('', $runs) . '
 </w:p>';
     }
@@ -538,10 +560,11 @@ class DocxAngebotService
         $align = $options['align'] ?? 'left';
         $before = (int) ($options['before'] ?? 0);
         $after = (int) ($options['after'] ?? 40);
+        $keepNext = ! empty($options['keep_next']) ? '<w:keepNext/>' : '';
         $indent = ! empty($options['left']) ? '<w:ind w:left="' . (int) $options['left'] . '"/>' : '';
 
         return '<w:p>
-  <w:pPr><w:jc w:val="' . $align . '"/><w:spacing w:before="' . $before . '" w:after="' . $after . '"/>' . $indent . '</w:pPr>
+  <w:pPr>' . $keepNext . '<w:jc w:val="' . $align . '"/><w:spacing w:before="' . $before . '" w:after="' . $after . '"/>' . $indent . '</w:pPr>
   <w:r><w:rPr>' . $this->runStyle($options) . '</w:rPr>' . $this->textWithBreaks($text) . '</w:r>
 </w:p>';
     }
@@ -600,6 +623,81 @@ class DocxAngebotService
     </w:p>';
     }
 
+    private function pageBreak(): string
+    {
+        return '<w:p>
+  <w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr>
+  <w:r><w:br w:type="page"/></w:r>
+</w:p>';
+    }
+
+    private function shouldBreakBeforeSummary(array $data): bool
+    {
+        $items = $data['items'] ?? [];
+
+        if ($items === []) {
+            return false;
+        }
+
+        $tableHeight = self::TABLE_ROW_HEIGHT;
+
+        foreach ($items as $item) {
+            $tableHeight += $this->estimatedTableRowHeight($item);
+        }
+
+        $firstPageCapacity = max(0, self::PAGE_BODY_HEIGHT - $this->estimatedContentBeforeTableHeight($data));
+        $subsequentPageCapacity = self::PAGE_BODY_HEIGHT - self::TABLE_ROW_HEIGHT;
+
+        if ($tableHeight <= $firstPageCapacity) {
+            $remaining = $firstPageCapacity - $tableHeight;
+        } else {
+            $overflow = $tableHeight - $firstPageCapacity;
+            $usedOnLastPage = $overflow % $subsequentPageCapacity;
+            $remaining = $usedOnLastPage === 0 ? 0 : $subsequentPageCapacity - $usedOnLastPage;
+        }
+
+        return $remaining < ($this->estimatedSummaryHeight($data['summary'] ?? []) + self::SUMMARY_PAGE_RESERVE);
+    }
+
+    private function estimatedContentBeforeTableHeight(array $data): int
+    {
+        $height = $this->pxToTwips((int) ($data['spacing_top'] ?? 20));
+        $height += 335; // customer name
+        $height += 275; // address
+        $height += 265; // city
+        $height += 210; // horizontal rule
+        $height += 310; // UID/date row
+
+        if (trim((string) ($data['bvh'] ?? '')) !== '') {
+            $height += 495;
+        }
+
+        if (trim((string) ($data['auftragsnr'] ?? '')) !== '') {
+            $height += 295;
+        }
+
+        return $height + 335; // Angebot title
+    }
+
+    private function estimatedTableRowHeight(array $row): int
+    {
+        $description = (string) ($row[0] ?? '');
+        $lineCount = max(1, (int) ceil(mb_strlen($description) / 64));
+
+        return max(self::TABLE_ROW_HEIGHT, 220 + ($lineCount * 245));
+    }
+
+    private function estimatedSummaryHeight(array $summary): int
+    {
+        $rows = 2;
+
+        foreach ($summary['adjustments'] ?? [] as $adjustment) {
+            $rows += empty($adjustment['running_total']) ? 1 : 2;
+        }
+
+        return 180 + ($rows * 310) + 260;
+    }
+
     private function logoParagraph(): string
     {
         $cx = 285 * self::EMU_PER_PIXEL;
@@ -643,16 +741,45 @@ class DocxAngebotService
             . '<w:sz w:val="' . $size . '"/><w:szCs w:val="' . $size . '"/>';
     }
 
-    private function footer(): string
+    private function header(bool $hasLogo): string
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+  ' . ($hasLogo ? $this->logoParagraph() : '') . '
+  ' . $this->companyInfoTable() . '
+</w:hdr>';
+    }
+
+    private function footer(bool $showPageNumbers): string
     {
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  ' . ($showPageNumbers ? $this->pageNumberParagraph() : $this->paragraph('', ['after' => 0])) . '
   ' . $this->paragraph('Bankverbindung: Volksbank Niederösterreich AG, BIC: VBOEATWWNOM, IBAN: AT32 4715 0120 1679 0000', [
             'align' => 'center',
-            'size' => 18,
+            'size' => 16,
+            'before' => 0,
             'after' => 0,
         ]) . '
 </w:ftr>';
+    }
+
+    private function pageNumberParagraph(): string
+    {
+        return '<w:p>
+  <w:pPr><w:jc w:val="right"/><w:spacing w:before="0" w:after="0"/></w:pPr>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:fldChar w:fldCharType="begin"/></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:fldChar w:fldCharType="separate"/></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:t>1</w:t></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:fldChar w:fldCharType="end"/></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:t>/</w:t></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:fldChar w:fldCharType="begin"/></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:instrText xml:space="preserve"> NUMPAGES </w:instrText></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:fldChar w:fldCharType="separate"/></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:t>1</w:t></w:r>
+  <w:r><w:rPr>' . $this->runStyle(['size' => 18]) . '</w:rPr><w:fldChar w:fldCharType="end"/></w:r>
+</w:p>';
     }
 
     private function contentTypes(bool $hasLogo): string
@@ -664,6 +791,7 @@ class DocxAngebotService
   ' . ($hasLogo ? '<Default Extension="jpg" ContentType="image/jpeg"/>' : '') . '
   <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
   <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+  <Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>
   <Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>
 </Types>';
     }
@@ -681,8 +809,16 @@ class DocxAngebotService
         return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
   <Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  <Relationship Id="rIdHeader1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>
   <Relationship Id="rIdFooter1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>
-  ' . ($hasLogo ? '<Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo.jpg"/>' : '') . '
+</Relationships>';
+    }
+
+    private function headerRels(): string
+    {
+        return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rIdLogo" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/logo.jpg"/>
 </Relationships>';
     }
 

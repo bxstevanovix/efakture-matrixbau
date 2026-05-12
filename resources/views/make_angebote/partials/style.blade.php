@@ -589,9 +589,9 @@
     .page-counter {
         position: absolute;
         right: 0;
-        bottom: -5mm;
+        top: -5mm;
         display: none;
-        color: #888;
+        color: #000;
         text-align: right;
     }
 

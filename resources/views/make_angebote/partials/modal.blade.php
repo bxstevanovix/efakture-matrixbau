@@ -124,7 +124,7 @@
                                     >
                                 </div>
 
-                                <div class="mb-3 col-md-4">
+                                <div class="mb-3 col-md-4 angebot-number-field">
                                     <label for="rechnung_nr" class="form-label">Angebot Nr.</label>
                                     <input
                                         id="rechnung_nr"
@@ -138,7 +138,7 @@
                                     <div class="text-danger rechnung-error"></div>
                                 </div>
 
-                                <div class="mb-3 col-md-4">
+                                <div class="mb-3 col-md-4 ausfuehrungszeit-field">
                                     <label for="ausführungszeit" class="form-label">Ausführungszeit</label>
                                     <input
                                         id="ausführungszeit"
@@ -171,32 +171,32 @@
                             </button>
 
                             <div class="row angebot-field-row">
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-3 discount-percent-field">
                                     <label for="discount_percent" class="form-label">Nachlass %</label>
                                     <input type="number" id="discount_percent" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
                                 </div>
 
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-3 discount-fixed-field">
                                     <label for="discount_fixed" class="form-label">Nachlass Pauschale €</label>
                                     <input type="number" id="discount_fixed" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
                                 </div>
 
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-3 deckungs-field">
                                     <label for="deckungsrucklass_percent" class="form-label">Deckungsrücklass %</label>
                                     <input type="number" id="deckungsrucklass_percent" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
                                 </div>
 
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-3 abzug-label-field">
                                     <label for="abzug_tr_label" class="form-label">Abz. TR Text</label>
                                     <input type="text" id="abzug_tr_label" class="form-control text-center" value="Abz. TR 1" maxlength="40" autocomplete="off">
                                 </div>
 
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-3 abzug-value-field">
                                     <label for="abzug_tr1" class="form-label">Abz. TR €</label>
                                     <input type="number" id="abzug_tr1" class="form-control text-center" value="0" min="0" step="1" autocomplete="off">
                                 </div>
 
-                                <div class="col-md-2 mb-3">
+                                <div class="col-md-2 mb-3 tax-field">
                                     <div class="form-check mt-md-4 pt-md-2">
                                         <input type="checkbox" id="use_tax" class="form-check-input" autocomplete="off">
                                         <label class="form-check-label" for="use_tax">20% MwSt</label>

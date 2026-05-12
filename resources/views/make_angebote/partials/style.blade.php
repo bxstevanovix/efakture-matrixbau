@@ -646,6 +646,65 @@
             padding: 14px !important;
         }
 
+        .angebot-number-field,
+        .ausfuehrungszeit-field,
+        .discount-percent-field,
+        .discount-fixed-field,
+        .deckungs-field,
+        .tax-field,
+        .abzug-label-field,
+        .abzug-value-field {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+
+        .discount-percent-field {
+            order: 1;
+        }
+
+        .discount-fixed-field {
+            order: 2;
+        }
+
+        .deckungs-field {
+            order: 3;
+        }
+
+        .tax-field {
+            order: 4;
+            display: flex;
+            align-items: end;
+            padding-bottom: 2px;
+        }
+
+        .tax-field .form-check {
+            min-height: 38px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 0;
+        }
+
+        .abzug-label-field {
+            order: 5;
+        }
+
+        .abzug-value-field {
+            order: 6;
+        }
+
+        .angebot-number-field .form-label,
+        .ausfuehrungszeit-field .form-label,
+        .discount-percent-field .form-label,
+        .discount-fixed-field .form-label,
+        .deckungs-field .form-label,
+        .abzug-label-field .form-label,
+        .abzug-value-field .form-label {
+            min-height: 34px;
+            display: flex;
+            align-items: end;
+            line-height: 1.15;
+        }
+
         .item-row {
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 8px;

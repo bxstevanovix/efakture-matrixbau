@@ -90,6 +90,22 @@
 	<link href="{{ asset('files/vendor/bootstrap-select/css/bootstrap-select.min.css') }}" rel="stylesheet">
 	<link href="{{ asset('files/css/style.css') }}" rel="stylesheet">
 
+    <style>
+    @media (max-width: 765px) {
+        input,
+        textarea,
+        select,
+        .form-control {
+            font-size: 16px !important;
+        }
+
+        .auth-form input.form-control {
+            font-size: 16px !important;
+            line-height: 24px !important;
+        }
+    }
+    </style>
+
 </head>
 
 <body>

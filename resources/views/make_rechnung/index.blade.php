@@ -571,6 +571,7 @@
 								</tr>
 							</thead>
 						</table>
+						<div class="invoice-table-gap"></div>
 						<table class="invoice-table invoice-table-body">
 							<colgroup>
 								<col class="col-desc">

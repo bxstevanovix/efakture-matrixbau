@@ -356,7 +356,12 @@
     }
 
     .invoice-table-head {
-        margin-bottom: 6px;
+        margin-bottom: 0;
+    }
+
+    .invoice-table-gap {
+        width: 100%;
+        height: 8px;
     }
 
     .invoice-table col.col-desc {

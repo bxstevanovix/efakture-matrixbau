@@ -127,19 +127,19 @@ class DocxAngebotService
     private function companyInfoTable(): string
     {
         return '<w:tbl>
-                <w:tblPr><w:jc w:val="right"/><w:tblW w:w="5000" w:type="dxa"/></w:tblPr>
-                <w:tblGrid><w:gridCol w:w="2200"/><w:gridCol w:w="2800"/></w:tblGrid>
+                <w:tblPr><w:jc w:val="right"/><w:tblW w:w="4700" w:type="dxa"/></w:tblPr>
+                <w:tblGrid><w:gridCol w:w="2100"/><w:gridCol w:w="2600"/></w:tblGrid>
                 <w:tr>
                     ' . $this->plainCell([
                             'MaTrix Bau GmbH',
                             'UID: ATU82609768',
                             'Tel: 0676/480 46 49',
-                        ], 2200, ['color' => '1a64a2', 'size' => 18, 'align' => 'left']) . '
+                        ], 2100, ['color' => '1a64a2', 'size' => 18, 'align' => 'left']) . '
                     ' . $this->plainCell([
                             'Zetschegasse 3/12, 1230 Wien',
                             'Firmenbuchnummer: 658176',
                             'E-mail: office@matrix-bau.at',
-                        ], 2800, ['color' => '1a64a2', 'size' => 18, 'align' => 'left']) . '
+                        ], 2600, ['color' => '1a64a2', 'size' => 18, 'align' => 'left']) . '
                 </w:tr>
             </w:tbl>';
     }

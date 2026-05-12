@@ -369,7 +369,7 @@ function renderBreadcrumb(path) {
             ? '<i class="fa fa-folder text-warning me-1"></i>' 
             : '<i class="fa fa-folder-open text-warning me-1"></i>';
 
-        // ❗ prvi dio (izlazne / ulazne) NIJE klikabilan
+        // ❗ prvi dio (ausgangsrechnungen / eingangsrechnungen) NIJE klikabilan
         if (index === 0) {
             html += `
                 <span class="active">
@@ -399,8 +399,8 @@ function renderBreadcrumb(path) {
 // ✅ FORMAT NAZIVA
 function formatBreadcrumbName(name) {
 
-    if (name === 'izlazne-fakture') return 'Izlazne Fakture';
-    if (name === 'ulazne-fakture') return 'Ulazne Fakture';
+    if (name === 'ausgangsrechnungen') return 'Izlazne Fakture';
+    if (name === 'eingangsrechnungen') return 'Ulazne Fakture';
 
     return name.replaceAll('-', ' ');
 }

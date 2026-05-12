@@ -82,7 +82,8 @@ class DocxAngebotService
         $bvh = trim((string) ($data['bvh'] ?? ''));
         $auftragsnr = trim((string) ($data['auftragsnr'] ?? ''));
         $ausfuehrungszeit = trim((string) ($data['ausfuehrungszeit'] ?? ''));
-        $title = 'Angebot ' . trim((string) ($data['number'] ?? ''));
+        $documentLabel = trim((string) ($data['document_label'] ?? 'Angebot'));
+        $title = $documentLabel . ' ' . trim((string) ($data['number'] ?? ''));
 
         if ($ausfuehrungszeit !== '') {
             $title .= ', Ausführungszeit: ' . $ausfuehrungszeit;

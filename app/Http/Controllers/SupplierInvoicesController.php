@@ -257,7 +257,7 @@ class SupplierInvoicesController extends Controller
         // folder fakture
         $invoiceFolder = str_replace(['/', ' '], '-', $invoice->id_invoice);
 
-        $folder = 'ulazne-fakture/' . $companyFolder . '/' . $invoiceFolder;
+        $folder = 'eingangsrechnungen/' . $companyFolder . '/' . $invoiceFolder;
 
         // originalno ime fajla
         $originalName = $request->file('pdf_file')->getClientOriginalName();

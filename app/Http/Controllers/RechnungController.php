@@ -5,15 +5,19 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request as Request;
 use App\Models\Rechnung as Entity;
 
-use App\Http\Resources\JsonResource;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Firma;
-use Spatie\Browsershot\Browsershot;
 use App\Models\Beschreibung;
+use App\Services\DocxAngebotService;
 use Illuminate\Validation\Rule;
+use Symfony\Component\Process\ExecutableFinder;
+use Symfony\Component\Process\Process;
+use Throwable;
 
 class RechnungController extends Controller 
 {
@@ -46,7 +50,7 @@ class RechnungController extends Controller
                     'schlussrechnung' => 'S'
                 ];
 
-                return $typeMap[$entity->type] . ' - ' . $entity->id_invoice ;
+                return ($typeMap[$entity->type] ?? 'R') . ' - ' . $entity->id_invoice;
             })
 
             ->addColumn('actions', function ($entity) {
@@ -54,10 +58,10 @@ class RechnungController extends Controller
                             ['entity' => $entity]);
             })
             ->editColumn('price', function ($entity) {
-                return "€ " . $entity->price ;
+                return '€ ' . $entity->formatted_price;
             })
             ->editColumn("date_start", function ($entity) {
-                return $entity->date_start->format("d.m.Y");
+                return $entity->date_start ? $entity->date_start->format("d.m.Y") : '-';
             })
             ->editColumn("created_by", function ($entity) {
                 $user = User::find($entity->created_by);
@@ -89,16 +93,27 @@ class RechnungController extends Controller
             'rechnung_nr' => [
                 'required',
                 'string',
-                'max:50',
+                'max:20',
                 Rule::unique('rechnungen', 'id_invoice')->whereNull('deleted_at'),
             ],
             'ausführungszeit' => 'nullable|string|max:100',
             'invoice_note' => 'nullable|string',
-            'total' => 'required',
-            'html' => 'required|string'
+            'total' => 'required|string',
+            'discount_percent' => 'nullable|numeric|min:0|max:100',
+            'discount_fixed' => 'nullable',
+            'deckungsrucklass_percent' => 'nullable|numeric|min:0|max:100',
+            'use_tax' => 'nullable|boolean',
+            'abzug_tr1' => 'nullable',
+            'abzug_tr_label' => 'nullable|string|max:40',
+            'spacing_top' => 'nullable|integer|min:0|max:160',
+            'items' => 'nullable|array',
+            'items.*.name' => 'nullable|string|max:255',
+            'items.*.qty' => 'nullable',
+            'items.*.price' => 'nullable',
+            'items.*.total' => 'nullable',
         ]
         , [
-            'rechnung_nr.unique' => 'Angebotsnummer bereits vergeben!'
+            'rechnung_nr.unique' => 'Rechnungsnummer bereits vergeben!'
         ]);
 
         $type = $data['type'];
@@ -112,84 +127,105 @@ class RechnungController extends Controller
         $rechnungNr = $data['rechnung_nr'] ?? null;
         $ausführungszeit = $data['ausführungszeit'] ?? null;
         $invoiceNote = $data['invoice_note'] ?? null;
+        $items = $this->normalizeItems($data['items'] ?? []);
+        $totalValue = $items
+            ? $this->calculateTotal($items, $data)
+            : $this->parseMoney($data['total']);
 
-        // total format
-        $totalValue = str_replace('.', '', $data['total']);
-        $totalValue = str_replace(',', '.', $totalValue);
-        $totalValue = floatval($totalValue);
+        $folder = $this->folderForType($type);
+        $storagePath = null;
 
-        $html = $data['html'];
+        try {
+            Storage::disk('public')->makeDirectory($folder);
 
-        $pdfBinary = $this->generate($html, $type);
+            $slug = Str::slug($customerName);
+            $number = Str::slug(str_replace('/', '-', $rechnungNr));
+            $timestamp = Carbon::now()->format('dm-Hi');
 
-        $typeMap = [
-            'rechnung' => 'rechnungen',
-            'teilrechnung' => 'teilrechnungen',
-            'schlussrechnung' => 'schlussrechnungen'
-        ];
+            $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
+            $pdfBinary = $this->generateRechnungPdfBinary(
+                $data,
+                $items,
+                $totalValue,
+                $rechnungNr,
+                $filename
+            );
 
-        // folder
-        $folder = $typeMap[$type];
-        Storage::disk('public')->makeDirectory($folder);
+            $storagePath = $folder . '/' . $filename;
+            Storage::disk('public')->put($storagePath, $pdfBinary);
 
-        $slug = Str::slug($customerName);
-        $number = Str::slug(str_replace('/', '-', $rechnungNr));
-        $timestamp = Carbon::now()->format('dm-Hi');
-
-        // filename
-        $filename = $this->getUniqueFileName(
-            storage_path('app/public/' . $folder), "{$number}-{$slug}-{$timestamp}.pdf"
-        );
-
-        $storagePath = $folder . '/' . $filename;
-        Storage::disk('public')->put($storagePath, $pdfBinary);
-
-        if (!Storage::disk('public')->exists($storagePath)) {
-            return response()->json(['error' => 'PDF saving failed'], 500);
-        }
-
-        // snimi invoice
-        $invoice = new Entity();
-
-        $invoice->type = $type;
-        $invoice->id_invoice = $rechnungNr;
-        $invoice->price = $totalValue;
-        $invoice->firma = $customerName;
-        $invoice->adress = $adress;
-        $invoice->ort = $ort;
-        $invoice->uid = $uid;
-        $invoice->bvh = $bvh;
-        $invoice->auftragsnr = $auftragsnr;
-        $invoice->ausfuhrungszeit = $ausführungszeit;
-        $invoice->note = $invoiceNote;
-
-        $invoice->date_start = $dateValue;
-        
-        $invoice->invoice_url = $folder . '/' . $filename;
-        $invoice->created_by = auth()->id();
-
-        $invoice->save();
-
-        if($request->items){
-            foreach ($request->items as $item) {
-
-                Beschreibung::create([
-                    'invoice_type' => 'angebot',
-                    'invoice_id' => $invoice->id,
-
-                    'name'  => $item['name'] ?? null,
-                    'qty'   => $item['qty'] ?? 0,
-                    'price' => $item['price'] ?? 0,
-                    'total' => $item['total'] ?? 0,
-                ]);
+            if (!Storage::disk('public')->exists($storagePath)) {
+                throw new \RuntimeException('PDF saving failed.');
             }
-        }
 
-        return response()->json([
-            'success' => true,
-            'invoice_id' => $invoice->id,
-            'pdf_url' => route('rechnung.view', $invoice->id)
-        ]);
+            $invoice = DB::transaction(function () use (
+                $type,
+                $rechnungNr,
+                $totalValue,
+                $customerName,
+                $adress,
+                $ort,
+                $uid,
+                $bvh,
+                $auftragsnr,
+                $ausführungszeit,
+                $invoiceNote,
+                $dateValue,
+                $storagePath,
+                $items
+            ) {
+                $invoice = Entity::create([
+                    'type' => $type,
+                    'id_invoice' => $rechnungNr,
+                    'price' => number_format($totalValue, 2, '.', ''),
+                    'firma' => $customerName,
+                    'adress' => $adress,
+                    'ort' => $ort,
+                    'uid' => $uid,
+                    'bvh' => $bvh,
+                    'auftragsnr' => $auftragsnr,
+                    'ausfuhrungszeit' => $ausführungszeit,
+                    'note' => $invoiceNote,
+                    'date_start' => $dateValue,
+                    'invoice_url' => $storagePath,
+                    'created_by' => auth()->id(),
+                ]);
+
+                foreach ($items as $item) {
+                    Beschreibung::create([
+                        'invoice_type' => $type,
+                        'invoice_id' => $invoice->id,
+                        'name' => $item['name'],
+                        'qty' => $item['qty'],
+                        'price' => $item['price'],
+                        'total' => $item['total'],
+                    ]);
+                }
+
+                return $invoice;
+            });
+
+            return response()->json([
+                'success' => true,
+                'invoice_id' => $invoice->id,
+                'pdf_url' => route('rechnung.view', $invoice->id)
+            ]);
+        } catch (Throwable $exception) {
+            if ($storagePath && Storage::disk('public')->exists($storagePath)) {
+                Storage::disk('public')->delete($storagePath);
+            }
+
+            Log::error('Rechnung creation failed.', [
+                'rechnung_number' => $rechnungNr,
+                'type' => $type,
+                'storage_path' => $storagePath,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => $this->userFacingRechnungError($exception),
+            ], 500);
+        }
     }
 
     public function viewPdf($id)
@@ -287,422 +323,527 @@ class RechnungController extends Controller
         return $filename;
     }
 
+    private function folderForType(string $type): string
+    {
+        return [
+            'rechnung' => 'rechnungen',
+            'teilrechnung' => 'teilrechnungen',
+            'schlussrechnung' => 'schlussrechnungen',
+        ][$type] ?? 'rechnungen';
+    }
+
+    private function labelForType(string $type): string
+    {
+        return [
+            'rechnung' => 'Rechnung',
+            'teilrechnung' => 'Teilrechnung',
+            'schlussrechnung' => 'Schlussrechnung',
+        ][$type] ?? 'Rechnung';
+    }
+
+    private function normalizeItems(array $items): array
+    {
+        return collect($items)
+            ->map(function ($item) {
+                $name = trim((string) ($item['name'] ?? ''));
+                $qty = trim((string) ($item['qty'] ?? ''));
+                $price = trim((string) ($item['price'] ?? ''));
+                $total = trim((string) ($item['total'] ?? ''));
+
+                return [
+                    'name' => $name,
+                    'qty' => $qty,
+                    'price' => $price,
+                    'total' => number_format($this->parseMoney($total), 2, '.', ''),
+                ];
+            })
+            ->filter(function ($item) {
+                return $item['name'] !== ''
+                    || ($item['qty'] !== '' && $this->parseMoney($item['qty']) !== 0.0)
+                    || $this->parseMoney($item['price']) > 0
+                    || $this->parseMoney($item['total']) > 0;
+            })
+            ->values()
+            ->all();
+    }
+
+    private function calculateTotal(array $items, array $data): float
+    {
+        $subtotal = collect($items)->sum(fn ($item) => $this->parseMoney($item['total'] ?? $item[3] ?? 0));
+
+        $discountPercent = (float) ($data['discount_percent'] ?? 0);
+        $discountFixed = $this->parseMoney($data['discount_fixed'] ?? 0);
+        $deckungsrucklassPercent = (float) ($data['deckungsrucklass_percent'] ?? 0);
+        $abzugTr1 = $this->parseMoney($data['abzug_tr1'] ?? 0);
+        $useTax = filter_var($data['use_tax'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        if ($discountPercent > 0) {
+            $subtotal -= $subtotal * ($discountPercent / 100);
+        }
+
+        if ($discountFixed > 0) {
+            $subtotal -= $discountFixed;
+        }
+
+        if ($deckungsrucklassPercent > 0) {
+            $subtotal -= $subtotal * ($deckungsrucklassPercent / 100);
+        }
+
+        if ($useTax) {
+            $subtotal += $subtotal * 0.20;
+        }
+
+        if ($abzugTr1 > 0) {
+            $subtotal -= $abzugTr1;
+        }
+
+        return round(max($subtotal, 0), 2);
+    }
+
+    private function parseMoney($value): float
+    {
+        $value = trim((string) $value);
+        $value = str_replace(['€', ' '], '', $value);
+
+        if ($value === '') {
+            return 0.0;
+        }
+
+        if (str_contains($value, ',') && str_contains($value, '.')) {
+            $value = str_replace('.', '', $value);
+            $value = str_replace(',', '.', $value);
+        } elseif (str_contains($value, ',')) {
+            $value = str_replace(',', '.', $value);
+        }
+
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    private function generateRechnungPdfBinary(
+        array $data,
+        array $items,
+        float $totalValue,
+        string $rechnungNr,
+        string $filename
+    ): string {
+        try {
+            return $this->generateRechnungPdfBinaryFromDocx($data, $items, $totalValue, $rechnungNr, $filename);
+        } catch (Throwable $exception) {
+            Log::error('DOCX Rechnung PDF generation failed.', [
+                'rechnung_number' => $rechnungNr,
+                'type' => $data['type'] ?? null,
+                'error' => $exception->getMessage(),
+            ]);
+
+            throw $exception;
+        }
+    }
+
+    private function generateRechnungPdfBinaryFromDocx(
+        array $data,
+        array $items,
+        float $totalValue,
+        string $rechnungNr,
+        string $filename
+    ): string {
+        $soffice = $this->findSofficeBinary();
+
+        if (! $soffice) {
+            throw new \RuntimeException('LibreOffice/soffice nije pronađen. Provjeri SOFFICE_PATH ili instalaciju LibreOffice-a u Docker containeru.');
+        }
+
+        $workDir = storage_path('app/docx-rechnungen/' . Str::uuid());
+
+        if (! is_dir($workDir)) {
+            mkdir($workDir, 0775, true);
+        }
+
+        $docxName = pathinfo($filename, PATHINFO_FILENAME) . '.docx';
+        $docxPath = $workDir . '/' . $docxName;
+        $pdfPath = $workDir . '/' . pathinfo($docxName, PATHINFO_FILENAME) . '.pdf';
+        $profileDir = $workDir . '/lo-profile';
+
+        try {
+            $docxData = $this->buildDocxRechnungData($data, $items, $totalValue, $rechnungNr, false);
+
+            app(DocxAngebotService::class)->createFromData($docxPath, $docxData);
+            $this->convertDocxToPdf($soffice, $profileDir, $workDir, $docxPath, $pdfPath);
+            $pdf = file_get_contents($pdfPath);
+
+            if ($this->countPdfPages($pdf) > 1) {
+                $docxData['show_page_numbers'] = true;
+                app(DocxAngebotService::class)->createFromData($docxPath, $docxData);
+
+                if (file_exists($pdfPath)) {
+                    unlink($pdfPath);
+                }
+
+                $this->convertDocxToPdf($soffice, $profileDir, $workDir, $docxPath, $pdfPath);
+                $pdf = file_get_contents($pdfPath);
+            }
+        } finally {
+            $this->deleteDirectory($workDir);
+        }
+
+        return $pdf;
+    }
+
+    private function convertDocxToPdf(string $soffice, string $profileDir, string $workDir, string $docxPath, string $pdfPath): void
+    {
+        $process = new Process([
+            $soffice,
+            '-env:UserInstallation=file://' . $profileDir,
+            '--headless',
+            '--convert-to',
+            'pdf',
+            '--outdir',
+            $workDir,
+            $docxPath,
+        ]);
+        $process->setTimeout(60);
+        $process->run();
+
+        if (! $process->isSuccessful() || ! file_exists($pdfPath)) {
+            $details = trim($process->getErrorOutput() ?: $process->getOutput());
+            $message = 'DOCX to PDF konverzija nije uspjela preko LibreOffice-a'
+                . ' (' . basename($soffice) . ', exit code ' . ($process->getExitCode() ?? 'n/a') . ').';
+
+            throw new \RuntimeException(trim($message . ' ' . $details));
+        }
+    }
+
+    private function userFacingRechnungError(Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+
+        if (
+            str_contains($message, 'LibreOffice')
+            || str_contains($message, 'soffice')
+            || str_contains($message, 'DOCX to PDF')
+        ) {
+            return 'PDF konnte nicht erstellt werden. Bitte prüfen, ob LibreOffice/soffice im Docker-Container installiert ist und SOFFICE_PATH korrekt gesetzt ist.';
+        }
+
+        if (str_contains($message, 'PDF saving failed')) {
+            return 'PDF konnte nicht im Storage gespeichert werden. Bitte prüfen Sie die Storage-Berechtigungen.';
+        }
+
+        return 'Rechnung konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder prüfen Sie die eingegebenen Daten.';
+    }
+
+    private function countPdfPages(string $pdf): int
+    {
+        $searchablePdf = $pdf . "\n" . $this->decodedPdfStreams($pdf);
+
+        if (preg_match_all('/\/Type\s*\/Page(?!s)\b/', $searchablePdf, $matches) > 0) {
+            return count($matches[0]);
+        }
+
+        if (preg_match_all('/\/Count\s+(\d+)/', $searchablePdf, $matches) > 0) {
+            return max(array_map('intval', $matches[1]));
+        }
+
+        return 1;
+    }
+
+    private function decodedPdfStreams(string $pdf): string
+    {
+        if (! preg_match_all('/stream\r?\n(.*?)\r?\nendstream/s', $pdf, $matches)) {
+            return '';
+        }
+
+        $decoded = '';
+
+        foreach ($matches[1] as $stream) {
+            $inflated = @gzuncompress($stream);
+
+            if ($inflated === false) {
+                $inflated = @zlib_decode($stream);
+            }
+
+            if ($inflated === false) {
+                $inflated = @gzinflate($stream);
+            }
+
+            if ($inflated !== false && strlen($inflated) <= 500000) {
+                $decoded .= "\n" . $inflated;
+            }
+        }
+
+        return $decoded;
+    }
+
+    private function buildDocxRechnungData(array $data, array $items, float $totalValue, string $rechnungNr, bool $showPageNumbers = false): array
+    {
+        $subtotal = collect($items)->sum(fn ($item) => $this->parseMoney($item['total'] ?? $item[3] ?? 0));
+        $discountPercent = (float) ($data['discount_percent'] ?? 0);
+        $discountFixed = $this->parseMoney($data['discount_fixed'] ?? 0);
+        $deckungsPercent = (float) ($data['deckungsrucklass_percent'] ?? 0);
+        $abzugTr1 = $this->parseMoney($data['abzug_tr1'] ?? 0);
+        $useTax = filter_var($data['use_tax'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $adjustments = [];
+        $running = $subtotal;
+
+        if ($discountPercent > 0) {
+            $amount = $running * ($discountPercent / 100);
+            $running -= $amount;
+            $adjustments[] = [
+                'label' => '- ' . $this->formatNumber($discountPercent, 0) . '% Nachlass',
+                'amount' => $this->formatMoney($amount),
+                'running_total' => $this->formatMoney($running),
+            ];
+        }
+
+        if ($discountFixed > 0) {
+            $running -= $discountFixed;
+            $adjustments[] = [
+                'label' => '- Pauschale',
+                'amount' => $this->formatMoney($discountFixed),
+                'running_total' => $this->formatMoney($running),
+            ];
+        }
+
+        if ($deckungsPercent > 0) {
+            $amount = $running * ($deckungsPercent / 100);
+            $running -= $amount;
+            $adjustments[] = [
+                'label' => '- ' . $this->formatNumber($deckungsPercent, 0) . '% Deckungsrücklass',
+                'amount' => $this->formatMoney($amount),
+                'running_total' => $this->formatMoney($running),
+            ];
+        }
+
+        if ($useTax) {
+            $amount = $running * 0.20;
+            $running += $amount;
+            $adjustments[] = [
+                'label' => '+ 20% MwSt',
+                'amount' => $this->formatMoney($amount),
+                'running_total' => $this->formatMoney($running),
+            ];
+        }
+
+        if ($abzugTr1 > 0) {
+            $running -= $abzugTr1;
+            $adjustments[] = [
+                'label' => '- ' . $this->abzugTrLabel($data),
+                'amount' => $this->formatMoney($abzugTr1),
+                'running_total' => $this->formatMoney($running),
+            ];
+        }
+
+        return [
+            'document_label' => $this->labelForType((string) ($data['type'] ?? 'rechnung')),
+            'customer_name' => trim((string) ($data['customer_name'] ?? '')),
+            'address' => trim((string) ($data['adress'] ?? '')),
+            'ort' => trim((string) ($data['ort'] ?? '')),
+            'uid' => trim((string) ($data['uid'] ?? '')),
+            'date' => Carbon::parse($data['date'])->format('d.m.Y'),
+            'bvh' => trim((string) ($data['bvh'] ?? '')),
+            'auftragsnr' => trim((string) ($data['auftragsnr'] ?? '')),
+            'number' => $rechnungNr,
+            'ausfuehrungszeit' => trim((string) ($data['ausführungszeit'] ?? '')),
+            'spacing_top' => (int) ($data['spacing_top'] ?? 20),
+            'use_tax' => $useTax,
+            'show_page_numbers' => $showPageNumbers,
+            'note_html' => (string) ($data['invoice_note'] ?? ''),
+            'items' => collect($items)->map(fn ($item) => [
+                $item['name'] ?? $item[0] ?? '',
+                $item['qty'] ?? $item[1] ?? '',
+                $item['price'] ?? $item[2] ?? '',
+                $this->formatMoney($this->parseMoney($item['total'] ?? $item[3] ?? 0)),
+            ])->all(),
+            'summary' => [
+                'subtotal' => $this->formatMoney($subtotal),
+                'adjustments' => $adjustments,
+                'total' => $this->formatMoney($totalValue),
+            ],
+        ];
+    }
+
+    private function findSofficeBinary(): ?string
+    {
+        $candidates = array_filter([
+            env('SOFFICE_PATH'),
+            (new ExecutableFinder())->find('soffice'),
+            (new ExecutableFinder())->find('libreoffice'),
+            '/Applications/LibreOffice.app/Contents/MacOS/soffice',
+        ]);
+
+        foreach ($candidates as $candidate) {
+            if (is_executable($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private function abzugTrLabel(array $data): string
+    {
+        $label = trim((string) ($data['abzug_tr_label'] ?? ''));
+
+        return $label !== '' ? $label : 'Abz. TR 1';
+    }
+
+    private function formatMoney(float $value): string
+    {
+        return number_format(max($value, 0), 2, ',', '.');
+    }
+
+    private function formatNumber(float $value, int $digits = 2): string
+    {
+        return number_format($value, $digits, ',', '.');
+    }
+
+    private function deleteDirectory(string $directory): void
+    {
+        if (! is_dir($directory)) {
+            return;
+        }
+
+        foreach (scandir($directory) ?: [] as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $path = $directory . '/' . $item;
+            is_dir($path) ? $this->deleteDirectory($path) : @unlink($path);
+        }
+
+        @rmdir($directory);
+    }
+
+    public function autocompleteFirma(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+
+        if (mb_strlen($q) < 2) {
+            return $this->autocompleteResponse([]);
+        }
+
+        $rechnungen = Entity::whereNotNull('firma')
+            ->where('firma', '!=', '')
+            ->where(function ($query) use ($q) {
+                $this->applyAutocompleteSearch($query, 'firma', $q);
+            })
+            ->select('firma')
+            ->distinct()
+            ->limit(20)
+            ->pluck('firma');
+
+        $firme = Firma::whereNotNull('name')
+            ->where('name', '!=', '')
+            ->where(function ($query) use ($q) {
+                $this->applyAutocompleteSearch($query, 'name', $q);
+            })
+            ->select('name')
+            ->distinct()
+            ->limit(20)
+            ->pluck('name');
+
+        $results = $this->prepareAutocompleteResults($rechnungen->merge($firme), $q);
+
+        return $this->autocompleteResponse($results);
+    }
+
     public function autocompleteAdress(Request $request)
     {
-        $term = $request->get('q');
+        $q = trim((string) $request->query('q', ''));
 
-        return Entity::where('adress', 'LIKE', "%$term%")
+        if (mb_strlen($q) < 2) {
+            return $this->autocompleteResponse([]);
+        }
+
+        $rechnungen = Entity::whereNotNull('adress')
+            ->where('adress', '!=', '')
+            ->where(function ($query) use ($q) {
+                $this->applyAutocompleteSearch($query, 'adress', $q);
+            })
             ->select('adress')
             ->distinct()
-            ->limit(10)
+            ->limit(20)
             ->pluck('adress');
+
+        $firme = Firma::whereNotNull('address')
+            ->where('address', '!=', '')
+            ->where(function ($query) use ($q) {
+                $this->applyAutocompleteSearch($query, 'address', $q);
+            })
+            ->select('address')
+            ->distinct()
+            ->limit(20)
+            ->pluck('address');
+
+        $results = $this->prepareAutocompleteResults($rechnungen->merge($firme), $q);
+
+        return $this->autocompleteResponse($results);
     }
 
     public function autocompleteBeschreibung(Request $request)
     {
-        $q = $request->q;
+        $q = trim((string) $request->query('q', ''));
 
-        if (!$q || strlen($q) < 2) {
-            return response()->json([]);
+        if (mb_strlen($q) < 2) {
+            return $this->autocompleteResponse([]);
         }
 
-        $results = Beschreibung::where('name', 'LIKE', "%{$q}%")
+        $results = Beschreibung::whereNotNull('name')
+            ->where('name', '!=', '')
+            ->where(function ($query) use ($q) {
+                $this->applyAutocompleteSearch($query, 'name', $q);
+            })
             ->select('name')
             ->distinct()
-            ->limit(10)
+            ->limit(30)
             ->pluck('name');
 
-        return response()->json($results);
+        $results = $this->prepareAutocompleteResults($results, $q);
+
+        return $this->autocompleteResponse($results);
     }
 
-    public function generate($html, $type)
+    private function autocompleteResponse($results)
     {
-        // Putanja do slike u public folderu
-        $logoPath = public_path('img/cist-beli-logo.jpg');
-
-        // Pretvori sliku u Base64 za PDF
-        if (file_exists($logoPath)) {
-            $logoBase64 = base64_encode(file_get_contents($logoPath));
-            $html = str_replace(
-                'img/cist-beli-logo.jpg',
-                'data:image/png;base64,' . $logoBase64,
-                $html
-            );
-        }
-
-        $title = ucfirst($type) . " PDF";
-
-        $fullHtml = "
-        <html>
-        <head>
-            <meta charset='utf-8'>
-            <title>" . $title . "</title>
-            <style>
-            body {
-                font-family: Arial, sans-serif;
-            }
-
-
-            @page {
-                margin: 5mm 15mm 5mm 15mm;
-            }
-
-            .a4-preview {
-                font-family: Arial, sans-serif;
-            }
-		
-            .a4-wrapper {
-                zoom: 1;
-            }
-
-            .a4-preview {
-                background: #fff;
-                box-sizing: border-box;
-                position: relative;  
-                color: #000 !important;
-                font-size:12px;
-            }
-
-            .header-a4 {
-                height: 210px;
-                display: flex;
-                flex-direction: column;
-                justify-content: flex-start;
-                position: relative;
-            }
-
-            .company-logo {
-                width: 285px;
-                margin-left: auto; /* guramo logo desno */
-            }
-
-            .company-logo img {
-                width: 100%;
-                display: block;
-            }
-
-            .company-text {
-                display: flex;
-                justify-content: flex-end;
-                width: 100%;
-                font-size: 10px;
-                gap: 1%;
-            }
-
-            .company-text-left {
-                width: 15%;
-            }
-
-            .company-text-right {
-                width: 23%;
-            }
-
-            .company-text-left p,
-            .company-text-right p {
-                margin: 3px 0;
-                line-height: 1.2;
-                color: #1a64a2;
-                font-size: 10px;
-            }
-
-            .firma {
-                margin-top: 5px;
-            }
-
-                .customer-lead {
-                    font-size: 12px;
-                    text-align: left;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-
-                .firma-hr {
-                    width: 350px;
-                    max-width: 100%;
-                    height: 1px;
-                    background-color: black;
-                    margin: 5px 0;
-                }
-                        
-                .invoice-table{
-                    width:100%;
-                    table-layout:fixed;
-                    border-collapse:collapse;
-                    border: 1px solid black;
-                }
-
-                /* širine kolona */
-                .invoice-table col.col-desc{
-                    width: calc(100% - 300px);
-                }
-
-                .invoice-table col.col-qty{
-                    width: 100px;
-                }
-
-                .invoice-table col.col-price{
-                    width: 100px;
-                }
-
-                .invoice-table col.col-total{
-                    width: 100px;
-                }
-
-                /* cell stil */
-                .invoice-table th,
-                .invoice-table td{
-                    padding:4px 8px;
-                    border-bottom: 1px solid black;
-                    line-height: 1.25;
-                    vertical-align:middle;
-                }
-
-                /* alignment */
-                .invoice-table td:nth-child(2),
-                .invoice-table td:nth-child(3),
-                .invoice-table td:nth-child(4){
-                    text-align:center;
-                    white-space:nowrap;
-                    border-left: 1px solid black;
-                }
-
-                /* opis kolona */
-                .invoice-table td:nth-child(1){
-                    text-align:left;
-                    word-break: break-word; /* KLJUČNO */
-                }
-
-                .invoice-table {
-                    font-family: Arial, sans-serif;
-                    font-size: 12px;
-                }
-
-                .invoice-table th:not(:first-child),
-                .invoice-table td:not(:first-child){
-                    border-left: 1px solid black;
-                }
-
-                .invoice-table th:first-child,
-                .invoice-table td:first-child {
-                    text-align: left !important;
-                }
-
-
-
-
-
-
-                .item-row{
-                display:flex;
-                align-items:center;
-                gap:10px;
-                width:100%;
-                margin-bottom:8px;
-                }
-
-                .item-name{
-                flex:1;
-                }
-
-                .item-qty{
-                width:125px;
-                flex-shrink:0;
-                text-align:center;
-                }
-
-                .item-price{
-                width:120px;
-                flex-shrink:0;
-                text-align:center;
-                }
-
-                .item-total{
-                width:115px;
-                flex-shrink:0;
-                text-align:right;
-                font-weight:600;
-                padding-right:10px;	
-                }
-
-                .remove-item{
-                width:34px;
-                height:34px;
-                border:none;
-                border-radius:6px;
-                background:#e74c3c;
-                color:white;
-                font-weight:bold;
-                cursor:pointer;
-                transition:0.2s;
-                }
-
-                .remove-item:hover{
-                background:#c0392b;
-                }
-
-                .qty-group{
-                display:flex;
-                width:175px;
-                }
-
-                .item-qty{
-                width:110px;
-                text-align:center;
-                }
-
-                .item-unit{
-                width:70px;
-                border-left:0;
-                }
-
-                /* uklanja strelice u Chrome, Edge, Safari */
-                .item-qty::-webkit-inner-spin-button,
-                .item-qty::-webkit-outer-spin-button{
-                    -webkit-appearance: none;
-                    margin: 0;
-                }
-
-                /* uklanja strelice u Firefox */
-                .item-qty{
-                    -moz-appearance: textfield;
-                }
-
-                #reverse_vat_note {
-                    width: 100%;
-                    margin-top: 50px; /* 50px ispod tabele */
-                    font-size: 12px;
-                    color: #666;
-                    text-align: center;
-                }
-
-                .invoice-footer {
-                    text-align:center;
-                    position: fixed;
-                    bottom: 5mm;
-                    left: 0;
-                    right: 0;
-                }
-
-                .form-control {
-                    color: black !important;
-                }
-
-                .card {
-                    height: auto !important;
-                }
-                .card-body {
-                    padding: 5px !important;
-                }
-
-                .doc-card{
-                    border:1px solid #ddd;
-                    border-radius:8px;
-                    padding:12px;
-                    text-align:center;
-                    cursor:pointer;
-                    transition:all .2s;
-                    background:#fff;
-                }
-
-                .doc-card:hover{
-                    border-color:#0d6efd;
-                }
-
-                .doc-card.active{
-                    border:2px solid #0d6efd;
-                    background:#f3f7ff;
-                    color:#0d6efd;
-                }
-
-                .a4-preview{
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                }
-
-                *{
-                    -webkit-font-smoothing: none;
-                    text-rendering: geometricPrecision;
-                }
-
-                .remove-item {
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    background-color: #ff4d4f;
-                    color: white;
-                    border: none;
-                    cursor: pointer;
-
-                    font-size: 18px;
-                    font-weight: bold;
-                    line-height: 1;
-                }
-
-                .remove-item:hover {
-                    background-color: #d9363e;
-                }
-
-                .autocomplete-box {
-                    position: absolute;
-                    top: 100%;
-                    left: 0;
-                    width: 100%;          /* 🔥 KLJUČ */
-                    background: #fff;
-                    border: 1px solid #ddd;
-                    z-index: 9999;
-                    max-height: 200px;
-                    overflow-y: auto;
-                    box-sizing: border-box;
-                }
-
-                .autocomplete-item {
-                    padding: 8px;
-                    cursor: pointer;
-                }
-
-                .autocomplete-item {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-
-                .autocomplete-item:hover {
-                    background: #f2f2f2;
-                }
-
-                .ql-editor {
-                    font-family: Arial, Helvetica, sans-serif;
-                }
-
-                #p_invoice_note p {
-                    margin: 0 0 4px 0;
-                }
-
-                #p_invoice_note ul,
-                #p_invoice_note ol {
-                    margin: 0 0 4px 15px;
-                    padding: 0;
-                }
-
-                #p_invoice_note strong {
-                    font-weight: bold;
-                }
-
-	        </style>
-        </head>
-        <body>
-            $html
-        </body>
-        </html>
-        ";
-
-        return Browsershot::html($fullHtml)
-                ->noSandbox()
-                ->format('A4')
-                ->showBackground()
-                ->pdf();
+        return response()->json($results)
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->header('Pragma', 'no-cache');
+    }
+
+    private function applyAutocompleteSearch($query, string $column, string $term): void
+    {
+        $normalizedTerm = $this->normalizeAutocompleteTerm($term);
+        $normalizedColumn = "REPLACE(REPLACE(REPLACE(REPLACE(LOWER({$column}), 'ä', 'ae'), 'ö', 'oe'), 'ü', 'ue'), 'ß', 'ss')";
+
+        $query->where($column, 'LIKE', "%{$term}%")
+            ->orWhereRaw("{$normalizedColumn} LIKE ?", ["%{$normalizedTerm}%"]);
+    }
+
+    private function prepareAutocompleteResults($values, string $term)
+    {
+        $normalizedTerm = $this->normalizeAutocompleteTerm($term);
+
+        return collect($values)
+            ->filter(fn ($value) => trim((string) $value) !== '')
+            ->filter(function ($value) use ($term, $normalizedTerm) {
+                $value = (string) $value;
+
+                return mb_stripos($value, $term) !== false
+                    || str_contains($this->normalizeAutocompleteTerm($value), $normalizedTerm);
+            })
+            ->unique(fn ($value) => $this->normalizeAutocompleteTerm((string) $value))
+            ->values()
+            ->take(10);
+    }
+
+    private function normalizeAutocompleteTerm(string $value): string
+    {
+        $value = mb_strtolower(trim($value));
+
+        return str_replace(
+            ['ä', 'ö', 'ü', 'ß'],
+            ['ae', 'oe', 'ue', 'ss'],
+            $value
+        );
     }
 }

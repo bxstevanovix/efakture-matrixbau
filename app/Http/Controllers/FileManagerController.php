@@ -24,7 +24,7 @@ class FileManagerController extends Controller
                     'type' => 'Folder',
                     'size' => '-',
                     'date' => '-',
-                    'path' => 'izlazne-fakture/' . $folderName,
+                    'path' => 'ausgangsrechnungen/' . $folderName,
                     'is_dir' => true
                 ],
                 [
@@ -32,7 +32,7 @@ class FileManagerController extends Controller
                     'type' => 'Folder',
                     'size' => '-',
                     'date' => '-',
-                    'path' => 'ulazne-fakture/' . $folderName,
+                    'path' => 'eingangsrechnungen/' . $folderName,
                     'is_dir' => true
                 ]
             ]);

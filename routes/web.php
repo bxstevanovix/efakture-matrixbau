@@ -112,6 +112,7 @@ Route::middleware('auth')->group(function () {
         // Autocomplete za firma i adress
         Route::get('/autocomplete/firma', [RechnungController::class, 'autocompleteFirma']);
         Route::get('/autocomplete/adress', [RechnungController::class, 'autocompleteAdress']);
+        Route::get('/autocomplete/beschreibung', [RechnungController::class, 'autocompleteBeschreibung']);
     });
 
     // PROFILE

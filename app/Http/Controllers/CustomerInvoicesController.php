@@ -259,7 +259,7 @@ class CustomerInvoicesController extends Controller
         // folder fakture
         $invoiceFolder = str_replace(['/', ' '], '-', $invoice->id_invoice);
 
-        $folder = 'izlazne-fakture/' . $companyFolder . '/' . $invoiceFolder;
+        $folder = 'ausgangsrechnungen/' . $companyFolder . '/' . $invoiceFolder;
 
         // originalno ime fajla
         $originalName = $request->file('pdf_file')->getClientOriginalName();
@@ -301,7 +301,7 @@ class CustomerInvoicesController extends Controller
         // folder fakture
         $invoiceFolder = str_replace(['/', ' '], '-', $invoice->id_invoice);
 
-        $folder = 'izlazne-fakture/' . $companyFolder . '/' . $invoiceFolder;
+        $folder = 'ausgangsrechnungen/' . $companyFolder . '/' . $invoiceFolder;
 
         // originalno ime fajla
         $originalName = $request->file('pdf_file')->getClientOriginalName();

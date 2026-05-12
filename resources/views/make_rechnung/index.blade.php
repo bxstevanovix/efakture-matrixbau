@@ -328,11 +328,8 @@
 @push('footer_scripts')
 	<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 	<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 	<script>
 		$(function() {
-
-			// QUILL ---------------------------------------------------
 			const quill = new Quill('#editor', {
 				theme: 'snow',
 				placeholder: 'Optionaler Text...',
@@ -346,14 +343,14 @@
 				}
 			});
 
-			quill.on('text-change', function () {
-				document.getElementById("p_invoice_note").innerHTML = `<div class="ql-editor">${quill.root.innerHTML}</div>`;
-			});
-			// QUILL END -----------------------------------------------
+			const documentLabels = {
+				rechnung: 'Rechnung',
+				teilrechnung: 'Teilrechnung',
+				schlussrechnung: 'Schlussrechnung'
+			};
 
-			// DATATABLES
-			let datatableUrl = "{{ route('rechnung.datatable') }}";
-			let tableLabels = [
+			const datatableUrl = "{{ route('rechnung.datatable') }}";
+			const tableLabels = [
 				@json(__('ID')),
 				@json(__('Firma')),
 				@json(__('Adresa')),
@@ -362,82 +359,82 @@
 				@json(__('Cijena')),
 				@json(__('Opcije'))
 			];
+
 			$('#exampledb').DataTable({
-				"processing": true,
-				"serverSide": true,
-				"responsive": false,
-				"autoWidth": false,
-				"ajax": { url: datatableUrl, type: "post" },
-				"columns": [
-					{"data": "id_invoice", "name": "id_invoice", width: "10%"},
-					{"data": "firma", width: "22%", orderable:false,},
-					{"data": "adress", width: "22%", orderable:false,},
-					{"data": "date_start", width: "10%", orderable:false,},
-					{"data": "created_by", width: "16%", orderable:false,},
-					{"data": "price", width: "10%", orderable:false,},
-					{"data": "actions", width: "10%", orderable:false, searchable:false, className:"text-right"}
+				processing: true,
+				serverSide: true,
+				responsive: false,
+				autoWidth: false,
+				ajax: { url: datatableUrl, type: "post" },
+				columns: [
+					{ data: "id_invoice", name: "id_invoice", width: "10%" },
+					{ data: "firma", width: "22%", orderable: false },
+					{ data: "adress", width: "22%", orderable: false },
+					{ data: "date_start", width: "10%", orderable: false },
+					{ data: "created_by", width: "16%", orderable: false },
+					{ data: "price", width: "10%", orderable: false },
+					{ data: "actions", width: "10%", orderable: false, searchable: false, className: "text-right" }
 				],
-				"language": {
-					"search": "Suchen:",
-					"paginate": { "previous": '<i class="fa-solid fa-angle-left"></i>', "next": '<i class="fa-solid fa-angle-right"></i>' }
+				language: {
+					search: "Suchen:",
+					paginate: {
+						previous: '<i class="fa-solid fa-angle-left"></i>',
+						next: '<i class="fa-solid fa-angle-right"></i>'
+					}
 				},
-				"order": [[0, "desc"]],
-				"createdRow": function(row) {
+				order: [[0, "desc"]],
+				createdRow: function(row) {
 					$('td', row).each(function(index) {
 						$(this).attr('data-label', tableLabels[index] || '');
 					});
 				},
-				"drawCallback": function() {
-					let api = this.api();
-					let pageInfo = api.page.info();
+				drawCallback: function() {
+					const api = this.api();
+					const pageInfo = api.page.info();
+					const paginate = $(api.table().container()).find('.dataTables_paginate');
 
 					if (pageInfo.pages <= 1) {
-						$(api.table().container()).find('.dataTables_paginate').hide();
+						paginate.hide();
 					} else {
-						$(api.table().container()).find('.dataTables_paginate').show();
+						paginate.show();
 					}
 				}
 			});
 
-			// OPEN MODAL
 			const modal = document.getElementById("invoiceModal");
-			document.getElementById("openModal").onclick = () => modal.style.display = "block";
-
+			const a4Wrapper = document.getElementById("a4wrapper");
+			const previewPages = document.getElementById("previewPages");
 			const itemsContainer = document.getElementById("items");
-			const previewItems = document.getElementById("previewItems");
+			const createButton = document.getElementById("createInvoice");
+			const invoiceTypeInput = document.getElementById("invoice_type");
+			let itemIndex = 1;
 
-			itemsContainer.addEventListener("input", function(e){
-				if(e.target.matches("input, select")){
+			document.getElementById("openModal").onclick = () => {
+				modal.style.display = "block";
+				updatePreview();
+				setTimeout(scalePreview, 0);
+			};
+
+			document.querySelectorAll('.doc-card').forEach(card => {
+				card.addEventListener('click', function() {
+					document.querySelectorAll('.doc-card').forEach(item => item.classList.remove('active'));
+					this.classList.add('active');
+					invoiceTypeInput.value = this.dataset.type || 'rechnung';
 					updatePreview();
-				}
+				});
 			});
 
-			itemsContainer.addEventListener("change", function(e){
-				if(e.target.matches("select")){
-					updatePreview();
-				}
-			});
-
-			let index = 1;
-			// ADD ITEM
-			document.getElementById("addItem").onclick = function(){
+			document.getElementById("addItem").onclick = function() {
 				const row = document.createElement("div");
-				row.classList.add("item-row","col-12");
+				row.classList.add("item-row", "col-12");
 				row.innerHTML = `
-					<div style="position:relative; flex: 2;">
-						<input 
-							name="items[${index}][name]" 
-							type="text" 
-							class="item-name form-control" 
-							placeholder="Beschreibung"
-							autocomplete="off"
-						>
-
+					<div style="position:relative;">
+						<input name="items[${itemIndex}][name]" type="text" class="item-name form-control" placeholder="Beschreibung" maxlength="255" autocomplete="off">
 						<div class="autocomplete-box beschreibung-box"></div>
 					</div>
-					<input name="items[${index}][qty]" type="text" class="item-qty form-control" value="0">
-					<input name="items[${index}][price]" type="text" class="item-price form-control" value="0">
-					<input name="items[${index}][total]" type="text" class="item-total form-control" value="0">
+					<input name="items[${itemIndex}][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">
+					<input name="items[${itemIndex}][price]" type="text" class="item-price form-control" value="0" autocomplete="off">
+					<input name="items[${itemIndex}][total]" type="text" class="item-total form-control" value="0" autocomplete="off">
 					<button type="button" class="remove-item text-center"><i class="fa fa-times"></i></button>
 				`;
 
@@ -447,479 +444,720 @@
 				};
 
 				itemsContainer.appendChild(row);
+				itemIndex++;
 				updatePreview();
-
-				index++;
 			};
 
-			document.querySelectorAll("#customer_name, #adress, #ort, #uid, #date, #bvh, #rechnung_nr, #auftragsnr, #ausführungszeit, #discount_percent, #use_tax, #invoice_note")
-			.forEach(input => input.addEventListener("input", updatePreview));
+			itemsContainer.addEventListener("input", function(e) {
+				if (e.target.matches("input, select")) {
+					updatePreview();
+				}
+			});
+
+			itemsContainer.addEventListener("change", function(e) {
+				if (e.target.matches("input, select")) {
+					updatePreview();
+				}
+			});
+
+			document.querySelectorAll([
+				"#customer_name",
+				"#adress",
+				"#ort",
+				"#uid",
+				"#date",
+				"#bvh",
+				"#rechnung_nr",
+				"#auftragsnr",
+				"#ausführungszeit",
+				"#discount_percent",
+				"#discount_fixed",
+				"#deckungsrucklass_percent",
+				"#abzug_tr1",
+				"#abzug_tr_label",
+				"#use_tax",
+				"#spacing_input",
+				"#invoice_type"
+			].join(',')).forEach(input => {
+				input.addEventListener("input", updatePreview);
+				input.addEventListener("change", updatePreview);
+			});
+
+			quill.on('editor-change', updatePreview);
 
 			function updatePreview() {
-				document.getElementById("p_customer_name").innerText =
-					document.getElementById("customer_name").value;
+				const data = getPreviewData();
+				const items = getItems(false);
+				const previewItems = items.length ? items : [{ name: '', qty: '', price: '', total: 0 }];
+				const totals = calculateTotals(items);
 
-				document.getElementById("p_adress").innerText =
-					document.getElementById("adress").value;
+				previewPages.innerHTML = '';
 
-				document.getElementById("p_ort").innerText =
-					document.getElementById("ort").value;
+				let page = createPage(data, false, true);
+				let tbody = page.querySelector('.preview-items');
 
-				document.getElementById("p_uid").innerText =
-					document.getElementById("uid").value;
-				
-				document.getElementById("p_bvh").innerText =
-					document.getElementById("bvh").value;
+				previewItems.forEach(item => {
+					const row = createItemRow(item);
+					tbody.appendChild(row);
 
-				document.getElementById("p_rechnung_nr").innerText =
-					document.getElementById("rechnung_nr").value;
-
-				document.getElementById("p_auftragsnr").innerText =
-					document.getElementById("auftragsnr").value;	
-
-				document.getElementById("p_ausführungszeit").innerText =
-					document.getElementById("ausführungszeit").value;
-
-				document.getElementById("p_invoice_note").innerHTML = `<div class="ql-editor">${quill.root.innerHTML}</div>`;
-
-				let dateValue = document.getElementById("date").value;
-				if (dateValue) {
-					let d = new Date(dateValue);
-					let day = String(d.getDate()).padStart(2, '0');
-					let month = String(d.getMonth() + 1).padStart(2, '0');
-					let year = d.getFullYear();
-					document.getElementById("p_date").innerText = `${day}.${month}.${year}`;
-				}
-
-				let total = 0;
-				previewItems.innerHTML = "";
-				document.querySelectorAll(".item-row").forEach(row => {
-					const name = row.querySelector(".item-name")?.value || "";
-					let qtyVal = row.querySelector(".item-qty")?.value || "";
-					let priceVal = row.querySelector(".item-price")?.value || "";
-					let totalVal = row.querySelector(".item-total")?.value || "";
-					let rowTotal = parseFloat(totalVal.replace(/\./g,"").replace(",", "."));
-
-					if(!isNaN(rowTotal)){
-						total += rowTotal;
+					if (pageIsOverflowing(page) && tbody.children.length > 1) {
+						row.remove();
+						page = createPage(data, true, true);
+						tbody = page.querySelector('.preview-items');
+						tbody.appendChild(row);
 					}
-
-					previewItems.innerHTML += `
-					<tr>
-						<td>${name}</td>
-						<td>${qtyVal}</td>
-						<td>${priceVal}</td>
-						<td>
-							<span style="float:left;">€</span>
-							<span style="float:right;">${!isNaN(rowTotal) ? formatEuro(rowTotal) : ""}</span>
-						</td>
-					</tr>
-					`;
-
 				});
 
-				let subtotal = total;
+				const summary = createSummary(data, totals);
+				page.querySelector('.angebot-page-content').appendChild(summary);
 
-				document.getElementById("p_subtotal").innerText = formatEuro(subtotal);
-
-				let discount = 0;
-				let tax = 0;
-				let deckungsrucklass = 0;
-
-				let discountPercent = parseFloat(document.getElementById("discount_percent")?.value) || 0;
-				let discountFixed = parseFloat(document.getElementById("discount_fixed")?.value) || 0;
-				let deckungsPercent = parseFloat(document.getElementById("deckungsrucklass_percent")?.value) || 0;
-				let abzTr1 = parseFloat(document.getElementById("abzug_tr1")?.value) || 0;
-
-				const useTax = document.getElementById("use_tax")?.checked;
-
-				/* NACHLASS */
-				if(discountPercent > 0){
-					discount = subtotal * (discountPercent / 100);
-					subtotal = subtotal - discount;
-					document.getElementById("discount_row").style.display = "flex";
-					document.getElementById("p_discount").innerText = formatEuro(discount);
-					document.querySelector("#discount_row span:first-child").innerText = "- " + discountPercent + "% Nachlass";
-				}else{
-					document.getElementById("discount_row").style.display = "none";
+				if (pageIsOverflowing(page) && items.length > 0) {
+					summary.remove();
+					page = createPage(data, true, false);
+					page.querySelector('.angebot-page-content').appendChild(summary);
 				}
 
-				/* NACHLASS PAUSCHALE */
-				if(discountFixed > 0){
-					subtotal = subtotal - discountFixed;
-					document.getElementById("discount_fixed_row").style.display = "flex";
-					document.getElementById("p_discount_fixed").innerText = formatEuro(discountFixed);
-				}else{
-					document.getElementById("discount_fixed_row").style.display = "none";
-				}
-
-				/* DECKUNGSRÜCKLASS */
-				if(deckungsPercent > 0){
-					deckungsrucklass = subtotal * (deckungsPercent / 100);
-					subtotal = subtotal - deckungsrucklass;
-					document.getElementById("deckungsrucklass_row").style.display = "flex";
-					document.getElementById("p_deckungsrucklass").innerText = formatEuro(deckungsrucklass);
-					document.querySelector("#deckungsrucklass_row span:first-child").innerText =
-						"- " + deckungsPercent + "% Deckungsrücklass";
-				}else{
-					document.getElementById("deckungsrucklass_row").style.display = "none";
-				}
-
-				/* MWST */
-				if(useTax){
-					tax = subtotal * 0.20;
-					document.getElementById("tax_row").style.display = "flex";
-					document.getElementById("p_tax").innerText = formatEuro(tax);
-				}else{
-					document.getElementById("tax_row").style.display = "none";
-				}
-				
-				/* FINAL prije TR */
-				let finalTotal = subtotal + tax;
-
-				/* ABZUG TR 1 */
-				if(abzTr1 > 0){
-					finalTotal = finalTotal - abzTr1;
-					document.getElementById("abzug_tr1_row").style.display = "flex";
-					document.getElementById("p_abzug_tr1").innerText = formatEuro(abzTr1);
-				}else{
-					document.getElementById("abzug_tr1_row").style.display = "none";
-				}
-
-				/* FINAL */
-				/* GESAMTBETRAG */
-				document.getElementById("p_total").innerText = formatEuro(finalTotal);
-				
+				updatePageCounters();
+				scalePreview();
 			}
 
+			function getPreviewData() {
+				const type = invoiceTypeInput.value || 'rechnung';
 
-			
-				document.getElementById("createInvoice").onclick = function () {
+				return {
+					type,
+					documentLabel: documentLabels[type] || 'Rechnung',
+					customerName: valueOf('customer_name'),
+					adress: valueOf('adress'),
+					ort: valueOf('ort'),
+					uid: valueOf('uid'),
+					date: formatDisplayDate(valueOf('date')),
+					bvh: valueOf('bvh'),
+					rechnungNumber: valueOf('rechnung_nr'),
+					auftragsnr: valueOf('auftragsnr'),
+					ausfuehrungszeit: valueOf('ausführungszeit'),
+					note: quill.getText().trim() ? quill.root.innerHTML : '',
+					spacing: clamp(parseInt(valueOf('spacing_input'), 10) || 0, 0, 160),
+					discountPercent: parseNumber(valueOf('discount_percent')),
+					discountFixed: parseNumber(valueOf('discount_fixed')),
+					deckungsPercent: parseNumber(valueOf('deckungsrucklass_percent')),
+					abzugTr1: parseNumber(valueOf('abzug_tr1')),
+					abzugTrLabel: valueOf('abzug_tr_label') || 'Abz. TR 1',
+					useTax: document.getElementById('use_tax').checked
+				};
+			}
 
-					const inputs = document.querySelectorAll("input[required]");
+			function createPage(data, isContinuation, includeItemsTable = true) {
+				const page = document.createElement('div');
+				page.className = 'a4-preview';
+				page.innerHTML = `
+					<div class="angebot-page-content">
+						${renderHeader(data)}
+						${isContinuation ? '<div class="page-continuation">Fortsetzung</div>' : ''}
+						${includeItemsTable ? `
+						<table class="invoice-table invoice-table-head">
+							<colgroup>
+								<col class="col-desc">
+								<col class="col-qty">
+								<col class="col-price">
+								<col class="col-total">
+							</colgroup>
+							<thead>
+								<tr>
+									<th>Beschreibung</th>
+									<th>Menge</th>
+									<th>Einzelpreis</th>
+									<th>Betrag</th>
+								</tr>
+							</thead>
+						</table>
+						<table class="invoice-table invoice-table-body">
+							<colgroup>
+								<col class="col-desc">
+								<col class="col-qty">
+								<col class="col-price">
+								<col class="col-total">
+							</colgroup>
+							<tbody class="preview-items"></tbody>
+						</table>` : ''}
+					</div>
+					<div class="invoice-footer">
+						Bankverbindung: Volksbank Niederösterreich AG, BIC: VBOEATWWNOM, IBAN: AT32 4715 0120 1679 0000
+						<span class="page-counter"></span>
+					</div>
+				`;
+				previewPages.appendChild(page);
+				return page;
+			}
 
-					for (let input of inputs) {
+			function renderHeader(data) {
+				const uidLine = data.uid ? `UID-Nummer: ${escapeHtml(data.uid)}` : '';
+				const bvhLine = data.bvh ? `<p>BVH. ${escapeHtml(data.bvh)}</p>` : '';
+				const ausfuehrungszeit = data.ausfuehrungszeit ? `, Ausführungszeit: ${escapeHtml(data.ausfuehrungszeit)}` : '';
 
-						if (!input.value.trim()) {
-							input.classList.add("is-invalid");
-							input.focus();
+				return `
+					<div class="header-a4">
+						<div class="company-logo">
+							<img src="img/cist-beli-logo.jpg" alt="Matrix Bau Logo">
+						</div>
+						<div class="company-text">
+							<div class="company-text-left">
+								<p>MaTrix Bau GmbH</p>
+								<p>UID: ATU82609768</p>
+								<p>Tel: 0676/480 46 49</p>
+							</div>
+							<div class="company-text-right">
+								<p>Zetschegasse 3/12, 1230 Wien</p>
+								<p>Firmenbuchnummer: 658176</p>
+								<p>E-mail: office@matrix-bau.at</p>
+							</div>
+						</div>
+					</div>
+					<div class="firma" style="margin-top:${data.spacing}px;">
+						<p class="customer-lead">${escapeHtml(data.customerName)}</p>
+						<p class="customer-address">${escapeHtml(data.adress)}</p>
+						<p class="customer-address">${escapeHtml(data.ort)}</p>
+					</div>
+					<div class="firma-hr"></div>
+					<div class="customer-meta">
+						<p>${uidLine}</p>
+						<p>Datum: ${escapeHtml(data.date)}</p>
+					</div>
+					<div class="customer">
+						${bvhLine}
+						<p>${escapeHtml(data.auftragsnr)}</p>
+						<p><span class="angebot-title-line">${escapeHtml(data.documentLabel)} ${escapeHtml(data.rechnungNumber)}</span>${ausfuehrungszeit}</p>
+					</div>
+				`;
+			}
+
+			function createItemRow(item) {
+				const tr = document.createElement('tr');
+				const total = Number.isFinite(item.total) ? formatEuro(item.total) : '';
+				tr.innerHTML = `
+					<td>${escapeHtml(item.name)}</td>
+					<td>${escapeHtml(item.qty)}</td>
+					<td>${escapeHtml(item.price)}</td>
+					<td><span class="amount-cell"><span>€</span><span>${total}</span></span></td>
+				`;
+				return tr;
+			}
+
+			function createSummary(data, totals) {
+				const wrapper = document.createElement('div');
+				const afterDiscountPercent = totals.subtotal - totals.discount;
+				const afterDiscountFixed = afterDiscountPercent - data.discountFixed;
+				const afterDeckungsrucklass = afterDiscountFixed - totals.deckungsrucklass;
+				const afterTax = afterDeckungsrucklass + totals.tax;
+				const afterAbzugTr1 = afterTax - data.abzugTr1;
+				const runningTotalRow = value => `
+					<div class="summary-row summary-running-total">
+						<span></span>
+						<span class="summary-amount"><span>${formatEuro(value)}</span></span>
+					</div>`;
+				wrapper.className = 'offer-summary-wrap';
+				wrapper.innerHTML = `
+					<div class="offer-summary">
+						<div class="summary-row">
+							<span>Zwischensumme</span>
+							<span class="summary-amount"><span>${formatEuro(totals.subtotal)}</span></span>
+						</div>
+						${data.discountPercent > 0 ? `
+						<div class="summary-row">
+							<span>- ${formatEuro(data.discountPercent, 0)}% Nachlass</span>
+							<span class="summary-amount"><span>${formatEuro(totals.discount)}</span></span>
+						</div>
+						${runningTotalRow(afterDiscountPercent)}` : ''}
+						${data.discountFixed > 0 ? `
+						<div class="summary-row">
+							<span>- Pauschale</span>
+							<span class="summary-amount"><span>${formatEuro(data.discountFixed)}</span></span>
+						</div>
+						${runningTotalRow(afterDiscountFixed)}` : ''}
+						${data.deckungsPercent > 0 ? `
+						<div class="summary-row">
+							<span>- ${formatEuro(data.deckungsPercent, 0)}% Deckungsrücklass</span>
+							<span class="summary-amount"><span>${formatEuro(totals.deckungsrucklass)}</span></span>
+						</div>
+						${runningTotalRow(afterDeckungsrucklass)}` : ''}
+						${data.useTax ? `
+						<div class="summary-row">
+							<span>+ 20% MwSt</span>
+							<span class="summary-amount"><span>${formatEuro(totals.tax)}</span></span>
+						</div>
+						${runningTotalRow(afterTax)}` : ''}
+						${data.abzugTr1 > 0 ? `
+						<div class="summary-row">
+							<span>- ${escapeHtml(data.abzugTrLabel)}</span>
+							<span class="summary-amount"><span>${formatEuro(data.abzugTr1)}</span></span>
+						</div>
+						${runningTotalRow(afterAbzugTr1)}` : ''}
+						<hr class="summary-divider">
+						<div class="summary-row summary-total">
+							<span>Gesamtbetrag</span>
+							<span class="summary-total-value summary-amount"><span>€</span><span>${formatEuro(totals.total)}</span></span>
+						</div>
+					</div>
+					${data.note ? `<div class="description-left preview-note ql-editor">${data.note}</div>` : ''}
+					${!data.useTax ? '<div class="reverse-vat-note"><p>Bauleistung ohne USt. (MwSt. zahlt Empfänger gemäß §19 Abs. 1a UStG 1994)</p></div>' : ''}
+				`;
+				return wrapper;
+			}
+
+			function calculateTotals(items) {
+				const data = getPreviewData();
+				const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+				const discount = data.discountPercent > 0 ? subtotal * (data.discountPercent / 100) : 0;
+				let afterDiscount = subtotal - discount;
+
+				if (data.discountFixed > 0) {
+					afterDiscount -= data.discountFixed;
+				}
+
+				const deckungsrucklass = data.deckungsPercent > 0 ? afterDiscount * (data.deckungsPercent / 100) : 0;
+				afterDiscount -= deckungsrucklass;
+
+				const tax = data.useTax ? afterDiscount * 0.20 : 0;
+				let total = afterDiscount + tax;
+
+				if (data.abzugTr1 > 0) {
+					total -= data.abzugTr1;
+				}
+
+				return {
+					subtotal: Math.max(subtotal, 0),
+					discount: Math.max(discount, 0),
+					deckungsrucklass: Math.max(deckungsrucklass, 0),
+					tax: Math.max(tax, 0),
+					total: Math.max(total, 0)
+				};
+			}
+
+			function getItems(keepEmpty) {
+				return Array.from(document.querySelectorAll("#items .item-row"))
+					.map(row => {
+						const name = row.querySelector(".item-name")?.value || "";
+						const qty = row.querySelector(".item-qty")?.value || "";
+						const price = row.querySelector(".item-price")?.value || "";
+						const totalRaw = row.querySelector(".item-total")?.value || "";
+
+						return {
+							name: name.trim(),
+							qty: qty.trim(),
+							price: price.trim(),
+							total: parseNumber(totalRaw)
+						};
+					})
+					.filter(item => {
+						if (keepEmpty) {
+							return true;
+						}
+
+						return item.name !== ''
+							|| (item.qty !== '' && parseNumber(item.qty) !== 0)
+							|| parseNumber(item.price) > 0
+							|| item.total > 0;
+					});
+			}
+
+			function pageIsOverflowing(page) {
+				if (!page.getClientRects().length) {
+					return false;
+				}
+
+				const content = page.querySelector('.angebot-page-content');
+				const footer = page.querySelector('.invoice-footer');
+				const children = Array.from(content.children).filter(child => child.getClientRects().length);
+				const contentBottom = children.length
+					? Math.max(...children.map(child => child.getBoundingClientRect().bottom))
+					: content.getBoundingClientRect().bottom;
+
+				return contentBottom > footer.getBoundingClientRect().top - 10;
+			}
+
+			function updatePageCounters() {
+				const pages = previewPages.querySelectorAll('.a4-preview');
+				pages.forEach((page, index) => {
+					const counter = page.querySelector('.page-counter');
+
+					if (pages.length <= 1) {
+						counter.textContent = '';
+						counter.style.display = 'none';
+						return;
+					}
+
+					counter.textContent = `${index + 1}/${pages.length}`;
+					counter.style.display = 'block';
+				});
+			}
+
+			function scalePreview() {
+				if (!a4Wrapper || !previewPages) {
+					return;
+				}
+
+				a4Wrapper.style.transform = '';
+				a4Wrapper.style.height = '';
+
+				if (window.innerWidth >= 1200) {
+					return;
+				}
+
+				const pane = document.querySelector('.modal-right');
+				const available = Math.max((pane?.clientWidth || window.innerWidth) - 24, 280);
+				const scale = Math.min(1, available / 794);
+				const rawHeight = previewPages.scrollHeight;
+
+				a4Wrapper.style.transform = `scale(${scale})`;
+				a4Wrapper.style.height = `${rawHeight * scale}px`;
+			}
+
+			function valueOf(id) {
+				return document.getElementById(id)?.value || '';
+			}
+
+			function parseNumber(value) {
+				let normalized = String(value || '').replace(/[€\s]/g, '').trim();
+
+				if (!normalized) {
+					return 0;
+				}
+
+				if (normalized.includes(',') && normalized.includes('.')) {
+					normalized = normalized.replace(/\./g, '').replace(',', '.');
+				} else if (normalized.includes(',')) {
+					normalized = normalized.replace(',', '.');
+				}
+
+				const parsed = Number.parseFloat(normalized);
+				return Number.isFinite(parsed) ? parsed : 0;
+			}
+
+			function formatEuro(number, digits = 2) {
+				return new Intl.NumberFormat('de-DE', {
+					minimumFractionDigits: digits,
+					maximumFractionDigits: digits
+				}).format(Number(number) || 0);
+			}
+
+			function formatDisplayDate(value) {
+				if (!value) {
+					return '';
+				}
+
+				const parts = value.split('-');
+
+				if (parts.length !== 3) {
+					return value;
+				}
+
+				return `${parts[2]}.${parts[1]}.${parts[0]}`;
+			}
+
+			function escapeHtml(value) {
+				return String(value || '')
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/"/g, '&quot;')
+					.replace(/'/g, '&#039;');
+			}
+
+			function clamp(value, min, max) {
+				return Math.min(Math.max(value, min), max);
+			}
+
+			createButton.onclick = function() {
+				const inputs = document.querySelectorAll("#invoiceModal input[required]");
+
+				for (let input of inputs) {
+					if (!input.value.trim()) {
+						input.classList.add("is-invalid");
+						input.focus();
+						return;
+					}
+				}
+
+				updatePreview();
+
+				const data = getPreviewData();
+				const items = getItems(false);
+				const totals = calculateTotals(items);
+				const originalButtonHtml = createButton.innerHTML;
+
+				createButton.disabled = true;
+				createButton.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Speichern...';
+
+				$.ajax({
+					url: "{{ route('rechnung.store') }}",
+					type: "POST",
+					data: {
+						type: data.type,
+						customer_name: $("#customer_name").val(),
+						adress: $("#adress").val(),
+						ort: $("#ort").val(),
+						uid: $("#uid").val(),
+						date: $("#date").val(),
+						bvh: $("#bvh").val(),
+						auftragsnr: $("#auftragsnr").val(),
+						rechnung_nr: $("#rechnung_nr").val(),
+						ausführungszeit: $("#ausführungszeit").val(),
+						invoice_note: quill.root.innerHTML,
+						total: formatEuro(totals.total),
+						discount_percent: data.discountPercent,
+						discount_fixed: data.discountFixed,
+						deckungsrucklass_percent: data.deckungsPercent,
+						use_tax: data.useTax ? 1 : 0,
+						abzug_tr1: data.abzugTr1,
+						abzug_tr_label: data.abzugTrLabel,
+						spacing_top: data.spacing,
+						items: items,
+						_token: $('meta[name="csrf-token"]').attr('content')
+					},
+					success: function(response) {
+						if (response.pdf_url) {
+							window.open(response.pdf_url, "_blank");
+						}
+
+						modal.style.display = "none";
+						$('#exampledb').DataTable().draw(false);
+					},
+					error: function(xhr) {
+						$('.rechnung-error').text('');
+						$('#rechnung_nr').removeClass('is-invalid');
+
+						if (xhr.status === 422) {
+							const errors = xhr.responseJSON.errors;
+
+							if (errors?.rechnung_nr?.length) {
+								$('#rechnung_nr').addClass('is-invalid');
+								$('.rechnung-error').text(errors.rechnung_nr[0]);
+							}
+
 							return;
 						}
 
+						const message = xhr.responseJSON?.message || 'PDF konnte nicht über DOCX erstellt werden. Bitte prüfen, ob LibreOffice im Docker-Container installiert ist.';
+						alert(message);
+					},
+					complete: function() {
+						createButton.disabled = false;
+						createButton.innerHTML = originalButtonHtml;
+					}
+				});
+			};
+
+			document.getElementById("closeModal").onclick = () => {
+				modal.style.display = "none";
+			};
+
+			window.onclick = function(e) {
+				if (e.target === modal) {
+					modal.style.display = "none";
+				}
+			};
+
+			const minAutocompleteChars = 2;
+
+			function setupAutocomplete(inputId, boxId, url) {
+				const input = document.getElementById(inputId);
+				const box = document.getElementById(boxId);
+				let timeout;
+				let requestId = 0;
+				let activeIndex = -1;
+				let currentItems = [];
+
+				if (!input || !box) {
+					return;
+				}
+
+				function close() {
+					box.innerHTML = '';
+					currentItems = [];
+					activeIndex = -1;
+				}
+
+				function render(items) {
+					currentItems = items;
+					activeIndex = items.length ? 0 : -1;
+					box.innerHTML = '';
+
+					items.forEach((item, index) => {
+						const div = document.createElement('div');
+						div.className = 'autocomplete-item' + (index === activeIndex ? ' is-active' : '');
+						div.textContent = item;
+						div.addEventListener('mousedown', event => {
+							event.preventDefault();
+							input.value = item;
+							close();
+							updatePreview();
+						});
+						box.appendChild(div);
+					});
+				}
+
+				input.addEventListener('input', function() {
+					const query = input.value.trim();
+					clearTimeout(timeout);
+
+					if (query.length < minAutocompleteChars) {
+						close();
+						return;
 					}
 
-					const element = document.getElementById("invoicePreview");
-					const rechnungNr = document.getElementById("rechnung_nr").value;
-					const html = document.getElementById('a4wrapper').innerHTML;
-
-					let items = [];
-
-					document.querySelectorAll(".item-row").forEach(row => {
-						items.push({
-							name: row.querySelector(".item-name")?.value || "",
-							qty: row.querySelector(".item-qty")?.value || 0,
-							price: row.querySelector(".item-price")?.value || 0,
-							total: row.querySelector(".item-total")?.value || 0,
-						});
-					});
-
-					$.ajax({
-						url: "{{ route('rechnung.store') }}",
-						type: "POST",
-						data: {
-							type: $("#invoice_type").val(),
-							customer_name: $("#customer_name").val(),
-							adress: $("#adress").val(),
-							ort: $("#ort").val(),
-							uid: $("#uid").val(),
-							date: $("#date").val(),
-							bvh: $("#bvh").val(),
-							auftragsnr: $("#auftragsnr").val(),
-							rechnung_nr: $("#rechnung_nr").val(),
-							ausführungszeit: $("#ausführungszeit").val(),
-							invoice_note: quill.root.innerHTML,
-							total: $("#p_total").text(),
-							html: html,
-							items: items,
-							_token: $('meta[name="csrf-token"]').attr('content')
-						},
-						success: function(response){
-
-							console.log(response);
-
-							if(response.pdf_url){
-								window.open(response.pdf_url, "_blank");
-							}
-							modal.style.display = "none";
-							$('#exampledb').DataTable().draw(false);
-
-						},
-						error: function(xhr){
-							$('.rechnung-error').text('');
-							$('#rechnung_nr').removeClass('is-invalid');
-
-							if (xhr.status === 422) {
-
-								let errors = xhr.responseJSON.errors;
-
-								if (errors?.rechnung_nr?.length) {
-									$('#rechnung_nr').addClass('is-invalid');
-									$('.rechnung-error').text(errors.rechnung_nr[0]);
+					const currentRequest = ++requestId;
+					timeout = setTimeout(() => {
+						fetch(`${url}?q=${encodeURIComponent(query)}`)
+							.then(response => response.json())
+							.then(items => {
+								if (currentRequest !== requestId) {
+									return;
 								}
-							}
+
+								render(Array.isArray(items) ? items : []);
+							})
+							.catch(close);
+					}, 180);
+				});
+
+				input.addEventListener('keydown', function(event) {
+					if (!currentItems.length) {
+						return;
+					}
+
+					if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+						event.preventDefault();
+						activeIndex = event.key === 'ArrowDown'
+							? (activeIndex + 1) % currentItems.length
+							: (activeIndex - 1 + currentItems.length) % currentItems.length;
+						render(currentItems);
+					}
+
+					if (event.key === 'Enter' && activeIndex >= 0) {
+						event.preventDefault();
+						input.value = currentItems[activeIndex];
+						close();
+						updatePreview();
+					}
+
+					if (event.key === 'Escape') {
+						close();
+					}
+				});
+
+				document.addEventListener('mousedown', function(event) {
+					if (!box.contains(event.target) && event.target !== input) {
+						close();
+					}
+				});
+			}
+
+			function setupBeschreibungAutocomplete() {
+				let timeout;
+
+				document.addEventListener("input", function(e) {
+					if (!e.target.classList.contains("item-name")) {
+						return;
+					}
+
+					const input = e.target;
+					const box = input.parentElement.querySelector(".beschreibung-box");
+					const query = input.value.trim();
+					clearTimeout(timeout);
+
+					if (query.length < minAutocompleteChars) {
+						box.innerHTML = "";
+						return;
+					}
+
+					timeout = setTimeout(() => {
+						fetch(`/rechnung/autocomplete/beschreibung?q=${encodeURIComponent(query)}`)
+							.then(response => response.json())
+							.then(items => {
+								box.innerHTML = "";
+								items.forEach(item => {
+									const div = document.createElement("div");
+									div.classList.add("autocomplete-item");
+									div.innerText = item;
+									div.addEventListener("mousedown", event => {
+										event.preventDefault();
+										input.value = item;
+										box.innerHTML = "";
+										updatePreview();
+									});
+									box.appendChild(div);
+								});
+							});
+					}, 180);
+				});
+
+				document.addEventListener("mousedown", function(e) {
+					document.querySelectorAll(".beschreibung-box").forEach(box => {
+						const input = box.parentElement.querySelector(".item-name");
+
+						if (!box.contains(e.target) && e.target !== input) {
+							box.innerHTML = "";
 						}
 					});
+				});
+			}
 
-				};
+			setupAutocomplete("customer_name", "firma_box", "/rechnung/autocomplete/firma");
+			setupAutocomplete("adress", "adress_box", "/rechnung/autocomplete/adress");
+			setupBeschreibungAutocomplete();
 
+			function setValue(id, value) {
+				const element = document.getElementById(id);
 
-				document.getElementById("closeModal").onclick = () => {
-					modal.style.display = "none";
-				};
-
-				window.onclick = function(e) {
-					if (e.target === modal) {
-						modal.style.display = "none";
-					}
-				};
-
-				function formatEuro(number){
-
-					return new Intl.NumberFormat('de-DE', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2
-					}).format(number);
-
+				if (!element) {
+					return;
 				}
 
-				
+				element.value = value || '';
+				element.dispatchEvent(new Event('input', { bubbles: true }));
+				element.dispatchEvent(new Event('change', { bubbles: true }));
+			}
 
-				// prikaz/skrivanje teksta sa UID-om u previewu
-				document.getElementById("uid").addEventListener("input", function() {
-					let value = this.value.trim();
-					document.getElementById("p_uid").innerText = value;
-					document.getElementById("uid_line").style.display = value ? "block" : "none";
-				});
-				document.getElementById("uid").dispatchEvent(new Event("input"));
-				// prikaz/skrivanje teksta sa BVH-om u previewu
-				document.getElementById("bvh").addEventListener("input", function() {
-					let value = this.value.trim();
-					document.getElementById("p_bvh").innerText = value;
-					document.getElementById("bvh_line").style.display = value ? "block" : "none";
-				});
-				document.getElementById("bvh").dispatchEvent(new Event("input"));
-				// prikaz/skrivanje teksta sa Ausführungszeit-om u previewu
-				document.getElementById("ausführungszeit").addEventListener("input", function() {
-					let value = this.value.trim();
-					document.getElementById("p_ausführungszeit").innerText = value;
-					document.getElementById("ausführungszeit_line").style.display = value ? "inline" : "none";
-				});
-				document.getElementById("ausführungszeit").dispatchEvent(new Event("input"));
+			$('#firma_select').on('change', function() {
+				const selected = $(this).find(':selected')[0];
 
-				// autocomplete za adresu
-				const adressInput = document.getElementById("adress");
-				const adressList = document.getElementById("adress_suggestions");
-				adressInput.addEventListener("input", function(){
-					let value = this.value;
-					if(value.length < 2) return;
-
-					fetch("/rechnung/autocomplete/adress?q=" + value)
-						.then(res => res.json())
-						.then(data => {
-							adressList.innerHTML = "";
-							data.forEach(adress => {
-								let option = document.createElement("option");
-								option.value = adress;
-								adressList.appendChild(option);
-							});
-						});
-				});
-
-				// odabir tipa dokumenta //////////////////////////////////////////////////
-				const cards = document.querySelectorAll('.doc-card');
-				const input = document.getElementById('invoice_type');
-				const label = document.getElementById('rechnung-line');
-				const labels = {
-					rechnung: "Rechnung ",
-					teilrechnung: "Teilrechnung ",
-					schlussrechnung: "Schlussrechnung "
-				};
-				cards.forEach(card => {
-					card.addEventListener('click', function(){
-						cards.forEach(c => c.classList.remove('active'));
-						this.classList.add('active');
-						const type = this.dataset.type;
-						input.value = type;
-						label.textContent = labels[type] || '';
-					});
-				});
-				// default
-				const selected = input.value || "rechnung";
-				const defaultCard = document.querySelector(`.doc-card[data-type="${selected}"]`);
-				if(defaultCard){
-					defaultCard.classList.add('active');
-					label.textContent = labels[selected] || '';
+				if (!this.value || !selected) {
+					return;
 				}
 
-				////////////////////////////////////////////////////////////////////////////
-
-				// prikaz/skrivanje napomene o reverse chargeu kada se uključi/isključi MWST
-				$('#use_tax').on('change', function () {
-					if ($(this).is(':checked')) {
-						$('#reverse_vat_note').hide();
-					} else {
-						$('#reverse_vat_note').show();
-					}
-				});
-
-
-				document.getElementById("discount_percent")?.addEventListener("input", updatePreview);
-				document.getElementById("discount_percent")?.addEventListener("change", updatePreview);
-
-				document.getElementById("use_tax")?.addEventListener("input", updatePreview);
-				document.getElementById("use_tax")?.addEventListener("change", updatePreview);
-
-				document.getElementById("discount_fixed")?.addEventListener("input", updatePreview);
-				document.getElementById("discount_fixed")?.addEventListener("change", updatePreview);
-
-				document.getElementById("deckungsrucklass_percent")?.addEventListener("input", updatePreview);
-				document.getElementById("deckungsrucklass_percent")?.addEventListener("change", updatePreview);
-
-				document.getElementById("abzug_tr1")?.addEventListener("input", updatePreview);
-				document.getElementById("abzug_tr1")?.addEventListener("change", updatePreview);
-				
+				setValue('customer_name', selected.dataset.name);
+				setValue('adress', selected.dataset.adress);
+				setValue('ort', selected.dataset.ort);
+				setValue('uid', selected.dataset.uid);
 				updatePreview();
+			});
 
-				document.querySelectorAll("input").forEach(input => {
-					input.addEventListener("input", () => {
-						input.classList.remove("is-invalid");
-					});
-				});
-
-				$('#rechnung_nr').on('input', function () {
-					$('.rechnung-error').text('');
-					$(this).removeClass('is-invalid');
-				});
-
-				$(function(){
-					const params = new URLSearchParams(window.location.search);
-					if(params.get('openModal') === '1'){
-						modal.style.display = "block";
-						window.history.replaceState({}, document.title, window.location.pathname);
-					}
-				});
-
-				function setValue(id, value){
-					let el = document.getElementById(id);
-					el.value = value || "";
-					el.dispatchEvent(new Event("input"));
-				}
-				const firmaSelect = document.getElementById("firma_select");
-
-				// kad se izabere firma iz selecta
-				$('#firma_select').on('change', function () {
-
-					let selected = $(this).find(':selected')[0];
-
-					if (!this.value || !selected) return;
-
-					setValue("customer_name", selected.dataset.name);
-					setValue("adress", selected.dataset.adress);
-					setValue("ort", selected.dataset.ort);
-					setValue("uid", selected.dataset.uid);
-
-					updatePreview();
-				});
-			
-				document.getElementById("customer_name").addEventListener("input", function(){
-
-					$('#firma_select').val(null).trigger('change'); // select2 reset
-
-					document.getElementById("adress").value = "";
-					document.getElementById("ort").value = "";
-					document.getElementById("uid").value = "";
-
-					updatePreview();
-				});
-
-				["adress","ort","uid"].forEach(id => {
-					document.getElementById(id).dispatchEvent(new Event("input"));
-				});
-
+			if ($.fn.select2) {
 				$('#firma_select').select2({
-					placeholder: "Firma suchen…",
+					placeholder: 'Firma suchen...',
 					allowClear: true,
 					width: '100%'
 				});
+			}
 
-				const inputpx = document.getElementById('spacing_input');
-				const firma = document.getElementById('firma_block');
+			window.addEventListener('resize', scalePreview);
+			updatePreview();
 
-				inputpx.addEventListener('input', function () {
-					let value = parseInt(this.value) || 0;
+			document.querySelectorAll("input").forEach(input => {
+				input.addEventListener("input", () => input.classList.remove("is-invalid"));
+			});
 
-					// zaštita (0–100)
-					if (value < 0) value = 0;
-					if (value > 100) value = 100;
+			$('#rechnung_nr').on('input', function() {
+				$('.rechnung-error').text('');
+				$(this).removeClass('is-invalid');
+			});
 
-					firma.style.marginTop = value + 'px';
-				});
-
-				firma.style.marginTop = inputpx.value + 'px';
-
-				// AUTOCOMPLETE BESCHREIBUNG ------------------------------------------------
-				function setupBeschreibungAutocomplete() {
-					let timeout;
-					document.addEventListener("input", function (e) {
-						if (!e.target.classList.contains("item-name")) return;
-						const input = e.target;
-						const box = input.parentElement.querySelector(".beschreibung-box");
-
-						let query = input.value;
-
-						clearTimeout(timeout);
-
-						if (query.length < 2) {
-							box.innerHTML = "";
-							return;
-						}
-
-						timeout = setTimeout(() => {
-							fetch(`/angebote/autocomplete/beschreibung?q=${encodeURIComponent(query)}`)
-								.then(res => res.json())
-								.then(data => {
-									box.innerHTML = "";
-									data.forEach(item => {
-										const div = document.createElement("div");
-										div.classList.add("autocomplete-item");
-										div.innerText = item;
-										div.addEventListener("click", () => {
-											input.value = item;
-											box.innerHTML = "";
-											updatePreview();
-										});
-										box.appendChild(div);
-									});
-								});
-						}, 300);
-					});
-
-					// zatvaranje na klik van
-					document.addEventListener("click", function (e) {
-						document.querySelectorAll(".beschreibung-box").forEach(box => {
-							const input = box.parentElement.querySelector(".item-name");
-
-							if (!box.contains(e.target) && e.target !== input) {
-								box.innerHTML = "";
-							}
-						});
-					});
-
-				}
-
-				setupBeschreibungAutocomplete();
-				// AUTOCOMPLETE BESCHREIBUNG END --------------------------------------------
+			const params = new URLSearchParams(window.location.search);
+			if (params.get('openModal') === '1') {
+				modal.style.display = "block";
+				updatePreview();
+				window.history.replaceState({}, document.title, window.location.pathname);
+			}
 		});
-
 	</script>
 @endpush

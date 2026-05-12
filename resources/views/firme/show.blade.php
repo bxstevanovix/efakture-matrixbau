@@ -914,8 +914,8 @@ function renderCompanyBreadcrumb(path) {
 }
 
 function formatCompanyBreadcrumbName(name) {
-    if (name === 'izlazne-fakture') return '@lang('Izlazne Fakture')';
-    if (name === 'ulazne-fakture') return '@lang('Ulazne Fakture')';
+    if (name === 'ausgangsrechnungen') return '@lang('Izlazne Fakture')';
+    if (name === 'eingangsrechnungen') return '@lang('Ulazne Fakture')';
 
     return escapeHtml(name).replaceAll('-', ' ');
 }

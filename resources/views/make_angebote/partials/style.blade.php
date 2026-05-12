@@ -616,6 +616,20 @@
         .angebot-modal .modal-right {
             min-height: 420px;
         }
+
+        .note-editor-field,
+        .submit-action-field {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .submit-action-field {
+            clear: both;
+        }
+
+        .angebot-submit-btn {
+            margin-top: 24px;
+        }
     }
 
     @media (max-width: 767px) {
@@ -644,6 +658,21 @@
 
         .angebot-modal .card-body {
             padding: 14px !important;
+        }
+
+        .a4-preview .invoice-table {
+            border: 1px solid #111;
+            box-shadow: inset 0 0 0 1px #111;
+        }
+
+        .a4-preview .invoice-table th,
+        .a4-preview .invoice-table td {
+            border-bottom: 1px solid #111;
+        }
+
+        .a4-preview .invoice-table th:not(:first-child),
+        .a4-preview .invoice-table td:not(:first-child) {
+            border-left: 1px solid #111;
         }
 
         .angebot-number-field,

@@ -231,10 +231,10 @@
                             </div>
 
                             <div class="row">
-                                <div class="mb-3 col-md-8">
+                                <div class="mb-3 col-md-8 note-editor-field">
                                     <div id="editor"></div>
                                 </div>
-                                <div class="mb-3 col-md-4">
+                                <div class="mb-3 col-md-4 submit-action-field">
                                     <button id="createInvoice" type="button" class="btn btn-success waves-effect waves-light angebot-submit-btn">
                                         <i class="fa fa-save me-1"></i>
                                         @lang('Kreiraj račun')

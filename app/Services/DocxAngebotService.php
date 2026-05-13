@@ -119,7 +119,7 @@ class DocxAngebotService
       <w:headerReference w:type="default" r:id="rIdHeader1"/>
       <w:footerReference w:type="default" r:id="rIdFooter1"/>
       <w:pgSz w:w="11906" w:h="16838"/>
-      <w:pgMar w:top="' . $this->mmToTwips(64) . '" w:right="' . $this->mmToTwips(16) . '" w:bottom="' . $this->mmToTwips(28) . '" w:left="' . $this->mmToTwips(16) . '" w:header="' . $this->mmToTwips(4) . '" w:footer="' . $this->mmToTwips(14) . '" w:gutter="0"/>
+      <w:pgMar w:top="' . $this->mmToTwips(64) . '" w:right="870" w:bottom="' . $this->mmToTwips(28) . '" w:left="' . $this->mmToTwips(16) . '" w:header="' . $this->mmToTwips(4) . '" w:footer="' . $this->mmToTwips(14) . '" w:gutter="0"/>
     </w:sectPr>
   </w:body>
 </w:document>';
@@ -252,6 +252,7 @@ class DocxAngebotService
         return '<w:tbl>
   <w:tblPr>
     <w:jc w:val="right"/>
+    <w:tblInd w:w="-500" w:type="dxa"/>
     <w:tblW w:w="4600" w:type="dxa"/>
     <w:tblBorders>
       <w:top w:val="nil"/>

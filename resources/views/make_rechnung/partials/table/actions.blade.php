@@ -19,29 +19,6 @@
         data-cancel-text="@lang('Odustani')">
         <i class="fa fa-trash"></i>
     </button>
-    
-    {{-- <div class="btn-group">
-        <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Opcije</button>
-        <div class="dropdown-menu" style="">
-
-            <button class="btn btn-success create-invoice-btn w-100 d-flex align-items-center justify-content-center mb-2"
-                    data-invoice-id="{{ $entity->id }}">
-                <i class="fa fa-arrow-right"></i>&nbsp;&nbsp;&nbsp; @lang('Faktura')
-            </button>
-
-            <button style="width: 100%;" class="btn btn-danger swal-confirm"
-                data-title="{{ __('Da li ste sigurni da zelite da obrisete racun :id?', ['id' => $entity->id_invoice]) }}"
-                data-desc="@lang('Ova stavka se neće moći vratiti!')"
-                data-id="{{ $entity->id }}"
-                data-url="{{route('rechnung.delete', ['entity' => $entity->id])}}"
-                data-success="@lang('Racun je uspešno obrisan!')"
-                data-table="#exampledb"
-                data-confirm-text="@lang('Obrisi')"
-                data-cancel-text="@lang('Odustani')">
-                <i class="fa fa-trash"></i> Obrisi
-            </button>
-        </div>
-    </div> --}}
 </div>
 
 <script>

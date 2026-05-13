@@ -122,80 +122,98 @@ class AngeboteController extends Controller
             : $this->parseMoney($data['total']);
 
         $folder = 'angebote';
-        Storage::disk('public')->makeDirectory($folder);
+        $storagePath = null;
 
-        $slug = Str::slug($customerName);
-        $number = Str::slug(str_replace('/', '-', $rechnungNr));
-        $timestamp = Carbon::now()->format('dm-Hi');
+        try {
+            Storage::disk('public')->makeDirectory($folder);
 
-        $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
-        $pdfBinary = $this->generateOfferPdfBinary(
-            $data,
-            $items,
-            $totalValue,
-            $rechnungNr,
-            $filename
-        );
+            $slug = Str::slug($customerName);
+            $number = Str::slug(str_replace('/', '-', $rechnungNr));
+            $timestamp = Carbon::now()->format('dm-Hi');
 
-        $storagePath = $folder . '/' . $filename;
-        Storage::disk('public')->put($storagePath, $pdfBinary);
+            $filename = $this->getUniqueFileName($folder, "{$number}-{$slug}-{$timestamp}.pdf");
+            $pdfBinary = $this->generateOfferPdfBinary(
+                $data,
+                $items,
+                $totalValue,
+                $rechnungNr,
+                $filename
+            );
 
-        if (!Storage::disk('public')->exists($storagePath)) {
-            return response()->json(['error' => 'PDF saving failed'], 500);
-        }
+            $storagePath = $folder . '/' . $filename;
+            Storage::disk('public')->put($storagePath, $pdfBinary);
 
-        $invoice = DB::transaction(function () use (
-            $type,
-            $rechnungNr,
-            $totalValue,
-            $customerName,
-            $adress,
-            $ort,
-            $uid,
-            $bvh,
-            $auftragsnr,
-            $ausführungszeit,
-            $invoiceNote,
-            $dateValue,
-            $filename,
-            $items
-        ) {
-            $invoice = Entity::create([
-                'type' => $type,
-                'id_invoice' => $rechnungNr,
-                'price' => number_format($totalValue, 2, '.', ''),
-                'firma' => $customerName,
-                'adress' => $adress,
-                'ort' => $ort,
-                'uid' => $uid,
-                'bvh' => $bvh,
-                'auftragsnr' => $auftragsnr,
-                'ausfuhrungszeit' => $ausführungszeit,
-                'note' => $invoiceNote,
-                'date_start' => $dateValue,
-                'invoice_url' => 'angebote/' . $filename,
-                'created_by' => auth()->id(),
-            ]);
-
-            foreach ($items as $item) {
-                Beschreibung::create([
-                    'invoice_type' => 'angebot',
-                    'invoice_id' => $invoice->id,
-                    'name' => $item['name'],
-                    'qty' => $item['qty'],
-                    'price' => $item['price'],
-                    'total' => $item['total'],
-                ]);
+            if (!Storage::disk('public')->exists($storagePath)) {
+                throw new \RuntimeException('PDF saving failed.');
             }
 
-            return $invoice;
-        });
+            $invoice = DB::transaction(function () use (
+                $type,
+                $rechnungNr,
+                $totalValue,
+                $customerName,
+                $adress,
+                $ort,
+                $uid,
+                $bvh,
+                $auftragsnr,
+                $ausführungszeit,
+                $invoiceNote,
+                $dateValue,
+                $storagePath,
+                $items
+            ) {
+                $invoice = Entity::create([
+                    'type' => $type,
+                    'id_invoice' => $rechnungNr,
+                    'price' => number_format($totalValue, 2, '.', ''),
+                    'firma' => $customerName,
+                    'adress' => $adress,
+                    'ort' => $ort,
+                    'uid' => $uid,
+                    'bvh' => $bvh,
+                    'auftragsnr' => $auftragsnr,
+                    'ausfuhrungszeit' => $ausführungszeit,
+                    'note' => $invoiceNote,
+                    'date_start' => $dateValue,
+                    'invoice_url' => $storagePath,
+                    'created_by' => auth()->id(),
+                ]);
 
-        return response()->json([
-            'success' => true,
-            'invoice_id' => $invoice->id,
-            'pdf_url' => route('angebote.view', $invoice->id)
-        ]);
+                foreach ($items as $item) {
+                    Beschreibung::create([
+                        'invoice_type' => 'angebot',
+                        'invoice_id' => $invoice->id,
+                        'name' => $item['name'],
+                        'qty' => $item['qty'],
+                        'price' => $item['price'],
+                        'total' => $item['total'],
+                    ]);
+                }
+
+                return $invoice;
+            });
+
+            return response()->json([
+                'success' => true,
+                'invoice_id' => $invoice->id,
+                'pdf_url' => route('angebote.view', $invoice->id)
+            ]);
+        } catch (Throwable $exception) {
+            if ($storagePath && Storage::disk('public')->exists($storagePath)) {
+                Storage::disk('public')->delete($storagePath);
+            }
+
+            Log::error('Angebot creation failed.', [
+                'angebot_number' => $rechnungNr,
+                'storage_path' => $storagePath,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return response()->json([
+                'message' => $this->userFacingOfferError($exception),
+            ], 500);
+        }
     }
 
     public function viewPdf($id)
@@ -501,6 +519,25 @@ class AngeboteController extends Controller
         if (! $process->isSuccessful() || ! file_exists($pdfPath)) {
             throw new \RuntimeException($process->getErrorOutput() ?: 'DOCX to PDF konverzija nije uspjela.');
         }
+    }
+
+    private function userFacingOfferError(Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+
+        if (
+            str_contains($message, 'LibreOffice')
+            || str_contains($message, 'soffice')
+            || str_contains($message, 'DOCX to PDF')
+        ) {
+            return 'PDF konnte nicht erstellt werden. Bitte prüfen, ob LibreOffice/soffice im Docker-Container installiert ist und SOFFICE_PATH korrekt gesetzt ist.';
+        }
+
+        if (str_contains($message, 'PDF saving failed')) {
+            return 'PDF konnte nicht im Storage gespeichert werden. Bitte prüfen Sie die Storage-Berechtigungen.';
+        }
+
+        return 'Angebot konnte nicht erstellt werden. Bitte versuchen Sie es erneut oder prüfen Sie die eingegebenen Daten.';
     }
 
     private function countPdfPages(string $pdf): int

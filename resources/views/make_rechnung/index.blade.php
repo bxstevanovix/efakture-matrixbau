@@ -1054,43 +1054,130 @@
 			}
 
 			function setupBeschreibungAutocomplete() {
-				let timeout;
+				const wiredInputs = new WeakSet();
+
+				function wireInput(input) {
+					if (wiredInputs.has(input)) {
+						return;
+					}
+
+					wiredInputs.add(input);
+
+					const box = input.parentElement.querySelector(".beschreibung-box");
+					let timeout;
+					let requestId = 0;
+					let activeIndex = -1;
+					let currentItems = [];
+
+					function choose(index) {
+						if (!currentItems[index]) {
+							return;
+						}
+
+						input.value = currentItems[index];
+						box.innerHTML = "";
+						activeIndex = -1;
+						currentItems = [];
+						updatePreview();
+					}
+
+					function render(items) {
+						currentItems = items;
+						activeIndex = items.length ? 0 : -1;
+						box.innerHTML = "";
+
+						items.forEach((item, index) => {
+							const div = document.createElement("div");
+							div.classList.add("autocomplete-item");
+
+							if (index === activeIndex) {
+								div.classList.add("is-active");
+							}
+
+							div.innerText = item;
+							div.addEventListener("mousedown", e => e.preventDefault());
+							div.addEventListener("click", () => choose(index));
+							box.appendChild(div);
+						});
+					}
+
+					function updateActive() {
+						box.querySelectorAll(".autocomplete-item").forEach((item, index) => {
+							item.classList.toggle("is-active", index === activeIndex);
+
+							if (index === activeIndex) {
+								item.scrollIntoView({ block: "nearest" });
+							}
+						});
+					}
+
+					function requestSuggestions() {
+						const query = input.value.trim();
+						clearTimeout(timeout);
+						requestId++;
+
+						if (query.length < minAutocompleteChars) {
+							box.innerHTML = "";
+							currentItems = [];
+							activeIndex = -1;
+							return;
+						}
+
+						timeout = setTimeout(() => {
+							const currentRequestId = requestId;
+
+							fetch(`/rechnung/autocomplete/beschreibung?q=${encodeURIComponent(query)}`)
+								.then(response => response.json())
+								.then(data => {
+									if (currentRequestId === requestId && input.value.trim() === query) {
+										render(Array.isArray(data) ? data : []);
+									}
+								});
+						}, 300);
+					}
+
+					input.addEventListener("keydown", function(e) {
+						if (!currentItems.length) {
+							return;
+						}
+
+						if (e.key === "ArrowDown") {
+							e.preventDefault();
+							activeIndex = (activeIndex + 1) % currentItems.length;
+							updateActive();
+						}
+
+						if (e.key === "ArrowUp") {
+							e.preventDefault();
+							activeIndex = activeIndex <= 0 ? currentItems.length - 1 : activeIndex - 1;
+							updateActive();
+						}
+
+						if (e.key === "Enter") {
+							e.preventDefault();
+							choose(activeIndex);
+						}
+
+						if (e.key === "Escape") {
+							box.innerHTML = "";
+							currentItems = [];
+							activeIndex = -1;
+						}
+					});
+
+					input.addEventListener("input", requestSuggestions);
+					requestSuggestions();
+				}
 
 				document.addEventListener("input", function(e) {
 					if (!e.target.classList.contains("item-name")) {
 						return;
 					}
 
-					const input = e.target;
-					const box = input.parentElement.querySelector(".beschreibung-box");
-					const query = input.value.trim();
-					clearTimeout(timeout);
-
-					if (query.length < minAutocompleteChars) {
-						box.innerHTML = "";
-						return;
-					}
-
-					timeout = setTimeout(() => {
-						fetch(`/rechnung/autocomplete/beschreibung?q=${encodeURIComponent(query)}`)
-							.then(response => response.json())
-							.then(items => {
-								box.innerHTML = "";
-								items.forEach(item => {
-									const div = document.createElement("div");
-									div.classList.add("autocomplete-item");
-									div.innerText = item;
-									div.addEventListener("mousedown", event => {
-										event.preventDefault();
-										input.value = item;
-										box.innerHTML = "";
-										updatePreview();
-									});
-									box.appendChild(div);
-								});
-							});
-					}, 180);
+					wireInput(e.target);
 				});
+
+				document.querySelectorAll(".item-name").forEach(wireInput);
 
 				document.addEventListener("mousedown", function(e) {
 					document.querySelectorAll(".beschreibung-box").forEach(box => {

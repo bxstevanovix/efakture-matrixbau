@@ -19,6 +19,7 @@ class DocxAngebotService
     private const PAGE_BOTTOM_MARGIN = 1587;
     private const PAGE_BODY_HEIGHT = self::PAGE_HEIGHT - self::PAGE_TOP_MARGIN - self::PAGE_BOTTOM_MARGIN;
     private const TABLE_ROW_HEIGHT = 360;
+    private const TABLE_HEADER_BODY_GAP = 120;
     private const SUMMARY_PAGE_RESERVE = 760;
 
     public function create(string $path): string
@@ -89,6 +90,9 @@ class DocxAngebotService
             $title .= ', Ausführungszeit: ' . $ausfuehrungszeit;
         }
 
+        $itemsTable = $this->table($this->tableHeader())
+            . $this->spacer(self::TABLE_HEADER_BODY_GAP)
+            . $this->table($tableRows);
         $note = $this->noteParagraphs((string) ($data['note_html'] ?? ''));
         $reverseVat = empty($data['use_tax'])
             ? $this->paragraph('Bauleistung ohne USt. (MwSt. zahlt Empfänger gemäß §19 Abs. 1a UStG 1994)', [
@@ -110,7 +114,7 @@ class DocxAngebotService
     ' . ($bvh !== '' ? $this->paragraph('BVH. ' . $bvh, ['before' => 200, 'after' => 30]) : '') . '
     ' . ($auftragsnr !== '' ? $this->paragraph($auftragsnr, ['after' => 30]) : '') . '
     ' . $this->paragraph($title, ['bold' => true, 'after' => 70]) . '
-    ' . $this->table($this->tableHeader() . $tableRows) . '
+    ' . $itemsTable . '
     ' . $summaryPageLead . '
     ' . $this->summary($data['summary'] ?? []) . '
     ' . $note . '
@@ -641,14 +645,14 @@ class DocxAngebotService
             return false;
         }
 
-        $tableHeight = self::TABLE_ROW_HEIGHT;
+        $tableHeight = self::TABLE_ROW_HEIGHT + self::TABLE_HEADER_BODY_GAP;
 
         foreach ($items as $item) {
             $tableHeight += $this->estimatedTableRowHeight($item);
         }
 
         $firstPageCapacity = max(0, self::PAGE_BODY_HEIGHT - $this->estimatedContentBeforeTableHeight($data));
-        $subsequentPageCapacity = self::PAGE_BODY_HEIGHT - self::TABLE_ROW_HEIGHT;
+        $subsequentPageCapacity = self::PAGE_BODY_HEIGHT;
 
         if ($tableHeight <= $firstPageCapacity) {
             $remaining = $firstPageCapacity - $tableHeight;
@@ -706,7 +710,7 @@ class DocxAngebotService
         $cy = 174 * self::EMU_PER_PIXEL;
 
         return '<w:p>
-  <w:pPr><w:jc w:val="right"/> <w:ind w:right="500"/> <w:spacing w:after="0"/></w:pPr>
+  <w:pPr><w:jc w:val="right"/> <w:ind w:right="400"/> <w:spacing w:after="0"/></w:pPr>
   <w:r>
     <w:drawing>
       <wp:inline distT="0" distB="0" distL="0" distR="0">

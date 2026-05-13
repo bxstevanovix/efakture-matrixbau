@@ -19,7 +19,7 @@ class DocxAngebotService
     private const PAGE_BOTTOM_MARGIN = 1587;
     private const PAGE_BODY_HEIGHT = self::PAGE_HEIGHT - self::PAGE_TOP_MARGIN - self::PAGE_BOTTOM_MARGIN;
     private const TABLE_ROW_HEIGHT = 360;
-    private const TABLE_HEADER_BODY_GAP = 120;
+    private const TABLE_HEADER_BODY_GAP = 40;
     private const SUMMARY_PAGE_RESERVE = 760;
 
     public function create(string $path): string

@@ -13,13 +13,13 @@
 
 
 <link rel="stylesheet" href="{{ asset('files/vendor/select2/css/select2.min.css') }}">
-<link rel="manifest" href="{{ asset('manifest.webmanifest') }}?v=10">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}?v=11">
 <link rel="icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
 <link rel="shortcut icon" type="image/svg+xml" href="{{ asset('f-circle.svg') }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
 <link rel="apple-touch-icon-precomposed" sizes="180x180" href="{{ asset('matrix-m-apple-touch-icon.png') }}">
-<meta name="application-name" content="Matrix-Bau">
-<meta name="apple-mobile-web-app-title" content="Matrix-Bau">
+<meta name="application-name" content="Matrix">
+<meta name="apple-mobile-web-app-title" content="Matrix">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">

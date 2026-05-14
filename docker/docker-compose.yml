@@ -9,7 +9,6 @@ services:
     volumes:
       - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - ..:/var/www/html:ro
-      - efk-matrixbau-public-build:/var/www/html/public/build:ro
       - efk-matrixbau-storage:/var/www/html/storage:ro
       - ./.htpasswd:/etc/nginx/.htpasswd:ro
     depends_on:
@@ -26,7 +25,6 @@ services:
     container_name: efk-matrixbau-app
     volumes:
       - efk-matrixbau-storage:/var/www/html/storage
-      - efk-matrixbau-public-build:/var/www/html/public/build
     env_file:
       - .env.production
     depends_on:
@@ -81,7 +79,6 @@ services:
 volumes:
   efk-matrixbau-db-data:
   efk-matrixbau-storage:
-  efk-matrixbau-public-build:
 
 networks:
   efk-matrixbau-net:

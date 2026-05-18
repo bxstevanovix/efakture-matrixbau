@@ -160,7 +160,7 @@
                             </div>
                         </div>
                         <div class="mb-3 col-md-6">
-                            <label class="form-label">@lang('Adresa')</label>
+                            <label class="form-label">@lang('Adresa') (BVH)</label>
                             <input 
                                 id="address"
                                 type="text" 

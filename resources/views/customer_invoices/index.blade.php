@@ -467,7 +467,7 @@
 							<tr>
 								<th class="">@lang('ID')</th>
                                 <th class="">@lang('Firma')</th>
-                                <th class="">@lang('Adresa')</th>
+                                <th class="">@lang('Adresa') (BVH)</th>
                                 <th class="">@lang('Datum')</th>
                                 <th class="">@lang('Rok placanja')</th>
                                 <th class="">@lang('Za uplatu')</th>

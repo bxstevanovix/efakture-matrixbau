@@ -31,7 +31,10 @@ class SupplierInvoicesController extends Controller
     
     public function datatable()
     {
-        $query = Entity::query()->where('id', '>', 0)->orderBy('created_at', 'desc');
+        $query = Entity::query()
+            ->where('id', '>', 0)
+            ->orderBy('date_start', 'desc')
+            ->orderBy('created_at', 'desc');
 
         return datatables($query)
             ->addColumn('actions', function ($entity) {

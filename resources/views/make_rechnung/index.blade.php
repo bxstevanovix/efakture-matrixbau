@@ -52,6 +52,18 @@
 			border-radius: 6px !important;
 		}
 
+		.angebot-modal .invoice-table-head th {
+			font-weight: 700;
+		}
+
+		.angebot-modal .invoice-table-head th:first-child {
+			text-align: left !important;
+		}
+
+		.angebot-modal .invoice-table-head th:not(:first-child) {
+			text-align: center;
+		}
+
 		@media (max-width: 767px) {
 			.rechnung-page .card-header {
 				display: flex;

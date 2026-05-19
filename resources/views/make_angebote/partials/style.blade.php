@@ -338,7 +338,7 @@
     }
 
     .page-continuation {
-        margin: 0 0 10px 0;
+        margin: 12mm 0 10px 0;
         color: #555;
         font-size: 10pt;
         font-weight: 500;

@@ -96,7 +96,7 @@ class AngeboteController extends Controller
             'abzug_tr_label' => 'nullable|string|max:40',
             'spacing_top' => 'nullable|integer|min:0|max:160',
             'items' => 'nullable|array',
-            'items.*.name' => 'nullable|string|max:255',
+            'items.*.name' => 'nullable|string|max:1000',
             'items.*.qty' => 'nullable',
             'items.*.price' => 'nullable',
             'items.*.total' => 'nullable',

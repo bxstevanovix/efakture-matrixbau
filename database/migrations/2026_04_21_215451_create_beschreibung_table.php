@@ -16,8 +16,7 @@ return new class extends Migration
 
             $table->string('invoice_type'); // angebot, rechnung itd.
             $table->string('invoice_id');
-
-            $table->string('name')->nullable();
+            $table->string('name', 1000)->nullable();
             $table->string('qty')->default(0);
             $table->string('price')->default(0);
             $table->string('total')->default(0);

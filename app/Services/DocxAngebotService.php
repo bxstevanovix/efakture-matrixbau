@@ -20,6 +20,7 @@ class DocxAngebotService
     private const PAGE_BODY_HEIGHT = self::PAGE_HEIGHT - self::PAGE_TOP_MARGIN - self::PAGE_BOTTOM_MARGIN;
     private const TABLE_ROW_HEIGHT = 360;
     private const TABLE_HEADER_BODY_GAP = 40;
+    private const CONTINUATION_PAGE_TOP_GAP_PX = 25;
     private const SUMMARY_PAGE_RESERVE = 760;
 
     public function create(string $path): string
@@ -65,16 +66,6 @@ class DocxAngebotService
 
     private function document(array $data, bool $hasLogo): string
     {
-        $tableRows = '';
-
-        foreach (($data['items'] ?? []) as $row) {
-            $tableRows .= $this->tableRow($row);
-        }
-
-        if (($data['items'] ?? []) === []) {
-            $tableRows .= $this->tableRow(['', '', '', '']);
-        }
-
         $summaryBreaksToNewPage = $this->shouldBreakBeforeSummary($data);
         $summaryPageLead = $summaryBreaksToNewPage
             ? $this->pageBreak() . $this->repeatedCustomerBlock($data)
@@ -90,9 +81,7 @@ class DocxAngebotService
             $title .= ', Ausführungszeit: ' . $ausfuehrungszeit;
         }
 
-        $itemsTable = $this->table($this->tableHeader())
-            . $this->spacer(self::TABLE_HEADER_BODY_GAP)
-            . $this->table($tableRows);
+        $itemsTable = $this->itemsTables($data);
         $note = $this->noteParagraphs((string) ($data['note_html'] ?? ''));
         $reverseVat = empty($data['use_tax'])
             ? $this->paragraph('Bauleistung ohne USt. (MwSt. zahlt Empfänger gemäß §19 Abs. 1a UStG 1994)', [
@@ -175,6 +164,53 @@ class DocxAngebotService
     private function tableHeader(): string
     {
         return $this->tableRow(['Beschreibung', 'Menge', 'Einzelpreis', 'Betrag'], true);
+    }
+
+    private function itemsTables(array $data): string
+    {
+        $items = $data['items'] ?? [];
+
+        if ($items === []) {
+            $items = [['', '', '', '']];
+        }
+
+        $tables = '';
+        $rows = '';
+        $usedHeight = self::TABLE_ROW_HEIGHT + self::TABLE_HEADER_BODY_GAP;
+        $capacity = max(0, self::PAGE_BODY_HEIGHT - $this->estimatedContentBeforeTableHeight($data));
+        $isFirstTablePage = true;
+        $continuationGap = $this->pxToTwips(self::CONTINUATION_PAGE_TOP_GAP_PX);
+
+        foreach ($items as $item) {
+            $rowHeight = $this->estimatedTableRowHeight($item);
+
+            if ($rows === '' && $usedHeight + $rowHeight > $capacity && $isFirstTablePage) {
+                $tables .= $this->pageBreak() . $this->spacer($continuationGap);
+                $capacity = self::PAGE_BODY_HEIGHT - $continuationGap;
+                $isFirstTablePage = false;
+            } elseif ($rows !== '' && $usedHeight + $rowHeight > $capacity) {
+                $tables .= $this->tableBlock($rows)
+                    . $this->pageBreak()
+                    . $this->spacer($continuationGap);
+
+                $rows = '';
+                $usedHeight = self::TABLE_ROW_HEIGHT + self::TABLE_HEADER_BODY_GAP;
+                $capacity = self::PAGE_BODY_HEIGHT - $continuationGap;
+                $isFirstTablePage = false;
+            }
+
+            $rows .= $this->tableRow($item);
+            $usedHeight += $rowHeight;
+        }
+
+        return $tables . $this->tableBlock($rows);
+    }
+
+    private function tableBlock(string $rows): string
+    {
+        return $this->table($this->tableHeader())
+            . $this->spacer(self::TABLE_HEADER_BODY_GAP)
+            . $this->table($rows);
     }
 
     private function table(string $rows): string
@@ -639,30 +675,35 @@ class DocxAngebotService
 
     private function shouldBreakBeforeSummary(array $data): bool
     {
+        $remaining = $this->remainingSpaceAfterItems($data);
+
+        return $remaining < ($this->estimatedSummaryHeight($data['summary'] ?? []) + self::SUMMARY_PAGE_RESERVE);
+    }
+
+    private function remainingSpaceAfterItems(array $data): int
+    {
         $items = $data['items'] ?? [];
 
         if ($items === []) {
-            return false;
+            $items = [['', '', '', '']];
         }
 
-        $tableHeight = self::TABLE_ROW_HEIGHT + self::TABLE_HEADER_BODY_GAP;
+        $usedHeight = self::TABLE_ROW_HEIGHT + self::TABLE_HEADER_BODY_GAP;
+        $capacity = max(0, self::PAGE_BODY_HEIGHT - $this->estimatedContentBeforeTableHeight($data));
+        $continuationGap = $this->pxToTwips(self::CONTINUATION_PAGE_TOP_GAP_PX);
 
         foreach ($items as $item) {
-            $tableHeight += $this->estimatedTableRowHeight($item);
+            $rowHeight = $this->estimatedTableRowHeight($item);
+
+            if ($usedHeight + $rowHeight > $capacity) {
+                $capacity = self::PAGE_BODY_HEIGHT - $continuationGap;
+                $usedHeight = self::TABLE_ROW_HEIGHT + self::TABLE_HEADER_BODY_GAP;
+            }
+
+            $usedHeight += $rowHeight;
         }
 
-        $firstPageCapacity = max(0, self::PAGE_BODY_HEIGHT - $this->estimatedContentBeforeTableHeight($data));
-        $subsequentPageCapacity = self::PAGE_BODY_HEIGHT;
-
-        if ($tableHeight <= $firstPageCapacity) {
-            $remaining = $firstPageCapacity - $tableHeight;
-        } else {
-            $overflow = $tableHeight - $firstPageCapacity;
-            $usedOnLastPage = $overflow % $subsequentPageCapacity;
-            $remaining = $usedOnLastPage === 0 ? 0 : $subsequentPageCapacity - $usedOnLastPage;
-        }
-
-        return $remaining < ($this->estimatedSummaryHeight($data['summary'] ?? []) + self::SUMMARY_PAGE_RESERVE);
+        return max(0, $capacity - $usedHeight);
     }
 
     private function estimatedContentBeforeTableHeight(array $data): int

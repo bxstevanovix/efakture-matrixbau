@@ -441,7 +441,7 @@
 				row.classList.add("item-row", "col-12");
 				row.innerHTML = `
 					<div style="position:relative;">
-						<input name="items[${itemIndex}][name]" type="text" class="item-name form-control" placeholder="Beschreibung" maxlength="255" autocomplete="off">
+						<input name="items[${itemIndex}][name]" type="text" class="item-name form-control" placeholder="Beschreibung" maxlength="1000" autocomplete="off">
 						<div class="autocomplete-box beschreibung-box"></div>
 					</div>
 					<input name="items[${itemIndex}][qty]" type="text" class="item-qty form-control" value="0" autocomplete="off">

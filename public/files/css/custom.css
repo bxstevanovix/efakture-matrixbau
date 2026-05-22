@@ -32,6 +32,11 @@ select[name="exampledb_length"] option {
     padding: 10px !important;
 }
 
+.deznav .metismenu > li:hover > a svg [fill="none"],
+.deznav .metismenu > li:focus > a svg [fill="none"] {
+    fill: none !important;
+}
+
 @media (max-width: 767px) {
     #main-wrapper {
         --dz-sidebar-width: min(18.25rem, 88vw);

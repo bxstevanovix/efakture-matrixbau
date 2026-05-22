@@ -12,7 +12,13 @@
             </li>
 
             <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="true">
-                    <i class="fa-solid fa-file-export text-success"></i>
+                    <svg data-chakra-component="CIcon" viewBox="22.82 10.4 63.45 70.17" role="presentation" class="css-5ffdf css-3cz70w css-0"><g>
+                        <path fill="currentColor" d="M63.08 80.57H30.91a8.1 8.1 0 01-8.09-8.09V54l17.37-43.6h22.89a8.08 8.08 0 018.08 8.08v54a8.09 8.09 0 01-8.08 8.09zM24.82 54.4v18.08a6.09 6.09 0 006.09 6.09h32.17a6.09 6.09 0 006.08-6.09v-54a6.09 6.09 0 00-6.08-6.08H41.54z"></path>
+                        <path fill="currentColor" d="M24.77 54.53l-1.89-.65c3.65-10.72 10.44-15.14 15.9-18.69 1.35-.87 2.62-1.7 3.78-2.57 2-1.47 2.62-3 2-4.68a19.28 19.28 0 00-2.43-4.33l-1-1.58C37.19 16 39.88 11.1 40 10.9l1.73 1c-.08.16-2.18 4 1.06 9.05.37.57.71 1.09 1 1.56a21.72 21.72 0 012.65 4.77c.89 2.51-.07 5-2.71 7-1.21.91-2.51 1.75-3.89 2.65-5.44 3.5-11.64 7.53-15.07 17.6zM31.44 68.06h30.45v2H31.44zM31.25 59.59H61.7v2H31.25zM31.25 51.12H61.7v2H31.25zM70.03 56.35h9.32v2h-9.32zM69.78 49.89h9.32v2h-9.32zM69.78 43.27h9.32v2h-9.32z"></path>
+                        <path fill="currentColor" d="M81.45 68.12h-12.1v-2h12.1a2.82 2.82 0 002.82-2.82V29.39A2.44 2.44 0 0081.83 27H70.4v-2h11.43a4.44 4.44 0 014.44 4.44V63.3a4.82 4.82 0 01-4.82 4.82z"></path>
+                        <path fill="none" d="M0 0h90.71v90.71H0z"></path>
+                        </g>
+                    </svg>
                     <span class="nav-text">@lang('Izlazne fakture')</span>
                 </a>
                 <ul aria-expanded="true" class="mm-show">
@@ -22,7 +28,13 @@
                 </ul>
             </li>
             <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="true">
-                    <i class="fa-solid fa-file-import text-warning"></i>
+                    <svg data-chakra-component="CIcon" viewBox="0 10.1 71.79 70.17" role="presentation" class="css-5ffdf css-3cz70w css-0"><g>
+                        <path fill="currentColor" d="M63.7 80.27H31.53a8.08 8.08 0 01-8.08-8.08h2a6.09 6.09 0 006.08 6.08H63.7a6.09 6.09 0 006.09-6.08v-54a6.09 6.09 0 00-6.09-6.09H42.07L25.45 41.18v2.41h-2v-2.94L40.91 10.1H63.7a8.1 8.1 0 018.09 8.09v54a8.09 8.09 0 01-8.09 8.08z"></path>
+                        <path fill="currentColor" d="M23.45 50.59h2v21.6h-2zM25.35 42.17l-1.81-.86c3.7-7.76 10.51-10.93 16-13.48 1.35-.63 2.62-1.22 3.78-1.85 2.64-1.41 2.12-2.48 1.94-2.83a13.49 13.49 0 00-2.37-3L41.83 19c-3.33-3.68-2.19-7.17-1.12-8.51l1.56 1.25c-.07.1-1.94 2.62 1 5.92l1 1.12A14.9 14.9 0 0147 22.26c.59 1.18 1 3.46-2.78 5.48-1.21.66-2.51 1.26-3.89 1.9-5.41 2.54-11.6 5.42-14.98 12.53zM32.06 67.76h30.45v2H32.06zM31.87 59.3h30.45v2H31.87zM8.59 52.21H0v-2h7.92l5.76-4.32A16.66 16.66 0 0120 43l.44 1.95a14.63 14.63 0 00-5.57 2.58z"></path>
+                        <path fill="currentColor" d="M24.81 72.47h-4.19a11.55 11.55 0 01-6.23-1.82l-3.47-2.21H.49v-2h11l4 2.52a9.56 9.56 0 005.16 1.51h4.19zM36.22 52.12H20.14v-2h16.08a2.54 2.54 0 100-5.08H20.14V43h16.08a4.54 4.54 0 110 9.08z"></path>
+                        <path fill="none" d="M.23 0h90.71v90.71H.23z"></path>
+                        </g>
+                    </svg>
                     <span class="nav-text">@lang('Ulazne fakture')</span>
                 </a>
                 <ul aria-expanded="true" class="mm-show">

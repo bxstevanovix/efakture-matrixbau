@@ -10,6 +10,7 @@ use App\Http\Controllers\DashController;
 use App\Http\Controllers\SupplierInvoicesController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\PDFController;
+use App\Http\Controllers\ProjektiController;
 
 Route::get('/', function () {
     return auth()->check()
@@ -24,6 +25,31 @@ Route::post('/dashboard/datatable-customers', [DashController::class, 'datatable
 Route::post('/dashboard/datatable-suppliers', [DashController::class, 'datatableSuppliers'])->name('datatable_suppliers');
 
 Route::middleware('auth')->group(function () {
+
+    // PROJEKTI
+    Route::name('projekti.')->prefix('/projekti')->group(function() {
+        Route::get('/', [ProjektiController::class, 'index'])->name('index');
+        Route::post('/datatable', [ProjektiController::class, 'datatable'])->name('datatable');
+        Route::post('/create', [ProjektiController::class, 'save'])->name('store');
+        Route::post('/{entity}/update', [ProjektiController::class, 'update'])->name('update');
+        Route::post('/{entity}/records', [ProjektiController::class, 'storeRecord'])->name('records.store');
+        Route::post('/{entity}/records/{record}/update', [ProjektiController::class, 'updateRecord'])->name('records.update');
+        Route::post('/{entity}/records/{record}/delete', [ProjektiController::class, 'deleteRecord'])->name('records.delete');
+        Route::get('/{entity}/records/{record}/files/{file}', [ProjektiController::class, 'viewRecordFile'])->name('records.files.view');
+        Route::post('/{entity}/records/{record}/files', [ProjektiController::class, 'uploadRecordFile'])->name('records.files.store');
+        Route::post('/{entity}/records/{record}/files/{file}/delete', [ProjektiController::class, 'deleteRecordFile'])->name('records.files.delete');
+        Route::get('/{entity}/documents/{document}', [ProjektiController::class, 'viewDocument'])->name('documents.view');
+        Route::post('/{entity}/documents', [ProjektiController::class, 'uploadDocument'])->name('documents.store');
+        Route::post('/{entity}/documents/{document}/delete', [ProjektiController::class, 'deleteDocument'])->name('documents.delete');
+        Route::post('/{entity}/budget/items', [ProjektiController::class, 'storeBudgetItem'])->name('budget.items.store');
+        Route::post('/{entity}/budget/items/{budgetItem}/delete', [ProjektiController::class, 'deleteBudgetItem'])->name('budget.items.delete');
+        Route::post('/{entity}/delete', [ProjektiController::class, 'delete'])->name('delete');
+        Route::get('/view/{id}', [ProjektiController::class, 'viewPdf'])->name('view');
+        Route::get('/autocomplete/firma', [ProjektiController::class, 'autocompleteFirma']);
+        Route::get('/autocomplete/adress', [ProjektiController::class, 'autocompleteAdress']);
+        Route::get('/{entity}', [ProjektiController::class, 'show'])->name('show');
+    });
+
     
     //IZLAZNE FAKTURE
     Route::name('customer-invoices.')->prefix('customer-invoices')->group(function () {

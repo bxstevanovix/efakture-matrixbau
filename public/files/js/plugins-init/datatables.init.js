@@ -170,6 +170,11 @@ let dataSet = [
 	lengthChange:true,
 	searching: true,
 	pageLength:10,
+	order: [[0, 'desc']],
+	autoWidth:false,
+	columnDefs: [
+		{ targets: -1, orderable: false, searchable: false, width: '46px', className: 'project-actions-column' }
+	],
 	language: {
 		paginate: {
 			next: '<i class="fa fa-angle-double-right" aria-hidden="true"></i>',

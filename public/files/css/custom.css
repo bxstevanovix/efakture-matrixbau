@@ -88,3 +88,8 @@ select[name="exampledb_length"] option {
     font-size: 16px !important;
   }
 }
+
+.nav-text {
+    color: black !important;
+}
+

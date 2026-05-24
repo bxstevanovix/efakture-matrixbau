@@ -64,10 +64,9 @@
                     width: 100%;
                 }
                 input:focus {
-                    border-color: #6366f1;
-                    outline: 2px solid transparent;
-                    outline-offset: 2px;
-                    box-shadow: 0 0 0 3px rgb(99 102 241 / .2);
+                    border-color: rgba(91, 70, 178, 0.62);
+                    box-shadow: 0 0 0 4px rgba(91, 70, 178, 0.12);
+                    outline: 0;
                 }
                 button,
                 a[href] {

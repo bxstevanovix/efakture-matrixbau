@@ -896,7 +896,6 @@
 						abzug_tr1: data.abzugTr1,
 						abzug_tr_label: data.abzugTrLabel,
 						spacing_top: data.spacing,
-						html: a4Wrapper.innerHTML,
 						items: items,
 						_token: $('meta[name="csrf-token"]').attr('content')
 					},

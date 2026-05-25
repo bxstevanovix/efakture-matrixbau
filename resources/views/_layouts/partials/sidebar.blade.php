@@ -64,8 +64,8 @@
                 </ul>
             </li>
             <hr>
-            <li>
-                <a class="has-arrow " href="javascript:void(0);" aria-expanded="true">
+            <li class="mm-active">
+                <a class="has-arrow mm-active" href="javascript:void(0);" aria-expanded="true">
                     <i class="flaticon-notes text-primary"></i>
                     <span class="nav-text">@lang('Racuni')</span>
                 </a>
@@ -75,8 +75,8 @@
                     <li><a class="dz-active" href="{{ route('rechnung.index') }}?openModal=1">+ @lang('Kreiraj racun')</a></li>
                 </ul>
             </li>
-            <li>
-                <a class="has-arrow " href="javascript:void(0);" aria-expanded="true">
+            <li class="mm-active">
+                <a class="has-arrow mm-active" href="javascript:void(0);" aria-expanded="true">
                     <i class="flaticon-notes text-primary"></i>
                     <span class="nav-text">@lang('Ponude')</span>
                 </a>

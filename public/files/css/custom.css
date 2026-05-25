@@ -2,6 +2,14 @@
     color: red;
 }
 
+html.preloader-suppressed #preloader {
+    display: none !important;
+}
+
+html.preloader-suppressed #main-wrapper {
+    opacity: 1 !important;
+}
+
 .form-control:focus,
 .form-select:focus,
 input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):focus,
@@ -101,4 +109,8 @@ select[name="exampledb_length"] option {
 
 .nav-text {
     color: black !important;
+}
+
+body[data-theme-version="dark"] .deznav .nav-text {
+    color: #fff !important;
 }

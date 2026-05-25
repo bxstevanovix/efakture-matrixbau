@@ -437,6 +437,11 @@
   "Transport": "Transport",
   "Oprema": "Ausrüstung",
   "Za budućnost - otvori modal za uređivanje": "Für später - Modal zur Bearbeitung öffnen",
-  "Otkaži": "Abbrechen"
+  "Otkaži": "Abbrechen",
+
+
+
+  "Pošalji u Izlazne račune": "In Ausgangsrechnungen verschieben",
+  "Broj fakture već postoji u izlaznim fakturama!": "Die Rechnungsnummer existiert bereits in den Ausgangsrechnungen!"
 
 }

@@ -322,7 +322,7 @@
 									<th>@lang('Datum')</th>
 									<th>@lang('Kreirao')</th>
 									<th>@lang('Cijena')</th>
-									<th class="text-right">@lang('Opcije')</th>
+									<th class="text-center">@lang('Opcije')</th>
 								</tr>
 							</thead>
 							<tbody></tbody>
@@ -335,6 +335,7 @@
 	</div>
 
 	@include('make_rechnung.partials.modal')
+	@include('make_rechnung.partials.customer_invoice_modal')
 @endsection
 
 @push('footer_scripts')
@@ -412,6 +413,158 @@
 					}
 				}
 			});
+
+			const sendToCustomerInvoiceModalElement = document.getElementById('sendToCustomerInvoiceModal');
+			const sendToCustomerInvoiceModal = sendToCustomerInvoiceModalElement && window.bootstrap
+				? new bootstrap.Modal(sendToCustomerInvoiceModalElement)
+				: null;
+
+			document.addEventListener('click', function(event) {
+				const button = event.target.closest('.send-to-customer-invoice');
+
+				if (!button) {
+					return;
+				}
+
+				event.preventDefault();
+
+				const originalHtml = button.innerHTML;
+				button.disabled = true;
+				button.innerHTML = '<i class="fa fa-spinner fa-spin"></i>';
+
+				fetch(button.dataset.url, {
+					headers: {
+						'Accept': 'application/json'
+					}
+				})
+					.then(response => {
+						if (!response.ok) {
+							throw new Error('Transfer data could not be loaded.');
+						}
+
+						return response.json();
+					})
+					.then(data => {
+						fillCustomerInvoiceModal(data);
+
+						if (sendToCustomerInvoiceModal) {
+							sendToCustomerInvoiceModal.show();
+						} else {
+							$('#sendToCustomerInvoiceModal').modal('show');
+						}
+					})
+					.catch(() => {
+						if (window.toastr) {
+							toastr.error('Podaci za račun nisu mogli biti učitani.');
+						} else {
+							alert('Podaci za račun nisu mogli biti učitani.');
+						}
+					})
+					.finally(() => {
+						button.disabled = false;
+						button.innerHTML = originalHtml;
+					});
+			});
+
+			function fillCustomerInvoiceModal(data) {
+				const form = document.getElementById('entity-form');
+				const companyWarning = document.getElementById('transferCompanyWarning');
+				const pdfWarning = document.getElementById('transferPdfWarning');
+
+				if (!form) {
+					return;
+				}
+
+				form.reset();
+				setTransferField('source_rechnung_id', data.id);
+				setTransferFieldByName('id_invoice', data.id_invoice);
+				setTransferFieldByName('address', data.address);
+				setTransferDateField('date_start', data.date_start);
+				setTransferDateField('date_end', '');
+				setTransferFieldByName('price', data.price);
+				setTransferFieldByName('text', data.text);
+				lockTransferReadonlyFields();
+
+				$('#companySelect').val(data.company || '').trigger('change');
+				lockCompanyField(data.company);
+				companyWarning?.classList.toggle('d-none', Boolean(data.company));
+				pdfWarning?.classList.toggle('d-none', Boolean(data.pdf_available));
+			}
+
+			function lockTransferReadonlyFields() {
+				[
+					'id_invoice',
+					'date_start',
+					'price'
+				].forEach(name => {
+					const field = document.querySelector(`#entity-form [name="${name}"]`);
+
+					if (!field) {
+						return;
+					}
+
+					field.readOnly = true;
+					field.classList.remove('bg-light');
+					field.classList.add('transfer-readonly');
+				});
+			}
+
+			function lockCompanyField(companyId) {
+				const form = document.getElementById('entity-form');
+				const companySelect = $('#companySelect');
+				let hiddenCompany = form?.querySelector('input[data-transfer-company="1"]');
+
+				if (!form || !companySelect.length) {
+					return;
+				}
+
+				if (companyId) {
+					if (!hiddenCompany) {
+						hiddenCompany = document.createElement('input');
+						hiddenCompany.type = 'hidden';
+						hiddenCompany.name = 'company';
+						hiddenCompany.dataset.transferCompany = '1';
+						form.appendChild(hiddenCompany);
+					}
+
+					hiddenCompany.value = companyId;
+					companySelect.prop('disabled', true).trigger('change');
+					return;
+				}
+
+				companySelect.prop('disabled', true).trigger('change');
+				hiddenCompany?.remove();
+			}
+
+			function setTransferField(id, value) {
+				const field = document.getElementById(id);
+
+				if (field) {
+					field.value = value || '';
+				}
+			}
+
+			function setTransferFieldByName(name, value) {
+				const field = document.querySelector(`#entity-form [name="${name}"]`);
+
+				if (field) {
+					field.value = value || '';
+				}
+			}
+
+			function setTransferDateField(id, value) {
+				const field = document.getElementById(id);
+
+				if (!field) {
+					return;
+				}
+
+				field.value = value || '';
+
+				if ($.fn.datepicker) {
+					$(field).datepicker('update', field.value);
+				}
+			}
 
 			const modal = document.getElementById("invoiceModal");
 			const a4Wrapper = document.getElementById("a4wrapper");

@@ -590,11 +590,11 @@ $(function() {
             type: "post",
         },
         "columns": [
-            {"data": "id_invoice", orderable: false, "className": "", responsivePriority: 1},
+            {"data": "id_invoice", "name": "id_invoice", orderable: true, "className": "", responsivePriority: 1},
             {"data": "company", orderable: false, "className": "", responsivePriority: 4},
             {"data": "address", orderable: false, "className": "", responsivePriority: 6},
             {"data": "date_start", orderable: false, searchable: false, "className": "", responsivePriority: 7},
-            {"data": "date_end", orderable: false, searchable: false, "className": "", responsivePriority: 3},
+            {"data": "date_end", "name": "date_end", orderable: true, searchable: false, "className": "", responsivePriority: 3},
             {"data": "debt", orderable: false, searchable: false, "className": "", responsivePriority: 5},
             {"data": "paid", orderable: false, searchable: false, "className": "", responsivePriority: 2},
             {"data": "actions", orderable: false, searchable: false, "className": "text-right", responsivePriority: 5}

@@ -279,6 +279,8 @@ class DocxAngebotService
     private function summary(array $summary): string
     {
         $rows = $this->summaryRow('Zwischensumme', $summary['subtotal'] ?? '0,00');
+        $labelWidth = self::TABLE_WIDTH - self::TABLE_COLUMNS[3];
+        $amountWidth = self::TABLE_COLUMNS[3];
 
         foreach ($summary['adjustments'] ?? [] as $adjustment) {
             $rows .= $this->summaryRow($adjustment['label'], $adjustment['amount']);
@@ -288,13 +290,11 @@ class DocxAngebotService
             }
         }
 
-        $rows .= $this->summaryRow('Gesamtbetrag', '€ ' . ($summary['total'] ?? '0,00'), false, true);
+        $rows .= $this->summaryRow('Gesamtbetrag', $summary['total'] ?? '0,00', false, true);
 
         return '<w:tbl>
   <w:tblPr>
-    <w:jc w:val="right"/>
-    <w:tblInd w:w="-500" w:type="dxa"/>
-    <w:tblW w:w="4600" w:type="dxa"/>
+    <w:tblW w:w="' . self::TABLE_WIDTH . '" w:type="dxa"/>
     <w:tblBorders>
       <w:top w:val="nil"/>
       <w:left w:val="nil"/>
@@ -304,7 +304,7 @@ class DocxAngebotService
       <w:insideV w:val="nil"/>
     </w:tblBorders>
   </w:tblPr>
-  <w:tblGrid><w:gridCol w:w="3000"/><w:gridCol w:w="1600"/></w:tblGrid>
+  <w:tblGrid><w:gridCol w:w="' . $labelWidth . '"/><w:gridCol w:w="' . $amountWidth . '"/></w:tblGrid>
   ' . $rows . '
 </w:tbl>';
     }
@@ -322,18 +322,44 @@ class DocxAngebotService
         }
 
         $topSpacing = $total ? 220 : 0;
+        $labelWidth = self::TABLE_WIDTH - self::TABLE_COLUMNS[3];
+        $amountWidth = self::TABLE_COLUMNS[3];
 
         return '<w:tr>
   <w:trPr><w:cantSplit/></w:trPr>
   <w:tc>
-    <w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr>
+    <w:tcPr><w:tcW w:w="' . $labelWidth . '" w:type="dxa"/></w:tcPr>
     ' . $this->paragraph($label, ['bold' => $total, 'size' => $size, 'before' => $topSpacing, 'after' => 20, 'keep_next' => $keepNext]) . '
   </w:tc>
   <w:tc>
-    <w:tcPr><w:tcW w:w="3000" w:type="dxa"/>' . $amountBorders . '</w:tcPr>
-    ' . $this->paragraph($value, ['bold' => $total, 'size' => $size, 'align' => 'right', 'before' => $topSpacing, 'after' => 20, 'keep_next' => $keepNext]) . '
+    <w:tcPr><w:tcW w:w="' . $amountWidth . '" w:type="dxa"/>' . $amountBorders . '</w:tcPr>
+    ' . $this->summaryAmountParagraph($value, ['bold' => $total, 'size' => $size, 'before' => $topSpacing, 'after' => 20, 'keep_next' => $keepNext]) . '
   </w:tc>
 </w:tr>';
+    }
+
+    private function summaryAmountParagraph(string $value, array $options = []): string
+    {
+        $style = $this->runStyle($options);
+        $before = (int) ($options['before'] ?? 0);
+        $after = (int) ($options['after'] ?? 0);
+        $keepNext = ! empty($options['keep_next']) ? '<w:keepNext/>' : '';
+
+        return '<w:p>
+  <w:pPr>
+    ' . $keepNext . '
+    <w:tabs><w:tab w:val="right" w:pos="1320"/></w:tabs>
+    <w:spacing w:before="' . $before . '" w:after="' . $after . '"/>
+  </w:pPr>
+  <w:r><w:rPr>' . $style . '</w:rPr><w:t xml:space="preserve">€</w:t></w:r>
+  <w:r><w:tab/></w:r>
+  <w:r><w:rPr>' . $style . '</w:rPr><w:t xml:space="preserve">' . $this->e($this->stripCurrency($value)) . '</w:t></w:r>
+</w:p>';
+    }
+
+    private function stripCurrency(string $value): string
+    {
+        return trim(str_replace('€', '', $value));
     }
 
     private function noteParagraphs(string $html): string

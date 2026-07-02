@@ -57,9 +57,20 @@ class SupplierInvoicesController extends Controller
             })->editColumn('date_start',function($entity){
                 $date = Carbon::parse($entity->date_start);
                 return $date->format('d-m-Y');
+            })->orderColumn('id_invoice', function ($query, $order) {
+                $query
+                    ->reorder('date_start', 'desc')
+                    ->orderBy('created_at', 'desc');
             })->editColumn('date_end',function($entity){
                 $date = Carbon::parse($entity->date_end);
                 return $date->format('d-m-Y');
+            })->orderColumn('date_end', function ($query, $order) {
+                $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+
+                $query
+                    ->reorder('status', 'asc')
+                    ->orderBy('date_end', $direction)
+                    ->orderBy('id', $direction);
             })->rawColumns(['actions', 'company', 'image', 'drivers', 'trucks'])
             ->setRowAttr([
                 'data-id' => function($entity) {

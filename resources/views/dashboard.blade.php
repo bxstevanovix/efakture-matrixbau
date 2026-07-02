@@ -138,6 +138,17 @@
         vertical-align: middle;
     }
 
+    .dashboard-page .transactions-table th,
+    .dashboard-page .transactions-table td {
+        font-size: 15px;
+        line-height: 1.35;
+    }
+
+    .dashboard-page .transactions-table .dashboard-pdf-link {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+
     .dashboard-page .summary-table td {
         padding: 12px 0;
         border-color: #f1f1f1;
@@ -419,6 +430,7 @@
                                     <th>@lang('ID')</th>
                                     <th>@lang('Firma')</th>
                                     <th class="text-end">@lang('Iznos')</th>
+                                    <th class="text-end">PDF</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -452,6 +464,7 @@
                                     <th>@lang('ID')</th>
                                     <th>@lang('Firma')</th>
                                     <th class="text-end">@lang('Iznos')</th>
+                                    <th class="text-end">PDF</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -881,6 +894,7 @@ var table = $('#entity-list-table').DataTable({
         {"data": "id_invoice", orderable: false},
         {"data": "company", orderable: false},
         {"data": "price", orderable: false, "className": "text-end"},
+        {"data": "pdf", orderable: false, searchable: false, "className": "text-end"},
     ],
     order: [[0, "asc"]],
 });
@@ -907,6 +921,7 @@ var table1 = $('#entity-list-table1').DataTable({
         {"data": "id_invoice", orderable: false},
         {"data": "company", orderable: false},
         {"data": "price", orderable: false, "className": "text-end"},
+        {"data": "pdf", orderable: false, searchable: false, "className": "text-end"},
     ],
     order: [[0, "asc"]],
 });

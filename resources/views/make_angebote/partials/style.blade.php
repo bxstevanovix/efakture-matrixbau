@@ -440,13 +440,17 @@
     }
 
     .summary-amount {
-        min-width: 100px;
-        width: max-content;
+        min-width: 83px;
+        width: 83px;
         display: inline-grid;
-        grid-template-columns: auto auto;
-        justify-content: end;
+        grid-template-columns: auto 1fr;
+        column-gap: 8px;
         justify-self: end;
         white-space: nowrap;
+    }
+
+    .summary-amount span:last-child {
+        text-align: right;
     }
 
     .summary-running-total {
@@ -462,10 +466,6 @@
     .summary-total {
         font-weight: 500;
         font-size: 11pt;
-    }
-
-    .summary-total-value {
-        column-gap: 8px;
     }
 
     .summary-total-value {

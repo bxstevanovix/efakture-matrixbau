@@ -73,7 +73,7 @@ class RechnungController extends Controller
                 return $user ? $user->name : '-';
             })
             ->orderColumn('id_invoice', function ($query, $order) {
-                $query->orderBy('id', $order); // 👈 SORT PO ID
+                $this->orderByRechnungNumber($query, $order);
             })
             ->rawColumns(['actions', 'image'])
             ->setRowAttr([
@@ -82,6 +82,53 @@ class RechnungController extends Controller
                 }
             ])
             ->make(true);
+    }
+
+    private function orderByRechnungNumber($query, string $order): void
+    {
+        $direction = strtolower($order) === 'asc' ? 'asc' : 'desc';
+        $driver = DB::connection()->getDriverName();
+
+        if (! in_array($driver, ['mysql', 'mariadb'], true)) {
+            $query
+                ->orderBy('rechnungen.id_invoice', $direction)
+                ->orderBy('rechnungen.id', $direction);
+
+            return;
+        }
+
+        $column = 'rechnungen.id_invoice';
+        $normalized = "REPLACE(TRIM(COALESCE({$column}, '')), '/', '-')";
+        $regularPattern = "'^[0-9]+-[0-9]{4}$'";
+        $partialPattern = "'^[0-9]+-[0-9]+-[0-9]{4}$'";
+
+        $isSortable = "({$normalized} REGEXP {$regularPattern} OR {$normalized} REGEXP {$partialPattern})";
+        $sortableRank = "CASE WHEN {$isSortable} THEN 0 ELSE 1 END";
+        $invoiceYear = "CASE WHEN {$isSortable} THEN CAST(SUBSTRING_INDEX({$normalized}, '-', -1) AS UNSIGNED) ELSE 0 END";
+        $invoiceNumber = "
+            CASE
+                WHEN {$normalized} REGEXP {$partialPattern}
+                    THEN CAST(SUBSTRING_INDEX(SUBSTRING_INDEX({$normalized}, '-', 2), '-', -1) AS UNSIGNED)
+                WHEN {$normalized} REGEXP {$regularPattern}
+                    THEN CAST(SUBSTRING_INDEX({$normalized}, '-', 1) AS UNSIGNED)
+                ELSE 0
+            END
+        ";
+        $partialNumber = "
+            CASE
+                WHEN {$normalized} REGEXP {$partialPattern}
+                    THEN CAST(SUBSTRING_INDEX({$normalized}, '-', 1) AS UNSIGNED)
+                ELSE 0
+            END
+        ";
+
+        $query
+            ->orderByRaw("{$sortableRank} asc")
+            ->orderByRaw("{$invoiceYear} {$direction}")
+            ->orderByRaw("{$invoiceNumber} {$direction}")
+            ->orderByRaw("{$partialNumber} {$direction}")
+            ->orderBy($column, $direction)
+            ->orderBy('rechnungen.id', $direction);
     }
     
     public function save(Request $request)

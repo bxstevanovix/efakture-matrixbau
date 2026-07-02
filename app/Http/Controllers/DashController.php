@@ -97,7 +97,9 @@ class DashController extends Controller
             })->editColumn('company', function ($entity) {
                 $company = Firma::where('id', $entity->company)->first();    
                 return $company['name'];  
-            })->rawColumns(['price'])
+            })->addColumn('pdf', function ($entity) {
+                return $this->dashboardPdfLink($entity, 'customer-invoices.view');
+            })->rawColumns(['price', 'pdf'])
             ->setRowAttr([
                 'data-id' => function($entity) {
                     return $entity->id;
@@ -129,7 +131,9 @@ class DashController extends Controller
             })->editColumn('company', function ($entity) {
                 $company = Firma::where('id', $entity->company)->first();    
                 return $company['name'];  
-            })->rawColumns(['price'])
+            })->addColumn('pdf', function ($entity) {
+                return $this->dashboardPdfLink($entity, 'supplier-invoices.view');
+            })->rawColumns(['price', 'pdf'])
             ->setRowAttr([
                 'data-id' => function($entity) {
                     return $entity->id;
@@ -140,5 +144,18 @@ class DashController extends Controller
         $datatables = $datatables->getData(true);
 
         return response()->json($datatables);
+    }
+
+    private function dashboardPdfLink($entity, string $routeName): string
+    {
+        if (! $entity->pdf) {
+            return '<span class="text-muted">-</span>';
+        }
+
+        $url = route($routeName, $entity->id);
+
+        return '<a href="' . e($url) . '" target="_blank" rel="noopener" class="btn btn-info btn-sm dashboard-pdf-link" title="Prikaži PDF">'
+            . '<i class="fa fa-eye me-1"></i>PDF'
+            . '</a>';
     }
 }

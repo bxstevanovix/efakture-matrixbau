@@ -635,52 +635,56 @@
 				const afterDeckungsrucklass = afterDiscountFixed - totals.deckungsrucklass;
 				const afterTax = afterDeckungsrucklass + totals.tax;
 				const afterAbzugTr1 = afterTax - data.abzugTr1;
+				const summaryAmount = (value, extraClass = '') => `
+					<span class="summary-amount${extraClass ? ` ${extraClass}` : ''}">
+						<span>€</span><span>${formatEuro(value)}</span>
+					</span>`;
 				const runningTotalRow = value => `
 					<div class="summary-row summary-running-total">
 						<span></span>
-						<span class="summary-amount"><span>${formatEuro(value)}</span></span>
+						${summaryAmount(value)}
 					</div>`;
 				wrapper.className = 'offer-summary-wrap';
 				wrapper.innerHTML = `
 					<div class="offer-summary">
 						<div class="summary-row">
 							<span>Zwischensumme</span>
-							<span class="summary-amount"><span>${formatEuro(totals.subtotal)}</span></span>
+							${summaryAmount(totals.subtotal)}
 						</div>
 						${data.discountPercent > 0 ? `
 						<div class="summary-row">
 							<span>- ${formatEuro(data.discountPercent, 0)}% Nachlass</span>
-							<span class="summary-amount"><span>${formatEuro(totals.discount)}</span></span>
+							${summaryAmount(totals.discount)}
 						</div>
 						${runningTotalRow(afterDiscountPercent)}` : ''}
 						${data.discountFixed > 0 ? `
 						<div class="summary-row">
 							<span>- Pauschale</span>
-							<span class="summary-amount"><span>${formatEuro(data.discountFixed)}</span></span>
+							${summaryAmount(data.discountFixed)}
 						</div>
 						${runningTotalRow(afterDiscountFixed)}` : ''}
 						${data.deckungsPercent > 0 ? `
 						<div class="summary-row">
 							<span>- ${formatEuro(data.deckungsPercent, 0)}% Deckungsrücklass</span>
-							<span class="summary-amount"><span>${formatEuro(totals.deckungsrucklass)}</span></span>
+							${summaryAmount(totals.deckungsrucklass)}
 						</div>
 						${runningTotalRow(afterDeckungsrucklass)}` : ''}
 						${data.useTax ? `
 						<div class="summary-row">
 							<span>+ 20% MwSt</span>
-							<span class="summary-amount"><span>${formatEuro(totals.tax)}</span></span>
+							${summaryAmount(totals.tax)}
 						</div>
 						${runningTotalRow(afterTax)}` : ''}
 						${data.abzugTr1 > 0 ? `
 						<div class="summary-row">
 							<span>- ${escapeHtml(data.abzugTrLabel)}</span>
-							<span class="summary-amount"><span>${formatEuro(data.abzugTr1)}</span></span>
+							${summaryAmount(data.abzugTr1)}
 						</div>
 						${runningTotalRow(afterAbzugTr1)}` : ''}
 						<hr class="summary-divider">
 						<div class="summary-row summary-total">
-							<span>Gesamtbetrag</span>
-							<span class="summary-total-value summary-amount"><span>€</span><span>${formatEuro(totals.total)}</span></span>
+							<span><strong>Gesamtbetrag</strong></span>
+							${summaryAmount(totals.total, 'summary-total-value')}
 						</div>
 					</div>
 					${data.note ? `<div class="description-left preview-note ql-editor">${data.note}</div>` : ''}

@@ -279,8 +279,8 @@ class DocxAngebotService
     private function summary(array $summary): string
     {
         $rows = $this->summaryRow('Zwischensumme', $summary['subtotal'] ?? '0,00');
-        $labelWidth = self::TABLE_WIDTH - self::TABLE_COLUMNS[3];
-        $amountWidth = self::TABLE_COLUMNS[3];
+        $labelWidth = 3060;
+        $amountWidth = 1540;
 
         foreach ($summary['adjustments'] ?? [] as $adjustment) {
             $rows .= $this->summaryRow($adjustment['label'], $adjustment['amount']);
@@ -294,7 +294,9 @@ class DocxAngebotService
 
         return '<w:tbl>
   <w:tblPr>
-    <w:tblW w:w="' . self::TABLE_WIDTH . '" w:type="dxa"/>
+    <w:jc w:val="right"/>
+    <w:tblInd w:w="-500" w:type="dxa"/>
+    <w:tblW w:w="' . ($labelWidth + $amountWidth) . '" w:type="dxa"/>
     <w:tblBorders>
       <w:top w:val="nil"/>
       <w:left w:val="nil"/>
@@ -322,8 +324,8 @@ class DocxAngebotService
         }
 
         $topSpacing = $total ? 220 : 0;
-        $labelWidth = self::TABLE_WIDTH - self::TABLE_COLUMNS[3];
-        $amountWidth = self::TABLE_COLUMNS[3];
+        $labelWidth = 3060;
+        $amountWidth = 1540;
 
         return '<w:tr>
   <w:trPr><w:cantSplit/></w:trPr>

@@ -469,7 +469,7 @@
                                 <th class="">@lang('Firma')</th>
                                 <th class="">@lang('Adresa') (BVH)</th>
                                 <th class="">@lang('Datum')</th>
-                                <th class="">@lang('Rok placanja1')</th>
+                                <th class="">@lang('Rok placanja')</th>
                                 <th class="">@lang('Za uplatu')</th>
                                 <th></th>
                                 <th class="disabled-sorting text-right">@lang('Opcije')</th>

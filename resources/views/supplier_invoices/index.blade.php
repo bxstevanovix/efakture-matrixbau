@@ -593,7 +593,7 @@ $(function() {
             {"data": "id_invoice", "name": "id_invoice", orderable: true, "className": "", responsivePriority: 1},
             {"data": "company", orderable: false, "className": "", responsivePriority: 4},
             {"data": "address", orderable: false, "className": "", responsivePriority: 6},
-            {"data": "date_start", "name": "date_start", orderable: true, searchable: false, "className": "", responsivePriority: 7},
+            {"data": "date_start", orderable: false, searchable: false, "className": "", responsivePriority: 7},
             {"data": "date_end", "name": "date_end", orderable: true, searchable: false, "className": "", responsivePriority: 3},
             {"data": "debt", orderable: false, searchable: false, "className": "", responsivePriority: 5},
             {"data": "paid", orderable: false, searchable: false, "className": "", responsivePriority: 2},
@@ -604,9 +604,9 @@ $(function() {
                 $(this).attr('data-label', tableLabels[index] || '');
             });
         },
-        "order": [[3, "desc"]],
+        "order": [[0, "asc"]],
         "stateLoadParams": function(settings, data) {
-            data.order = [[3, "desc"]];
+            data.order = [[0, "asc"]];
         },
         "rowCallback": function(row, data, index) {
             var today = moment();
